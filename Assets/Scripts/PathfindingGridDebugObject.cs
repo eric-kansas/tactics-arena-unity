@@ -6,26 +6,37 @@ using TMPro;
 public class PathfindingGridDebugObject : GridDebugObject
 {
 
-    [SerializeField] private TextMeshPro gCostText;
-    [SerializeField] private TextMeshPro hCostText;
-    [SerializeField] private TextMeshPro fCostText;
-    [SerializeField] private SpriteRenderer isWalkableSpriteRenderer;
+    [SerializeField] private TextMeshPro terrainText;
+    [SerializeField] private TextMeshPro elevationText;
+    [SerializeField] private Transform elevationPrefabTransform;
+    [SerializeField] private MeshRenderer prefabMeshRenderer;
+    [SerializeField] private Material[] terrainMaterials; // Assuming you have materials for each terrain type
 
-    private PathNode pathNode;
+    private GridObject gridObject;
 
     public override void SetGridObject(object gridObject)
     {
         base.SetGridObject(gridObject);
-        pathNode = (PathNode)gridObject;
+        this.gridObject = (GridObject)gridObject;
     }
 
     protected override void Update()
     {
         base.Update();
-        gCostText.text = pathNode.GetGCost().ToString();
-        hCostText.text = pathNode.GetHCost().ToString();
-        fCostText.text = pathNode.GetFCost().ToString();
-        isWalkableSpriteRenderer.color = pathNode.IsWalkable() ? Color.green : Color.red;
+        terrainText.text = gridObject.GetTerrainType().ToString();
+        elevationText.text = gridObject.GetElevation().ToString();
+
+        // Update the prefab's material based on terrain type
+        int terrainIndex = (int)gridObject.GetTerrainType();
+        prefabMeshRenderer.material = terrainMaterials[terrainIndex];
+
+        float elevationScaleFactor = 0.5f; // Adjust this factor as needed
+
+        elevationPrefabTransform.localScale = new Vector3(
+            elevationPrefabTransform.localScale.x,
+            gridObject.GetElevation() * elevationScaleFactor,
+            elevationPrefabTransform.localScale.z
+        );
     }
-    
+
 }

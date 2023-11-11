@@ -22,7 +22,7 @@ public class LevelGrid : MonoBehaviour
     [SerializeField] private int width;
     [SerializeField] private int height;
     [SerializeField] private float cellSize;
-    
+
     private GridSystem<GridObject> gridSystem;
 
 
@@ -36,16 +36,30 @@ public class LevelGrid : MonoBehaviour
         }
         Instance = this;
 
-        gridSystem = new GridSystem<GridObject>(width, height, cellSize, 
-                (GridSystem<GridObject> g, GridPosition gridPosition) => new GridObject(g, gridPosition));
-        //gridSystem.CreateDebugObjects(gridDebugObjectPrefab);
+        gridSystem = new GridSystem<GridObject>(width, height, cellSize,
+            (GridSystem<GridObject> g, GridPosition gridPosition) =>
+            {
+                var (terrain, elevation) = GetRandomTerrainAndElevation();
+                return new GridObject(g, gridPosition, terrain, elevation);
+            });
+
+        gridSystem.CreateDebugObjects(gridDebugObjectPrefab);
+    }
+
+    private (TerrainType, int) GetRandomTerrainAndElevation()
+    {
+        Array terrainTypes = Enum.GetValues(typeof(TerrainType));
+        TerrainType randomTerrain = (TerrainType)terrainTypes.GetValue(UnityEngine.Random.Range(0, terrainTypes.Length));
+
+        int randomElevation = UnityEngine.Random.Range(1, 5);
+
+        return (randomTerrain, randomElevation);
     }
 
     private void Start()
     {
         Pathfinding.Instance.Setup(width, height, cellSize);
     }
-
 
     public void AddUnitAtGridPosition(GridPosition gridPosition, Unit unit)
     {
@@ -71,7 +85,8 @@ public class LevelGrid : MonoBehaviour
 
         AddUnitAtGridPosition(toGridPosition, unit);
 
-        OnAnyUnitMovedGridPosition?.Invoke(this, new OnAnyUnitMovedGridPositionEventArgs {
+        OnAnyUnitMovedGridPosition?.Invoke(this, new OnAnyUnitMovedGridPositionEventArgs
+        {
             unit = unit,
             fromGridPosition = fromGridPosition,
             toGridPosition = toGridPosition,
@@ -80,12 +95,22 @@ public class LevelGrid : MonoBehaviour
 
     public GridPosition GetGridPosition(Vector3 worldPosition) => gridSystem.GetGridPosition(worldPosition);
 
-    public Vector3 GetWorldPosition(GridPosition gridPosition) => gridSystem.GetWorldPosition(gridPosition);
+    public Vector3 GetWorldPosition(GridPosition gridPosition)
+    {
+        Vector3 basePosition = gridSystem.GetWorldPosition(gridPosition);
+
+        int elevation = GetElevationAtGridPosition(gridPosition);
+
+        float elevationScaleFactor = 0.5f;
+        basePosition.y += elevation * elevationScaleFactor;
+
+        return basePosition;
+    }
 
     public bool IsValidGridPosition(GridPosition gridPosition) => gridSystem.IsValidGridPosition(gridPosition);
 
     public int GetWidth() => gridSystem.GetWidth();
-    
+
     public int GetHeight() => gridSystem.GetHeight();
 
     public bool HasAnyUnitOnGridPosition(GridPosition gridPosition)
@@ -116,6 +141,18 @@ public class LevelGrid : MonoBehaviour
     {
         GridObject gridObject = gridSystem.GetGridObject(gridPosition);
         gridObject.ClearInteractable();
+    }
+
+    public int GetElevationAtGridPosition(GridPosition gridPosition)
+    {
+        GridObject gridObject = gridSystem.GetGridObject(gridPosition);
+        return gridObject.GetElevation();
+    }
+
+    public TerrainType GetTerrainTypeAtGridPosition(GridPosition gridPosition)
+    {
+        GridObject gridObject = gridSystem.GetGridObject(gridPosition);
+        return gridObject.GetTerrainType();
     }
 
 

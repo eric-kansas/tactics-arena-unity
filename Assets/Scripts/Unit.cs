@@ -32,6 +32,8 @@ public class Unit : MonoBehaviour
         gridPosition = LevelGrid.Instance.GetGridPosition(transform.position);
         LevelGrid.Instance.AddUnitAtGridPosition(gridPosition, this);
 
+        transform.position = LevelGrid.Instance.GetWorldPosition(gridPosition);
+
         TurnSystem.Instance.OnTurnChanged += TurnSystem_OnTurnChanged;
 
         healthSystem.OnDead += HealthSystem_OnDead;
@@ -85,7 +87,8 @@ public class Unit : MonoBehaviour
         {
             SpendActionPoints(baseAction.GetActionPointsCost());
             return true;
-        } else
+        }
+        else
         {
             return false;
         }
@@ -96,7 +99,8 @@ public class Unit : MonoBehaviour
         if (actionPoints >= baseAction.GetActionPointsCost())
         {
             return true;
-        } else
+        }
+        else
         {
             return false;
         }

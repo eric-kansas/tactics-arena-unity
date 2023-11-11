@@ -5979,7 +5979,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b91c0a015b54174fb51d5c40ec6dc30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridDebugObjectPrefab: {fileID: 9178942185925439383, guid: f25d0876b972f0f42b6b42f0fbe09e53,
+  gridDebugObjectPrefab: {fileID: 9178942185925439383, guid: 0cead39ca24e82244a2e8ed11ea2aa77,
     type: 3}
   width: 15
   height: 26
