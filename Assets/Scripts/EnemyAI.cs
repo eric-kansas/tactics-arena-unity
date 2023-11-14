@@ -44,7 +44,8 @@ public class EnemyAI : MonoBehaviour
                     if (TryTakeEnemyAIAction(SetStateTakingTurn))
                     {
                         state = State.Busy;
-                    } else
+                    }
+                    else
                     {
                         // No more enemies have actions they can take, end enemy turn
                         TurnSystem.Instance.NextTurn();
@@ -73,7 +74,7 @@ public class EnemyAI : MonoBehaviour
 
     private bool TryTakeEnemyAIAction(Action onEnemyAIActionComplete)
     {
-        foreach (Unit enemyUnit in UnitManager.Instance.GetEnemyUnitList())
+        foreach (Unit enemyUnit in UnitManager.Instance.GetTeamUnitList(TurnSystem.Instance.GetCurrentTeam()))
         {
             if (TryTakeEnemyAIAction(enemyUnit, onEnemyAIActionComplete))
             {

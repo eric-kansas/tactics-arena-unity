@@ -21,6 +21,7 @@ public class UnitActionSystem : MonoBehaviour
 
     private BaseAction selectedAction;
     private bool isBusy;
+    private int playerTeamIndex = 0;
 
 
     private void Awake()
@@ -46,7 +47,7 @@ public class UnitActionSystem : MonoBehaviour
             return;
         }
 
-        if (!TurnSystem.Instance.IsPlayerTurn())
+        if (TurnSystem.Instance.GetCurrentTeam() != playerTeamIndex)
         {
             return;
         }
@@ -117,7 +118,7 @@ public class UnitActionSystem : MonoBehaviour
                         return false;
                     }
 
-                    if (unit.IsEnemy())
+                    if (unit.GetTeam() != playerTeamIndex)
                     {
                         // Clicked on an Enemy
                         return false;

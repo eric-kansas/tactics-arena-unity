@@ -109,7 +109,7 @@ public class SwordAction : BaseAction
 
                 Unit targetUnit = LevelGrid.Instance.GetUnitAtGridPosition(testGridPosition);
 
-                if (targetUnit.IsEnemy() == unit.IsEnemy())
+                if (targetUnit.GetTeam() == unit.GetTeam())
                 {
                     // Both Units on same 'team'
                     continue;

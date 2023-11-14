@@ -10,6 +10,8 @@ public class Pathfinding : MonoBehaviour
 
     private const int MOVE_STRAIGHT_COST = 10;
     private const int MOVE_DIAGONAL_COST = 14;
+    private const int ELEVATION_CHANGE_COST = 20; // or any other value based on your game design
+
 
     [SerializeField] private Transform gridDebugObjectPrefab;
     [SerializeField] private LayerMask obstaclesLayerMask;
@@ -41,7 +43,7 @@ public class Pathfinding : MonoBehaviour
         gridSystem = new GridSystem<PathNode>(width, height, cellSize,
             (GridSystem<PathNode> g, GridPosition gridPosition) => new PathNode(gridPosition));
 
-        gridSystem.CreateDebugObjects(gridDebugObjectPrefab);
+        //gridSystem.CreateDebugObjects(gridDebugObjectPrefab);
 
         for (int x = 0; x < width; x++)
         {
@@ -116,8 +118,16 @@ public class Pathfinding : MonoBehaviour
                     continue;
                 }
 
-                int tentativeGCost =
-                    currentNode.GetGCost() + CalculateDistance(currentNode.GetGridPosition(), neighbourNode.GetGridPosition());
+                int neighbourElevation = LevelGrid.Instance.GetElevationAtGridPosition(neighbourNode.GetGridPosition());
+                TerrainType neighbourTerrainType = LevelGrid.Instance.GetTerrainTypeAtGridPosition(neighbourNode.GetGridPosition());
+
+
+                // Calculate costs using the GridObject's data
+                int terrainMovementCost = GetTerrainMovementCost(neighbourTerrainType);
+                int elevationChangeCost = GetElevationChangeCost(currentNode, neighbourElevation);
+
+                int tentativeGCost = currentNode.GetGCost() + CalculateDistance(currentNode.GetGridPosition(), neighbourNode.GetGridPosition()) + terrainMovementCost + elevationChangeCost;
+
 
                 if (tentativeGCost < neighbourNode.GetGCost())
                 {
@@ -159,6 +169,27 @@ public class Pathfinding : MonoBehaviour
             }
         }
         return lowestFCostPathNode;
+    }
+
+    private int GetTerrainMovementCost(TerrainType terrainType)
+    {
+        return 0;
+        switch (terrainType)
+        {
+            case TerrainType.Forest:
+                return 15; // Higher cost for forest
+            case TerrainType.Mountain:
+                return 20; // Even higher cost for mountains
+                           // ... other cases
+            default:
+                return 10; // Default cost for plain terrain
+        }
+    }
+
+    private int GetElevationChangeCost(PathNode currentNode, int targetElevation)
+    {
+        int currentElevation = LevelGrid.Instance.GetElevationAtGridPosition(currentNode.GetGridPosition());
+        return Mathf.Abs(targetElevation - currentElevation) * ELEVATION_CHANGE_COST;
     }
 
     private PathNode GetNode(int x, int z)

@@ -135,5 +135,5 @@ public class MoveAction : BaseAction
             actionValue = targetCountAtGridPosition * 10,
         };
     }
-    
+
 }

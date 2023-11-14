@@ -10,10 +10,10 @@ public class Unit : MonoBehaviour
 
     public static event EventHandler OnAnyActionPointsChanged;
     public static event EventHandler OnAnyUnitSpawned;
-    public static event EventHandler OnAnyUnitDead;
+    public static Action<Unit> OnAnyUnitOutOfEnergy;
 
 
-    [SerializeField] private bool isEnemy;
+    [SerializeField] private int team;
 
 
     private GridPosition gridPosition;
@@ -32,11 +32,20 @@ public class Unit : MonoBehaviour
         gridPosition = LevelGrid.Instance.GetGridPosition(transform.position);
         LevelGrid.Instance.AddUnitAtGridPosition(gridPosition, this);
 
+        transform.position = LevelGrid.Instance.GetWorldPosition(gridPosition);
+
+        LevelGrid.Instance.OnElevationChanged += LevelGrid_OnElevationChange;
+
         TurnSystem.Instance.OnTurnChanged += TurnSystem_OnTurnChanged;
 
         healthSystem.OnDead += HealthSystem_OnDead;
 
         OnAnyUnitSpawned?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void OnDisable()
+    {
+        LevelGrid.Instance.OnElevationChanged -= LevelGrid_OnElevationChange;
     }
 
     private void Update()
@@ -85,7 +94,8 @@ public class Unit : MonoBehaviour
         {
             SpendActionPoints(baseAction.GetActionPointsCost());
             return true;
-        } else
+        }
+        else
         {
             return false;
         }
@@ -96,7 +106,8 @@ public class Unit : MonoBehaviour
         if (actionPoints >= baseAction.GetActionPointsCost())
         {
             return true;
-        } else
+        }
+        else
         {
             return false;
         }
@@ -116,8 +127,7 @@ public class Unit : MonoBehaviour
 
     private void TurnSystem_OnTurnChanged(object sender, EventArgs e)
     {
-        if ((IsEnemy() && !TurnSystem.Instance.IsPlayerTurn()) ||
-            (!IsEnemy() && TurnSystem.Instance.IsPlayerTurn()))
+        if (TurnSystem.Instance.GetCurrentTeam() == GetTeam())
         {
             actionPoints = ACTION_POINTS_MAX;
 
@@ -125,9 +135,27 @@ public class Unit : MonoBehaviour
         }
     }
 
-    public bool IsEnemy()
+    private void LevelGrid_OnElevationChange(GridPosition position, int newElevation)
     {
-        return isEnemy;
+        if (gridPosition == position)
+        {
+            UpdateVerticalPosition();
+        }
+    }
+
+    private void UpdateVerticalPosition()
+    {
+        transform.position = LevelGrid.Instance.GetWorldPosition(gridPosition);
+    }
+
+    public int GetTeam()
+    {
+        return team;
+    }
+
+    public void Heal(int healAmount)
+    {
+        healthSystem.Heal(healAmount);
     }
 
     public void Damage(int damageAmount)
@@ -137,11 +165,16 @@ public class Unit : MonoBehaviour
 
     private void HealthSystem_OnDead(object sender, EventArgs e)
     {
-        LevelGrid.Instance.RemoveUnitAtGridPosition(gridPosition, this);
+        //LevelGrid.Instance.RemoveUnitAtGridPosition(gridPosition, this);
 
-        Destroy(gameObject);
+        //Destroy(gameObject);
 
-        OnAnyUnitDead?.Invoke(this, EventArgs.Empty);
+        OnAnyUnitOutOfEnergy?.Invoke(this);
+    }
+
+    public int GetMaxHealth()
+    {
+        return healthSystem.GetMaxHealth();
     }
 
     public float GetHealthNormalized()
