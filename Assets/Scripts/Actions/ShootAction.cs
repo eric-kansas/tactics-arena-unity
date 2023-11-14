@@ -47,7 +47,7 @@ public class ShootAction : BaseAction
         {
             case State.Aiming:
                 Vector3 aimDir = (targetUnit.GetWorldPosition() - unit.GetWorldPosition()).normalized;
-                
+
                 float rotateSpeed = 10f;
                 transform.forward = Vector3.Lerp(transform.forward, aimDir, Time.deltaTime * rotateSpeed);
                 break;
@@ -95,12 +95,13 @@ public class ShootAction : BaseAction
             targetUnit = targetUnit,
             shootingUnit = unit
         });
-        
-        OnShoot?.Invoke(this, new OnShootEventArgs {
+
+        OnShoot?.Invoke(this, new OnShootEventArgs
+        {
             targetUnit = targetUnit,
             shootingUnit = unit
         });
-        
+
         targetUnit.Damage(40);
     }
 
@@ -147,7 +148,7 @@ public class ShootAction : BaseAction
 
                 Unit targetUnit = LevelGrid.Instance.GetUnitAtGridPosition(testGridPosition);
 
-                if (targetUnit.IsEnemy() == unit.IsEnemy())
+                if (TurnSystem.Instance.GetCurrentTeam() == targetUnit.GetTeam())
                 {
                     // Both Units on same 'team'
                     continue;
@@ -200,7 +201,7 @@ public class ShootAction : BaseAction
     public override EnemyAIAction GetEnemyAIAction(GridPosition gridPosition)
     {
         Unit targetUnit = LevelGrid.Instance.GetUnitAtGridPosition(gridPosition);
-        
+
         return new EnemyAIAction
         {
             gridPosition = gridPosition,

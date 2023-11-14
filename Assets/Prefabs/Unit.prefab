@@ -626,10 +626,10 @@ GameObject:
   - component: {fileID: -3036872288860732532}
   - component: {fileID: 7875432187911017488}
   - component: {fileID: -1178977004828849864}
-  - component: {fileID: -2044145914545918145}
   - component: {fileID: 3935794340981501179}
   - component: {fileID: 6920165730332424967}
   - component: {fileID: 342142659723939178}
+  - component: {fileID: -686982697125586743}
   m_Layer: 7
   m_Name: Unit
   m_TagString: Untagged
@@ -667,7 +667,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a51a89a7d61b7aa4dbbbb0c4ace41f0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isEnemy: 0
+  team: 0
 --- !u!65 &7313912752346062244
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -760,21 +760,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: 100
---- !u!114 &-2044145914545918145
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7601346721002605772}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2900437a0a735e14ba44540bcebce4f9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ragdollPrefab: {fileID: 7601346721002605773, guid: 54e1426245761324d90029d345b5ac45,
-    type: 3}
-  originalRootBone: {fileID: 7596671305508343294}
 --- !u!114 &3935794340981501179
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -811,6 +796,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: df022b5ff97b9b342b3be3521283a4a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-686982697125586743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7601346721002605772}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54813909eaf24644db39ce89dd51ebe1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &7643742287666648287
@@ -1253,12 +1250,6 @@ PrefabInstance:
 --- !u!95 &7505571265498249468 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 95787105524477528, guid: 2f3e27eecb190e44a9af50723c394274,
-    type: 3}
-  m_PrefabInstance: {fileID: 7601346721586583204}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &7596671305508343294 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4966341056781146, guid: 2f3e27eecb190e44a9af50723c394274,
     type: 3}
   m_PrefabInstance: {fileID: 7601346721586583204}
   m_PrefabAsset: {fileID: 0}

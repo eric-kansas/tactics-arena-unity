@@ -10,9 +10,7 @@ public class UnitManager : MonoBehaviour
 
 
     private List<Unit> unitList;
-    private List<Unit> friendlyUnitList;
-    private List<Unit> enemyUnitList;
-
+    private Dictionary<int, List<Unit>> teamUnitListDict;
 
     private void Awake()
     {
@@ -25,14 +23,13 @@ public class UnitManager : MonoBehaviour
         Instance = this;
 
         unitList = new List<Unit>();
-        friendlyUnitList = new List<Unit>();
-        enemyUnitList = new List<Unit>();
+        teamUnitListDict = new Dictionary<int, List<Unit>>();
     }
 
     private void Start()
     {
         Unit.OnAnyUnitSpawned += Unit_OnAnyUnitSpawned;
-        Unit.OnAnyUnitDead += Unit_OnAnyUnitDead;
+        //Unit.OnAnyUnitOutOfEnergy += Unit_OnAnyUnitDead;
     }
 
     private void Unit_OnAnyUnitSpawned(object sender, EventArgs e)
@@ -41,13 +38,12 @@ public class UnitManager : MonoBehaviour
 
         unitList.Add(unit);
 
-        if (unit.IsEnemy())
+        int teamId = unit.GetTeam();
+        if (!teamUnitListDict.ContainsKey(teamId))
         {
-            enemyUnitList.Add(unit);
-        } else
-        {
-            friendlyUnitList.Add(unit);
+            teamUnitListDict[teamId] = new List<Unit>();
         }
+        teamUnitListDict[teamId].Add(unit);
     }
 
     private void Unit_OnAnyUnitDead(object sender, EventArgs e)
@@ -55,14 +51,10 @@ public class UnitManager : MonoBehaviour
         Unit unit = sender as Unit;
 
         unitList.Remove(unit);
-
-        if (unit.IsEnemy())
+        int teamId = unit.GetTeam();
+        if (teamUnitListDict.ContainsKey(teamId))
         {
-            enemyUnitList.Remove(unit);
-        }
-        else
-        {
-            friendlyUnitList.Remove(unit);
+            teamUnitListDict[teamId].Remove(unit);
         }
     }
 
@@ -71,14 +63,13 @@ public class UnitManager : MonoBehaviour
         return unitList;
     }
 
-    public List<Unit> GetFriendlyUnitList()
+    public List<Unit> GetTeamUnitList(int teamId)
     {
-        return friendlyUnitList;
-    }
-
-    public List<Unit> GetEnemyUnitList()
-    {
-        return enemyUnitList;
+        if (teamUnitListDict.TryGetValue(teamId, out var teamList))
+        {
+            return teamList;
+        }
+        return new List<Unit>(); // Return empty list if the team does not exist
     }
 
 }

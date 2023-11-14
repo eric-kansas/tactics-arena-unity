@@ -8,7 +8,6 @@ public class LevelGrid : MonoBehaviour
 
     public static LevelGrid Instance { get; private set; }
 
-
     public event EventHandler<OnAnyUnitMovedGridPositionEventArgs> OnAnyUnitMovedGridPosition;
     public class OnAnyUnitMovedGridPositionEventArgs : EventArgs
     {
@@ -16,6 +15,9 @@ public class LevelGrid : MonoBehaviour
         public GridPosition fromGridPosition;
         public GridPosition toGridPosition;
     }
+
+    public event Action<GridPosition, int> OnElevationChanged;
+
 
 
     [SerializeField] private Transform gridDebugObjectPrefab;
@@ -153,6 +155,16 @@ public class LevelGrid : MonoBehaviour
     {
         GridObject gridObject = gridSystem.GetGridObject(gridPosition);
         return gridObject.GetTerrainType();
+    }
+
+    public void ChangeElevation(GridPosition position, int amount)
+    {
+        // Change the elevation logic
+        GridObject gridObject = gridSystem.GetGridObject(position);
+        int newElevation = gridObject.GetElevation() + amount;
+        gridObject.SetElevation(newElevation);
+
+        OnElevationChanged?.Invoke(position, newElevation);
     }
 
 

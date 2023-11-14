@@ -173,6 +173,7 @@ public class Pathfinding : MonoBehaviour
 
     private int GetTerrainMovementCost(TerrainType terrainType)
     {
+        return 0;
         switch (terrainType)
         {
             case TerrainType.Forest:

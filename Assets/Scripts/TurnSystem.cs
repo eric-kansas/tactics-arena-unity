@@ -13,8 +13,8 @@ public class TurnSystem : MonoBehaviour
 
 
     private int turnNumber = 1;
-    private bool isPlayerTurn = true;
-
+    private int currentTeamIndex = 0;
+    private int totalTeams = 2; // Default to 2 teams
 
     private void Awake()
     {
@@ -27,11 +27,19 @@ public class TurnSystem : MonoBehaviour
         Instance = this;
     }
 
+    public void SetTotalTeams(int numberOfTeams)
+    {
+        if (numberOfTeams > 0)
+        {
+            totalTeams = numberOfTeams;
+        }
+    }
+
 
     public void NextTurn()
     {
         turnNumber++;
-        isPlayerTurn = !isPlayerTurn;
+        currentTeamIndex = (currentTeamIndex + 1) % totalTeams;
 
         OnTurnChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -41,9 +49,13 @@ public class TurnSystem : MonoBehaviour
         return turnNumber;
     }
 
-    public bool IsPlayerTurn()
+    public int GetCurrentTeam()
     {
-        return isPlayerTurn;
+        return currentTeamIndex;
     }
-    
+
+    internal bool IsPlayerTurn()
+    {
+        return currentTeamIndex == 0;
+    }
 }
