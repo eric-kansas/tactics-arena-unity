@@ -8,13 +8,20 @@ public class TurnSystem : MonoBehaviour
 
     public static TurnSystem Instance { get; private set; }
 
+    public static Color[] TeamColorList = new Color[]
+    {
+        Color.blue,
+        Color.red,
+        Color.green,
+        Color.yellow
+    };
 
     public event EventHandler OnTurnChanged;
 
 
     private int turnNumber = 1;
     private int currentTeamIndex = 0;
-    private int totalTeams = 2; // Default to 2 teams
+    private int totalTeams = 2;
 
     private void Awake()
     {

@@ -3,27 +3,27 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ActionGridSystemVisual : MonoBehaviour
+[Serializable]
+public struct GridVisualTypeMaterial
+{
+    public GridVisualType gridVisualType;
+    public Material material;
+}
+
+public enum GridVisualType
+{
+    White,
+    Blue,
+    Red,
+    RedSoft,
+    Yellow,
+}
+
+public class UnitActionGridSystemVisual : MonoBehaviour
 {
 
-    public static ActionGridSystemVisual Instance { get; private set; }
+    public static UnitActionGridSystemVisual Instance { get; private set; }
 
-
-    [Serializable]
-    public struct GridVisualTypeMaterial
-    {
-        public GridVisualType gridVisualType;
-        public Material material;
-    }
-
-    public enum GridVisualType
-    {
-        White,
-        Blue,
-        Red,
-        RedSoft,
-        Yellow,
-    }
 
     [SerializeField] private Transform gridSystemVisualSinglePrefab;
     [SerializeField] private List<GridVisualTypeMaterial> gridVisualTypeMaterialList;
