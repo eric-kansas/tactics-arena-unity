@@ -18,15 +18,12 @@ public class LevelGrid : MonoBehaviour
 
     public event Action<GridPosition, int> OnElevationChanged;
 
-
-
     [SerializeField] private Transform gridDebugObjectPrefab;
     [SerializeField] private int width;
     [SerializeField] private int height;
     [SerializeField] private float cellSize;
 
     private GridSystem<GridObject> gridSystem;
-
 
     private void Awake()
     {
