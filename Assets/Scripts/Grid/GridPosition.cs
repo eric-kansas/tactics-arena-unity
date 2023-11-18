@@ -2,6 +2,7 @@
 
 
 using System;
+using UnityEngine;
 
 public struct GridPosition : IEquatable<GridPosition>
 {
@@ -34,6 +35,11 @@ public struct GridPosition : IEquatable<GridPosition>
     public override string ToString()
     {
         return $"x: {x}; z: {z}";
+    }
+
+    public Vector2 ToVector2()
+    {
+        return new Vector2(x, z);
     }
 
     public static bool operator ==(GridPosition a, GridPosition b)

@@ -12,18 +12,21 @@ public class Unit : MonoBehaviour
     public static event EventHandler OnAnyUnitSpawned;
     public static Action<Unit> OnAnyUnitOutOfEnergy;
 
+    public static Action<Unit> OnAnyUnitExpendFavor;
 
     [SerializeField] private int team;
 
 
     private GridPosition gridPosition;
     private HealthSystem healthSystem;
+    private UnitFavor favorSystem;
     private BaseAction[] baseActionArray;
     private int actionPoints = ACTION_POINTS_MAX;
 
     private void Awake()
     {
         healthSystem = GetComponent<HealthSystem>();
+        favorSystem = GetComponent<UnitFavor>();
         baseActionArray = GetComponents<BaseAction>();
     }
 
@@ -35,7 +38,6 @@ public class Unit : MonoBehaviour
         transform.position = LevelGrid.Instance.GetWorldPosition(gridPosition);
 
         LevelGrid.Instance.OnElevationChanged += LevelGrid_OnElevationChange;
-
         TurnSystem.Instance.OnTurnChanged += TurnSystem_OnTurnChanged;
 
         healthSystem.OnDead += HealthSystem_OnDead;
@@ -163,6 +165,19 @@ public class Unit : MonoBehaviour
         healthSystem.Damage(damageAmount);
     }
 
+    public void AddFavor(int favorAmount)
+    {
+        favorSystem.Add(favorAmount);
+    }
+
+    // assumption for now is you can only use all favor
+    public void UseFavor()
+    {
+        favorSystem.Remove(GetMaxFavor());
+
+        OnAnyUnitExpendFavor?.Invoke(this);
+    }
+
     private void HealthSystem_OnDead(object sender, EventArgs e)
     {
         //LevelGrid.Instance.RemoveUnitAtGridPosition(gridPosition, this);
@@ -180,6 +195,16 @@ public class Unit : MonoBehaviour
     public float GetHealthNormalized()
     {
         return healthSystem.GetHealthNormalized();
+    }
+
+    public int GetMaxFavor()
+    {
+        return favorSystem.GetMaxFavor();
+    }
+
+    public float GetFavorNormalized()
+    {
+        return favorSystem.GetFavorNormalized();
     }
 
 }
