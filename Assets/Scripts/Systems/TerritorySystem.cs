@@ -4,11 +4,33 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class TerritorySystem : MonoBehaviour
 {
+    [Serializable]
+    public struct TerritoryScore
+    {
+        public int amount;
+        public int max;
+
+        public TerritoryScore(int v1, int v2)
+        {
+            amount = v1;
+            max = v2;
+        }
+
+        public float GetScoreNormalized()
+        {
+            return (float)amount / max;
+        }
+    }
+
     public static TerritorySystem Instance { get; private set; }
     public static Action<int, int> OnTerritoryOwnerChanged; // what zone to what team
+    public static Action<int, int> OnTerritoryScoreChanged; // what team to how many points
+
+    private Dictionary<int, TerritoryScore> territoryScores;
 
     public UnityEngine.Color[] TerritoryColorList = new UnityEngine.Color[]
     {
@@ -32,9 +54,16 @@ public class TerritorySystem : MonoBehaviour
         Instance = this;
 
         zones = new Dictionary<int, Rect>{
-            { 0, new(0,0,3,3) },
-            { 1, new(10,0,3,3) },
-            { 2, new(10,10,3,3) },
+            { 0, new(2,2,3,3) },
+            { 1, new(10,2,3,3) },
+            { 2, new(2,10,3,3) },
+            { 3, new(10,10,3,3) },
+            { 4 , new(6,6,3,3) },
+        };
+
+        territoryScores = new Dictionary<int, TerritoryScore>{
+            { 0, new(0, 10) },
+            { 1, new(0, 10) },
         };
 
         territoryOwners = new Dictionary<int, int>();
@@ -48,6 +77,44 @@ public class TerritorySystem : MonoBehaviour
     {
         LevelGrid.Instance.OnAnyUnitMovedGridPosition += LevelGrid_OnAnyUnitMovedGridPosition;
         Unit.OnAnyUnitSpawned += Unit_OnAnyUnitSpawned;
+
+        TurnSystem.Instance.OnTurnChanged += TurnSystem_OnTurnChanged;
+    }
+
+    private void TurnSystem_OnTurnChanged(object sender, EventArgs e)
+    {
+        // Here we will calculate and award points based on territory control
+
+        // Assuming you have a method or system to award points
+        foreach (KeyValuePair<int, int> territoryEntry in territoryOwners)
+        {
+            int zoneID = territoryEntry.Key;
+            int owningTeamID = territoryEntry.Value;
+
+            if (owningTeamID != -1) // Check if the territory is not neutral
+            {
+                // Award points to the team that controls this territory
+                AwardPointsToTeam(owningTeamID, CalculatePointsForTerritory(zoneID));
+            }
+        }
+    }
+
+    private void AwardPointsToTeam(int teamID, int points)
+    {
+        // Implement logic to award points to the given team.
+        // This might involve updating a score variable, notifying other systems, etc.
+        Debug.Log($"Team {teamID} awarded {points} points for controlling territory.");
+        TerritoryScore score = territoryScores[teamID];
+        score.amount += points;
+        territoryScores[teamID] = score;
+        OnTerritoryScoreChanged?.Invoke(teamID, points);
+    }
+
+    private int CalculatePointsForTerritory(int zoneID)
+    {
+        // Define how many points a territory is worth. 
+        // This could be a fixed value, or vary based on the territory's properties or game dynamics.
+        return 1; // Example: Each territory is worth 1 point per turn
     }
 
     private void Unit_OnAnyUnitSpawned(object sender, EventArgs e)
@@ -112,5 +179,11 @@ public class TerritorySystem : MonoBehaviour
     {
         return zones;
     }
+
+    public float GetTeamTerritoryScoreNormalized(int index)
+    {
+        return territoryScores[index].GetScoreNormalized();
+    }
+
 
 }

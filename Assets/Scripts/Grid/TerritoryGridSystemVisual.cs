@@ -42,11 +42,13 @@ public class TerritoryGridSystemVisual : MonoBehaviour
                 {
                     GridPosition gridPosition = new GridPosition((int)rect.x + x, (int)rect.y + z);
 
-                    Transform gridSystemVisualSingleTransform = Instantiate(gridSystemVisualSinglePrefab, LevelGrid.Instance.GetWorldPosition(gridPosition), Quaternion.identity);
+                    Vector3 pos = LevelGrid.Instance.GetWorldPosition(gridPosition);
+
+                    Transform gridSystemVisualSingleTransform = Instantiate(gridSystemVisualSinglePrefab, pos, Quaternion.identity);
 
                     gridSystemVisualSingleArray[x, z] = gridSystemVisualSingleTransform.GetComponent<GridSystemVisualSingle>();
 
-                    gridSystemVisualSingleArray[x, z].Show(GetGridVisualTypeMaterial(GridVisualType.Blue));
+                    gridSystemVisualSingleArray[x, z].Show(GetGridVisualTypeMaterial(zoneEntry.Key));
                 }
             }
 
@@ -54,18 +56,20 @@ public class TerritoryGridSystemVisual : MonoBehaviour
         }
     }
 
-    private Material GetGridVisualTypeMaterial(GridVisualType gridVisualType)
+    private Material GetGridVisualTypeMaterial(int zone)
     {
-        foreach (GridVisualTypeMaterial gridVisualTypeMaterial in gridVisualTypeMaterialList)
-        {
-            if (gridVisualTypeMaterial.gridVisualType == gridVisualType)
-            {
-                return gridVisualTypeMaterial.material;
-            }
-        }
+        return gridVisualTypeMaterialList[zone].material;
 
-        Debug.LogError("Could not find GridVisualTypeMaterial for GridVisualType " + gridVisualType);
-        return null;
+        // foreach (GridVisualTypeMaterial gridVisualTypeMaterial in gridVisualTypeMaterialList)
+        // {
+        //     if (gridVisualTypeMaterial.gridVisualType == gridVisualType)
+        //     {
+        //         return gridVisualTypeMaterial.material;
+        //     }
+        // }
+
+        // Debug.LogError("Could not find GridVisualTypeMaterial for GridVisualType " + gridVisualType);
+        // return null;
     }
 
 }

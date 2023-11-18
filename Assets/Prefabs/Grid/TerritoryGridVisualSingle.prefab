@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4317425081643120330}
   - component: {fileID: -5590318535648870137}
   m_Layer: 0
-  m_Name: GridSystemVisualSingle
+  m_Name: TerritoryGridVisualSingle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -73,7 +73,7 @@ Transform:
   m_GameObject: {fileID: 7990984179466228126}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0.03, z: 0}
+  m_LocalPosition: {x: 0, y: 0.01, z: 0}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 1
   m_Children: []

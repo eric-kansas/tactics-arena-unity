@@ -17,6 +17,10 @@ public enum GridVisualType
     Red,
     RedSoft,
     Yellow,
+    Green,
+    Purple,
+
+
 }
 
 public class UnitActionGridSystemVisual : MonoBehaviour

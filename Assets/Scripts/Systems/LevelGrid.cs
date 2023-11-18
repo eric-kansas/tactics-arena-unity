@@ -48,7 +48,7 @@ public class LevelGrid : MonoBehaviour
     private (TerrainType, int) GetRandomTerrainAndElevation()
     {
         Array terrainTypes = Enum.GetValues(typeof(TerrainType));
-        TerrainType randomTerrain = (TerrainType)terrainTypes.GetValue(UnityEngine.Random.Range(0, terrainTypes.Length));
+        TerrainType randomTerrain = TerrainType.Snow;//(TerrainType)terrainTypes.GetValue(UnityEngine.Random.Range(0, terrainTypes.Length));
 
         int randomElevation = UnityEngine.Random.Range(1, 5);
 

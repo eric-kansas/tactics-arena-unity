@@ -32,10 +32,10 @@ public class PathfindingGridDebugObject : GridDebugObject
 
         float elevationScaleFactor = 0.5f; // Adjust this factor as needed
 
-        elevationPrefabTransform.localScale = new Vector3(
-            elevationPrefabTransform.localScale.x,
+        transform.localScale = new Vector3(
+            transform.localScale.x,
             gridObject.GetElevation() * elevationScaleFactor,
-            elevationPrefabTransform.localScale.z
+            transform.localScale.z
         );
     }
 

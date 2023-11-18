@@ -3,11 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SpinAction : BaseAction
+public class SpecialAction : BaseAction
 {
-
     private float totalSpinAmount;
-
 
     private void Update()
     {
@@ -22,9 +20,18 @@ public class SpinAction : BaseAction
         totalSpinAmount += spinAddAmount;
         if (totalSpinAmount >= 360f)
         {
-            unit.AddFavor(50);
+            unit.UseFavor();
             ActionComplete();
         }
+    }
+
+    public override bool MeetsRequirements(GridPosition gridPosition)
+    {
+        if (unit.GetFavorNormalized() != 1.0)
+        {
+            return false;
+        }
+        return true;
     }
 
     public override void TakeAction(GridPosition gridPosition, Action onActionComplete)
@@ -37,7 +44,7 @@ public class SpinAction : BaseAction
 
     public override string GetActionName()
     {
-        return "Spin";
+        return "special";
     }
 
     public override List<GridPosition> GetValidActionGridPositionList()
