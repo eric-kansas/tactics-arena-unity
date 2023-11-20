@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class CameraManager : MonoBehaviour
 {
-    
+
     [SerializeField] private GameObject actionCameraGameObject;
 
     private void Start()
@@ -30,7 +30,7 @@ public class CameraManager : MonoBehaviour
     {
         switch (sender)
         {
-            case ShootAction shootAction:
+            case RangeAction shootAction:
                 Unit shooterUnit = shootAction.GetUnit();
                 Unit targetUnit = shootAction.GetTargetUnit();
 
@@ -49,7 +49,7 @@ public class CameraManager : MonoBehaviour
 
                 actionCameraGameObject.transform.position = actionCameraPosition;
                 actionCameraGameObject.transform.LookAt(targetUnit.GetWorldPosition() + cameraCharacterHeight);
-                
+
                 ShowActionCamera();
                 break;
         }
@@ -59,7 +59,7 @@ public class CameraManager : MonoBehaviour
     {
         switch (sender)
         {
-            case ShootAction shootAction:
+            case RangeAction shootAction:
                 HideActionCamera();
                 break;
         }

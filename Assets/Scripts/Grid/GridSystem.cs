@@ -8,13 +8,17 @@ public class GridSystem<TGridObject>
     private int width;
     private int height;
     private float cellSize;
+    private Vector3 worldOffset;
+
     private TGridObject[,] gridObjectArray;
 
-    public GridSystem(int width, int height, float cellSize, Func<GridSystem<TGridObject>, GridPosition, TGridObject> createGridObject)
+    public GridSystem(int width, int height, float cellSize, Vector3 worldOffset, Func<GridSystem<TGridObject>, GridPosition, TGridObject> createGridObject)
     {
         this.width = width;
         this.height = height;
         this.cellSize = cellSize;
+        this.worldOffset = worldOffset;
+
 
         gridObjectArray = new TGridObject[width, height];
 
@@ -30,7 +34,7 @@ public class GridSystem<TGridObject>
 
     public Vector3 GetWorldPosition(GridPosition gridPosition)
     {
-        return new Vector3(gridPosition.x, 0, gridPosition.z) * cellSize;
+        return new Vector3(gridPosition.x, 0, gridPosition.z) * cellSize + worldOffset;
     }
 
     public GridPosition GetGridPosition(Vector3 worldPosition)

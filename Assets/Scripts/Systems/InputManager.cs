@@ -51,19 +51,19 @@ public class InputManager : MonoBehaviour
 #else
         Vector2 inputMoveDir = new Vector2(0, 0);
 
-        if (Input.GetKey(KeyCode.W))
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
         {
             inputMoveDir.y = +1f;
         }
-        if (Input.GetKey(KeyCode.S))
+        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
         {
             inputMoveDir.y = -1f;
         }
-        if (Input.GetKey(KeyCode.A))
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
         {
             inputMoveDir.x = -1f;
         }
-        if (Input.GetKey(KeyCode.D))
+        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
         {
             inputMoveDir.x = +1f;
         }

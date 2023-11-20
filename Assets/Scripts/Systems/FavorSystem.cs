@@ -25,26 +25,35 @@ public class FavorSystem : MonoBehaviour
     }
 
     public static FavorSystem Instance { get; private set; }
-    public static Action<int> OnAnyTeamFavorChange;
+    public static Action<Team> OnAnyTeamFavorChange;
 
-    private Dictionary<int, TeamFavor> teamFavors;
+    private Dictionary<Team, TeamFavor> teamFavors;
 
     private void Awake()
     {
         if (Instance != null)
         {
-            Debug.LogError("There's more than one FavorSystem! " + transform + " - " + Instance);
+            Debug.LogError("There's more than one FavorSystem!");
             Destroy(gameObject);
             return;
         }
         Instance = this;
 
-        teamFavors = new Dictionary<int, TeamFavor>{
-                { 0, new(0, 10) },
-                { 1, new(0, 10) },
-            };
+        teamFavors = new Dictionary<Team, TeamFavor>();
+
+    }
+
+    private void Start()
+    {
+        // Assuming you have a way to get all teams, like from a GameManager or similar
+        foreach (Team team in Match.Instance.GetAllTeams())
+        {
+            teamFavors.Add(team, new TeamFavor(0, 10));
+        }
+
         Unit.OnAnyUnitExpendFavor += Unit_OnAnyUnitExpendFavor;
     }
+
 
     private void Unit_OnAnyUnitExpendFavor(Unit unit)
     {
@@ -62,12 +71,12 @@ public class FavorSystem : MonoBehaviour
     }
 
 
-    public TeamFavor GetTeamFavor(int index)
+    public TeamFavor GetTeamFavor(Team team)
     {
-        return teamFavors[index];
+        return teamFavors[team];
     }
 
-    public float GetTeamFavorNormalized(int index)
+    public float GetTeamFavorNormalized(Team index)
     {
         return teamFavors[index].GetFavorNormalized();
     }

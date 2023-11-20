@@ -7,35 +7,31 @@ public class Unit : MonoBehaviour
 {
     private const int ACTION_POINTS_MAX = 3;
 
-
     public static event EventHandler OnAnyActionPointsChanged;
     public static event EventHandler OnAnyUnitSpawned;
     public static Action<Unit> OnAnyUnitOutOfEnergy;
-
     public static Action<Unit> OnAnyUnitExpendFavor;
 
-    [SerializeField] private int team;
-
+    [SerializeField] private Team team;
 
     private GridPosition gridPosition;
     private HealthSystem healthSystem;
     private UnitFavor favorSystem;
     private BaseAction[] baseActionArray;
     private int actionPoints = ACTION_POINTS_MAX;
+    private bool inArena = true;
 
     private void Awake()
     {
-        healthSystem = GetComponent<HealthSystem>();
-        favorSystem = GetComponent<UnitFavor>();
-        baseActionArray = GetComponents<BaseAction>();
+
     }
 
     private void Start()
     {
-        gridPosition = LevelGrid.Instance.GetGridPosition(transform.position);
-        LevelGrid.Instance.AddUnitAtGridPosition(gridPosition, this);
+        //gridPosition = LevelGrid.Instance.GetGridPosition(transform.position);
+        //LevelGrid.Instance.AddUnitAtGridPosition(gridPosition, this);
 
-        transform.position = LevelGrid.Instance.GetWorldPosition(gridPosition);
+        //transform.position = LevelGrid.Instance.GetWorldPosition(gridPosition);
 
         LevelGrid.Instance.OnElevationChanged += LevelGrid_OnElevationChange;
         TurnSystem.Instance.OnTurnChanged += TurnSystem_OnTurnChanged;
@@ -45,21 +41,44 @@ public class Unit : MonoBehaviour
         OnAnyUnitSpawned?.Invoke(this, EventArgs.Empty);
     }
 
-    private void OnDisable()
+    public void Setup(Team team, Player player)
     {
-        LevelGrid.Instance.OnElevationChanged -= LevelGrid_OnElevationChange;
+        healthSystem = GetComponent<HealthSystem>();
+        favorSystem = GetComponent<UnitFavor>();
+        baseActionArray = new BaseAction[0];
+
+        this.team = team;
+        this.name = player.name;
+        foreach (var abilityData in player.GetAbilities())
+        {
+            Type abilityType = Type.GetType(abilityData.abilityBehaviourName);
+            if (abilityType != null)
+            {
+                gameObject.AddComponent(abilityType);
+            }
+            else
+            {
+                Debug.LogError("Ability type not found: " + abilityData.abilityBehaviourName);
+            }
+        }
+
+        // Re-fetch the baseActionArray to include the newly added abilities
+        baseActionArray = GetComponents<BaseAction>();
     }
 
     private void Update()
     {
-        GridPosition newGridPosition = LevelGrid.Instance.GetGridPosition(transform.position);
-        if (newGridPosition != gridPosition)
+        if (inArena)
         {
-            // Unit changed Grid Position
-            GridPosition oldGridPosition = gridPosition;
-            gridPosition = newGridPosition;
+            GridPosition newGridPosition = LevelGrid.Instance.GetGridPosition(transform.position);
+            if (newGridPosition != gridPosition)
+            {
+                // Unit changed Grid Position
+                GridPosition oldGridPosition = gridPosition;
+                gridPosition = newGridPosition;
 
-            LevelGrid.Instance.UnitMovedGridPosition(this, oldGridPosition, newGridPosition);
+                LevelGrid.Instance.UnitMovedGridPosition(this, oldGridPosition, newGridPosition);
+            }
         }
     }
 
@@ -129,7 +148,7 @@ public class Unit : MonoBehaviour
 
     private void TurnSystem_OnTurnChanged(object sender, EventArgs e)
     {
-        if (TurnSystem.Instance.GetCurrentTeam() == GetTeam())
+        if (TurnSystem.Instance.GetCurrentTeam() == GetTeam() && inArena)
         {
             actionPoints = ACTION_POINTS_MAX;
 
@@ -150,7 +169,7 @@ public class Unit : MonoBehaviour
         transform.position = LevelGrid.Instance.GetWorldPosition(gridPosition);
     }
 
-    public int GetTeam()
+    public Team GetTeam()
     {
         return team;
     }
@@ -180,8 +199,11 @@ public class Unit : MonoBehaviour
 
     private void HealthSystem_OnDead(object sender, EventArgs e)
     {
-        //LevelGrid.Instance.RemoveUnitAtGridPosition(gridPosition, this);
-
+        actionPoints = 0;
+        LevelGrid.Instance.RemoveUnitAtGridPosition(gridPosition, this);
+        inArena = false;
+        gridPosition = ReserveGridSystem.Instance.AddUnit(GetTeam(), this);
+        transform.position = ReserveGridSystem.Instance.GetWorldPosition(GetTeam(), gridPosition);
         //Destroy(gameObject);
 
         OnAnyUnitOutOfEnergy?.Invoke(this);
@@ -205,6 +227,16 @@ public class Unit : MonoBehaviour
     public float GetFavorNormalized()
     {
         return favorSystem.GetFavorNormalized();
+    }
+
+    public void SetInArena(bool inArena)
+    {
+        this.inArena = inArena;
+    }
+
+    public bool IsInArena()
+    {
+        return inArena;
     }
 
 }

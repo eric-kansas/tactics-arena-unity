@@ -1,52 +1,53 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class TurnSystem : MonoBehaviour
 {
-
     public static TurnSystem Instance { get; private set; }
 
     public static Color[] TeamColorList = new Color[]
     {
         Color.blue,
         Color.red,
-        Color.green,
-        Color.yellow
     };
 
     public event EventHandler OnTurnChanged;
 
-
     private int turnNumber = 1;
-    private int currentTeamIndex = 0;
-    private int totalTeams = 2;
+    private List<Team> teams;
+    private Team currentTeam;
 
     private void Awake()
     {
         if (Instance != null)
         {
-            Debug.LogError("There's more than one TurnSystem! " + transform + " - " + Instance);
+            Debug.LogError("There's more than one TurnSystem!");
             Destroy(gameObject);
             return;
         }
         Instance = this;
+        teams = new List<Team>();
     }
 
-    public void SetTotalTeams(int numberOfTeams)
+    private void Start()
     {
-        if (numberOfTeams > 0)
+        foreach (Team team in Match.Instance.GetAllTeams())
         {
-            totalTeams = numberOfTeams;
+            teams.Add(team);
         }
+
+        currentTeam = Match.Instance.GetClientTeam();
+        Debug.Log(currentTeam);
     }
 
 
     public void NextTurn()
     {
         turnNumber++;
-        currentTeamIndex = (currentTeamIndex + 1) % totalTeams;
+        int currentTeamIndex = teams.IndexOf(currentTeam);
+        currentTeam = teams[(currentTeamIndex + 1) % teams.Count];
 
         OnTurnChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -56,13 +57,13 @@ public class TurnSystem : MonoBehaviour
         return turnNumber;
     }
 
-    public int GetCurrentTeam()
+    public Team GetCurrentTeam()
     {
-        return currentTeamIndex;
+        return currentTeam;
     }
 
-    internal bool IsPlayerTurn()
+    public bool IsPlayerTurn()
     {
-        return currentTeamIndex == 0;
+        return currentTeam == Match.Instance.GetClientTeam();
     }
 }

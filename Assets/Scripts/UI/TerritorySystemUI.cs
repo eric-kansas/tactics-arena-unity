@@ -27,10 +27,15 @@ public class TerritorySystemUI : MonoBehaviour
             Rect zoneRect = zoneEntry.Value;
 
             // Calculate the world position for the icon based on the zone's Rect
+            Vector3 worldPosition = LevelGrid.Instance.GetWorldPositionFromRect(zoneRect);
+
             // Instantiate the icon
             Transform iconTransform = Instantiate(iconPrefab, Vector3.zero, Quaternion.identity, iconsContainer.transform);
             TerritoryControlIcon territoryControlIconUI = iconTransform.GetComponent<TerritoryControlIcon>();
-
+            territoryControlIconUI.GetButton().onClick.AddListener(() =>
+            {
+                CameraController.Instance.SetlookAtPoint(worldPosition);
+            });
 
             // Store the icon in the array
             territoryIcons[index] = territoryControlIconUI;
@@ -38,7 +43,7 @@ public class TerritorySystemUI : MonoBehaviour
         }
     }
 
-    private void TerritorySystem_OnTeamCapturedTerritory(int zone, int team)
+    private void TerritorySystem_OnTeamCapturedTerritory(int zone, Team team)
     {
         territoryIcons[zone].SetTeamControl(team);
     }

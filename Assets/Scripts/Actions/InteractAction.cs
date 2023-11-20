@@ -35,6 +35,11 @@ public class InteractAction : BaseAction
     {
         List<GridPosition> validGridPositionList = new List<GridPosition>();
 
+        if (!unit.IsInArena())
+        {
+            return validGridPositionList;
+        }
+
         GridPosition unitGridPosition = unit.GetGridPosition();
 
         for (int x = -maxInteractDistance; x <= maxInteractDistance; x++)

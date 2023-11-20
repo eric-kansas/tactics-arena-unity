@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ShootAction : BaseAction
+public class RangeAction : BaseAction
 {
 
     public static event EventHandler<OnShootEventArgs> OnAnyShoot;
@@ -109,7 +109,7 @@ public class ShootAction : BaseAction
 
     public override string GetActionName()
     {
-        return "Shoot";
+        return "Range";
     }
 
     public override List<GridPosition> GetValidActionGridPositionList()
@@ -121,6 +121,10 @@ public class ShootAction : BaseAction
     public List<GridPosition> GetValidActionGridPositionList(GridPosition unitGridPosition)
     {
         List<GridPosition> validGridPositionList = new List<GridPosition>();
+        if (!unit.IsInArena())
+        {
+            return validGridPositionList;
+        }
 
         for (int x = -maxShootDistance; x <= maxShootDistance; x++)
         {

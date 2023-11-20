@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SpinAction : BaseAction
+public class FavorAction : BaseAction
 {
 
     private float totalSpinAmount;
@@ -37,11 +37,16 @@ public class SpinAction : BaseAction
 
     public override string GetActionName()
     {
-        return "Spin";
+        return "Favor";
     }
 
     public override List<GridPosition> GetValidActionGridPositionList()
     {
+        if (!unit.IsInArena())
+        {
+            return new List<GridPosition>();
+        }
+
         GridPosition unitGridPosition = unit.GetGridPosition();
 
         return new List<GridPosition>

@@ -38,6 +38,10 @@ public class GrenadeAction : BaseAction
     public override List<GridPosition> GetValidActionGridPositionList()
     {
         List<GridPosition> validGridPositionList = new List<GridPosition>();
+        if (!unit.IsInArena())
+        {
+            return validGridPositionList;
+        }
 
         GridPosition unitGridPosition = unit.GetGridPosition();
 

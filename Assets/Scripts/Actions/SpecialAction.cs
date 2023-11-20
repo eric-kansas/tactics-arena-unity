@@ -49,6 +49,11 @@ public class SpecialAction : BaseAction
 
     public override List<GridPosition> GetValidActionGridPositionList()
     {
+        if (!unit.IsInArena())
+        {
+            return new List<GridPosition>();
+        }
+
         GridPosition unitGridPosition = unit.GetGridPosition();
 
         return new List<GridPosition>

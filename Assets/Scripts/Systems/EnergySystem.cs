@@ -25,9 +25,9 @@ public class EnergySystem : MonoBehaviour
     }
 
     public static EnergySystem Instance { get; private set; }
-    public static Action<int> OnAnyTeamEnergyChange;
+    public static Action<Team> OnAnyTeamEnergyChange;
+    private Dictionary<Team, TeamEnergy> teamEnergies;
 
-    private Dictionary<int, TeamEnergy> teamEnergies;
 
     private void Awake()
     {
@@ -39,10 +39,18 @@ public class EnergySystem : MonoBehaviour
         }
         Instance = this;
 
-        teamEnergies = new Dictionary<int, TeamEnergy>{
-                { 0, new(1000, 1000) },
-                { 1, new(1000, 1000) },
-            };
+        teamEnergies = new Dictionary<Team, TeamEnergy>();
+
+    }
+
+    private void Start()
+    {
+        // Assuming you have a way to get all teams, like from a GameManager or similar
+        foreach (Team team in Match.Instance.GetAllTeams())
+        {
+            teamEnergies.Add(team, new TeamEnergy(1000, 1000));
+        }
+
         Unit.OnAnyUnitOutOfEnergy += Unit_OnAnyUnitOutOfEnergy;
     }
 
@@ -63,14 +71,14 @@ public class EnergySystem : MonoBehaviour
         OnAnyTeamEnergyChange?.Invoke(unit.GetTeam());
     }
 
-    public TeamEnergy GetTeamEnergy(int index)
+    public TeamEnergy GetTeamEnergy(Team team)
     {
-        return teamEnergies[index];
+        return teamEnergies[team];
     }
 
-    public float GetTeamEnergyNormalized(int index)
+    public float GetTeamEnergyNormalized(Team team)
     {
-        return teamEnergies[index].GetEnergyNormalized();
+        return teamEnergies[team].GetEnergyNormalized();
     }
 
 }

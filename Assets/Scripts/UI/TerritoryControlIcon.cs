@@ -7,21 +7,26 @@ public class TerritoryControlIcon : MonoBehaviour
 {
 
     [SerializeField] private Image foregroundImage;
+    [SerializeField] private Button button;
 
     private void Start()
     {
-        // EnergySystem.OnAnyTeamEnergyChange += EnergySystem_OnAnyTeamEnergyChange;
-        // UpdateEnergyBars();
+
     }
 
-    public void SetTeamControl(int teamID)
+    public void SetTeamControl(Team team)
     {
-        if (teamID < 0)
+        if (team == null)
         {
             foregroundImage.color = Color.grey;
             return;
         }
 
-        foregroundImage.color = TurnSystem.TeamColorList[teamID];
+        foregroundImage.color = Match.Instance.GetTeamColor(team);
+    }
+
+    public Button GetButton()
+    {
+        return button;
     }
 }
