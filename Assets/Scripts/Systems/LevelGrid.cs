@@ -35,7 +35,7 @@ public class LevelGrid : MonoBehaviour
         }
         Instance = this;
 
-        gridSystem = new GridSystem<GridObject>(width, height, cellSize,
+        gridSystem = new GridSystem<GridObject>(width, height, cellSize, Vector3.zero,
             (GridSystem<GridObject> g, GridPosition gridPosition) =>
             {
                 var (terrain, elevation) = GetRandomTerrainAndElevation();
@@ -164,5 +164,9 @@ public class LevelGrid : MonoBehaviour
         OnElevationChanged?.Invoke(position, newElevation);
     }
 
-
+    public Vector3 GetWorldPositionFromRect(Rect rect)
+    {
+        Vector3 worldPosition = new Vector3(rect.center.x * cellSize, 1, rect.center.y * cellSize);
+        return worldPosition;
+    }
 }

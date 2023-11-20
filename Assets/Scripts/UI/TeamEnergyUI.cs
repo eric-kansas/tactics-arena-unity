@@ -16,21 +16,20 @@ public class TeamEnergyUI : MonoBehaviour
         UpdateEnergyBars();
     }
 
-    private void EnergySystem_OnAnyTeamEnergyChange(int team)
+    private void EnergySystem_OnAnyTeamEnergyChange(Team team)
     {
         UpdateEnergyBar(team);
     }
 
     private void UpdateEnergyBars()
     {
-        energyBarImage1.fillAmount = EnergySystem.Instance.GetTeamEnergyNormalized(0);
-        energyBarImage2.fillAmount = EnergySystem.Instance.GetTeamEnergyNormalized(1);
-
+        energyBarImage1.fillAmount = EnergySystem.Instance.GetTeamEnergyNormalized(Match.Instance.GetClientTeam());
+        energyBarImage2.fillAmount = EnergySystem.Instance.GetTeamEnergyNormalized(Match.Instance.GetAwayTeam());
     }
 
-    private void UpdateEnergyBar(int team)
+    private void UpdateEnergyBar(Team team)
     {
-        if (team == 0)
+        if (team == Match.Instance.GetClientTeam())
         {
             energyBarImage1.fillAmount = EnergySystem.Instance.GetTeamEnergyNormalized(team);
         }

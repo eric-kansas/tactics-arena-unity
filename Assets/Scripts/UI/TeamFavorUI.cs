@@ -19,21 +19,21 @@ public class TeamFavorUI : MonoBehaviour
         UpdateFavorBars();
     }
 
-    private void FavorSystem_OnAnyTeamFavorChange(int team)
+    private void FavorSystem_OnAnyTeamFavorChange(Team team)
     {
         UpdateFavorBar(team);
     }
 
     private void UpdateFavorBars()
     {
-        favorBarImage1.fillAmount = Mathf.Max(FavorSystem.Instance.GetTeamFavorNormalized(0), minFillAmount);
-        favorBarImage2.fillAmount = Mathf.Max(FavorSystem.Instance.GetTeamFavorNormalized(1), minFillAmount);
+        favorBarImage1.fillAmount = Mathf.Max(FavorSystem.Instance.GetTeamFavorNormalized(Match.Instance.GetClientTeam()), minFillAmount);
+        favorBarImage2.fillAmount = Mathf.Max(FavorSystem.Instance.GetTeamFavorNormalized(Match.Instance.GetAwayTeam()), minFillAmount);
     }
 
-    private void UpdateFavorBar(int team)
+    private void UpdateFavorBar(Team team)
     {
 
-        if (team == 0)
+        if (team == Match.Instance.GetClientTeam())
         {
             favorBarImage1.fillAmount = Mathf.Max(FavorSystem.Instance.GetTeamFavorNormalized(team), minFillAmount);
         }

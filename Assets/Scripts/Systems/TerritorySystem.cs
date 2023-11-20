@@ -27,10 +27,10 @@ public class TerritorySystem : MonoBehaviour
     }
 
     public static TerritorySystem Instance { get; private set; }
-    public static Action<int, int> OnTerritoryOwnerChanged; // what zone to what team
-    public static Action<int, int> OnTerritoryScoreChanged; // what team to how many points
+    public static Action<int, Team> OnTerritoryOwnerChanged; // what zone to what team
+    public static Action<Team, int> OnTerritoryScoreChanged; // what team to how many points
 
-    private Dictionary<int, TerritoryScore> territoryScores;
+    private Dictionary<Team, TerritoryScore> territoryScores;
 
     public UnityEngine.Color[] TerritoryColorList = new UnityEngine.Color[]
     {
@@ -41,7 +41,7 @@ public class TerritorySystem : MonoBehaviour
     };
 
     private Dictionary<int, Rect> zones;
-    private Dictionary<int, int> territoryOwners; // Maps zone ID to owner team ID
+    private Dictionary<int, Team> territoryOwners; // Maps zone ID to owner team ID
 
     private void Awake()
     {
@@ -61,15 +61,15 @@ public class TerritorySystem : MonoBehaviour
             { 4 , new(6,6,3,3) },
         };
 
-        territoryScores = new Dictionary<int, TerritoryScore>{
-            { 0, new(0, 10) },
-            { 1, new(0, 10) },
+        territoryScores = new Dictionary<Team, TerritoryScore>{
+            { Match.Instance.GetClientTeam(), new(0, 10) },
+            { Match.Instance.GetAwayTeam(), new(0, 10) },
         };
 
-        territoryOwners = new Dictionary<int, int>();
+        territoryOwners = new Dictionary<int, Team>();
         foreach (var zone in zones.Keys)
         {
-            territoryOwners[zone] = -1;
+            territoryOwners[zone] = null;
         }
     }
 
@@ -86,12 +86,12 @@ public class TerritorySystem : MonoBehaviour
         // Here we will calculate and award points based on territory control
 
         // Assuming you have a method or system to award points
-        foreach (KeyValuePair<int, int> territoryEntry in territoryOwners)
+        foreach (KeyValuePair<int, Team> territoryEntry in territoryOwners)
         {
             int zoneID = territoryEntry.Key;
-            int owningTeamID = territoryEntry.Value;
+            Team owningTeamID = territoryEntry.Value;
 
-            if (owningTeamID != -1) // Check if the territory is not neutral
+            if (owningTeamID != null) // Check if the territory is not neutral
             {
                 // Award points to the team that controls this territory
                 AwardPointsToTeam(owningTeamID, CalculatePointsForTerritory(zoneID));
@@ -99,15 +99,15 @@ public class TerritorySystem : MonoBehaviour
         }
     }
 
-    private void AwardPointsToTeam(int teamID, int points)
+    private void AwardPointsToTeam(Team team, int points)
     {
         // Implement logic to award points to the given team.
         // This might involve updating a score variable, notifying other systems, etc.
-        Debug.Log($"Team {teamID} awarded {points} points for controlling territory.");
-        TerritoryScore score = territoryScores[teamID];
+        Debug.Log($"Team {team.name} awarded {points} points for controlling territory.");
+        TerritoryScore score = territoryScores[team];
         score.amount += points;
-        territoryScores[teamID] = score;
-        OnTerritoryScoreChanged?.Invoke(teamID, points);
+        territoryScores[team] = score;
+        OnTerritoryScoreChanged?.Invoke(team, points);
     }
 
     private int CalculatePointsForTerritory(int zoneID)
@@ -144,7 +144,7 @@ public class TerritorySystem : MonoBehaviour
 
     private void UpdateTerritoryControl(int zoneID, Unit unit)
     {
-        int newOwner = CalculateNewOwnerForTerritory(zoneID);
+        Team newOwner = CalculateNewOwnerForTerritory(zoneID);
 
         if (territoryOwners[zoneID] != newOwner)
         {
@@ -153,9 +153,9 @@ public class TerritorySystem : MonoBehaviour
         }
     }
 
-    private int CalculateNewOwnerForTerritory(int zoneID)
+    private Team CalculateNewOwnerForTerritory(int zoneID)
     {
-        HashSet<int> teamsInZone = new HashSet<int>();
+        HashSet<Team> teamsInZone = new HashSet<Team>();
         Rect zoneRect = zones[zoneID];
 
         foreach (Unit tempUnit in UnitManager.Instance.GetUnitList())
@@ -172,7 +172,7 @@ public class TerritorySystem : MonoBehaviour
             return teamsInZone.First();
         }
 
-        return -1; // Territory becomes neutral if empty or contested
+        return null; // Territory becomes neutral if empty or contested
     }
 
     public Dictionary<int, Rect> GetZones()
@@ -180,9 +180,9 @@ public class TerritorySystem : MonoBehaviour
         return zones;
     }
 
-    public float GetTeamTerritoryScoreNormalized(int index)
+    public float GetTeamTerritoryScoreNormalized(Team team)
     {
-        return territoryScores[index].GetScoreNormalized();
+        return territoryScores[team].GetScoreNormalized();
     }
 
 

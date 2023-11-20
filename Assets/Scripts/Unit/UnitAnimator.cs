@@ -21,12 +21,12 @@ public class UnitAnimator : MonoBehaviour
             moveAction.OnStopMoving += MoveAction_OnStopMoving;
         }
 
-        if (TryGetComponent<ShootAction>(out ShootAction shootAction))
+        if (TryGetComponent<RangeAction>(out RangeAction shootAction))
         {
             shootAction.OnShoot += ShootAction_OnShoot;
         }
 
-        if (TryGetComponent<SwordAction>(out SwordAction swordAction))
+        if (TryGetComponent<MeleeAction>(out MeleeAction swordAction))
         {
             swordAction.OnSwordActionStarted += SwordAction_OnSwordActionStarted;
             swordAction.OnSwordActionCompleted += SwordAction_OnSwordActionCompleted;
@@ -59,11 +59,11 @@ public class UnitAnimator : MonoBehaviour
         animator.SetBool("IsWalking", false);
     }
 
-    private void ShootAction_OnShoot(object sender, ShootAction.OnShootEventArgs e)
+    private void ShootAction_OnShoot(object sender, RangeAction.OnShootEventArgs e)
     {
         animator.SetTrigger("Shoot");
 
-        Transform bulletProjectileTransform = 
+        Transform bulletProjectileTransform =
             Instantiate(bulletProjectilePrefab, shootPointTransform.position, Quaternion.identity);
 
         BulletProjectile bulletProjectile = bulletProjectileTransform.GetComponent<BulletProjectile>();

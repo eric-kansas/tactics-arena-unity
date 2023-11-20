@@ -6,13 +6,34 @@ using Cinemachine;
 public class CameraController : MonoBehaviour
 {
 
+    public static CameraController Instance { get; private set; }
+
+
     private const float MIN_FOLLOW_Y_OFFSET = 2f;
     private const float MAX_FOLLOW_Y_OFFSET = 20f;
+
 
     [SerializeField] private CinemachineVirtualCamera cinemachineVirtualCamera;
 
     private CinemachineTransposer cinemachineTransposer;
     private Vector3 targetFollowOffset;
+    private const float POSITION_CLOSENESS_THRESHOLD = 0.5f; // Threshold for position closeness in units
+
+    private float translationSpeed = 15f; // Speed of moving towards the target
+
+    private Vector3? lookAtPoint; // Target point to look at
+
+
+    private void Awake()
+    {
+        if (Instance != null)
+        {
+            Debug.LogError("There's more than one CameraController! " + transform + " - " + Instance);
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
 
     private void Start()
     {
@@ -25,6 +46,7 @@ public class CameraController : MonoBehaviour
         HandleMovement();
         HandleRotation();
         HandleZoom();
+        HandleLookAt();
     }
 
     private void HandleMovement()
@@ -58,5 +80,26 @@ public class CameraController : MonoBehaviour
         cinemachineTransposer.m_FollowOffset =
             Vector3.Lerp(cinemachineTransposer.m_FollowOffset, targetFollowOffset, Time.deltaTime * zoomSpeed);
     }
+
+    public void SetlookAtPoint(Vector3 point)
+    {
+        lookAtPoint = point;
+    }
+
+    private void HandleLookAt()
+    {
+        if (lookAtPoint.HasValue)
+        {
+            // Move the camera towards the lookAtPoint
+            transform.position = Vector3.MoveTowards(transform.position, lookAtPoint.Value, translationSpeed * Time.deltaTime);
+
+            // Check if the camera is close enough to the target position and rotation
+            if (Vector3.Distance(transform.position, lookAtPoint.Value) < POSITION_CLOSENESS_THRESHOLD)
+            {
+                lookAtPoint = null; // Reset lookAtPoint if the camera is close enough in both position and rotation
+            }
+        }
+    }
+
 
 }

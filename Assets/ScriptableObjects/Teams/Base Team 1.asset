@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26cfa43e5f4f532438de0675d1143a4b, type: 3}
+  m_Name: Base Team 1
+  m_EditorClassIdentifier: 
+  teamName: The Sandlot
+  players:
+  - {fileID: 11400000, guid: 79ced537e7aa6ce47a9c175c4758662f, type: 2}
+  - {fileID: 11400000, guid: 79ced537e7aa6ce47a9c175c4758662f, type: 2}
+  - {fileID: 11400000, guid: 79ced537e7aa6ce47a9c175c4758662f, type: 2}
+  - {fileID: 11400000, guid: 79ced537e7aa6ce47a9c175c4758662f, type: 2}

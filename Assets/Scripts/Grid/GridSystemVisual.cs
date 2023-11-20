@@ -160,21 +160,25 @@ public class ActionGridSystemVisual : MonoBehaviour
             case MoveAction moveAction:
                 gridVisualType = GridVisualType.White;
                 break;
-            case SpinAction spinAction:
+            case FavorAction spinAction:
                 gridVisualType = GridVisualType.Blue;
                 break;
-            case ShootAction shootAction:
+            case RangeAction shootAction:
                 gridVisualType = GridVisualType.Red;
-
-                ShowGridPositionRange(selectedUnit.GetGridPosition(), shootAction.GetMaxShootDistance(), GridVisualType.RedSoft);
+                if (selectedUnit.IsInArena())
+                {
+                    ShowGridPositionRange(selectedUnit.GetGridPosition(), shootAction.GetMaxShootDistance(), GridVisualType.RedSoft);
+                }
                 break;
             case GrenadeAction grenadeAction:
                 gridVisualType = GridVisualType.Yellow;
                 break;
-            case SwordAction swordAction:
+            case MeleeAction swordAction:
                 gridVisualType = GridVisualType.Red;
-
-                ShowGridPositionRangeSquare(selectedUnit.GetGridPosition(), swordAction.GetMaxSwordDistance(), GridVisualType.RedSoft);
+                if (selectedUnit.IsInArena())
+                {
+                    ShowGridPositionRangeSquare(selectedUnit.GetGridPosition(), swordAction.GetMaxSwordDistance(), GridVisualType.RedSoft);
+                }
                 break;
             case InteractAction interactAction:
                 gridVisualType = GridVisualType.Blue;

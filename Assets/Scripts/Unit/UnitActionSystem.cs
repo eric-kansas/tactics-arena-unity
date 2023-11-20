@@ -21,8 +21,6 @@ public class UnitActionSystem : MonoBehaviour
 
     private BaseAction selectedAction;
     private bool isBusy;
-    private int playerTeamIndex = 0;
-
 
     private void Awake()
     {
@@ -37,7 +35,7 @@ public class UnitActionSystem : MonoBehaviour
 
     private void Start()
     {
-        SetSelectedUnit(selectedUnit);
+        //SetSelectedUnit(selectedUnit);
     }
 
     private void Update()
@@ -47,7 +45,7 @@ public class UnitActionSystem : MonoBehaviour
             return;
         }
 
-        if (TurnSystem.Instance.GetCurrentTeam() != playerTeamIndex)
+        if (TurnSystem.Instance.GetCurrentTeam() != Match.Instance.GetClientTeam())
         {
             return;
         }
@@ -62,11 +60,17 @@ public class UnitActionSystem : MonoBehaviour
             return;
         }
 
+        if (selectedAction == null)
+        {
+            return;
+        }
+
         HandleSelectedAction();
     }
 
     private void HandleSelectedAction()
     {
+
         if (InputManager.Instance.IsMouseButtonDownThisFrame())
         {
             GridPosition mouseGridPosition = LevelGrid.Instance.GetGridPosition(MouseWorld.GetPosition());
@@ -83,6 +87,12 @@ public class UnitActionSystem : MonoBehaviour
 
             if (!selectedUnit.TrySpendActionPointsToTakeAction(selectedAction))
             {
+                return;
+            }
+
+            if (!selectedUnit.IsInArena())
+            {
+                // unit is not in arena
                 return;
             }
 
@@ -123,7 +133,7 @@ public class UnitActionSystem : MonoBehaviour
                         return false;
                     }
 
-                    if (unit.GetTeam() != playerTeamIndex)
+                    if (unit.GetTeam() != Match.Instance.GetClientTeam())
                     {
                         // Clicked on an Enemy
                         return false;
@@ -142,7 +152,7 @@ public class UnitActionSystem : MonoBehaviour
     {
         selectedUnit = unit;
 
-        SetSelectedAction(unit.GetAction<MoveAction>());
+        //SetSelectedAction(unit.GetAction<MoveAction>());
 
         OnSelectedUnitChanged?.Invoke(this, EventArgs.Empty);
     }

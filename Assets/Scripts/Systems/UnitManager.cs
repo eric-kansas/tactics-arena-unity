@@ -10,7 +10,7 @@ public class UnitManager : MonoBehaviour
 
 
     private List<Unit> unitList;
-    private Dictionary<int, List<Unit>> teamUnitListDict;
+    private Dictionary<Team, List<Unit>> teamUnitListDict;
 
     private void Awake()
     {
@@ -23,13 +23,13 @@ public class UnitManager : MonoBehaviour
         Instance = this;
 
         unitList = new List<Unit>();
-        teamUnitListDict = new Dictionary<int, List<Unit>>();
+        teamUnitListDict = new Dictionary<Team, List<Unit>>();
     }
 
     private void Start()
     {
         Unit.OnAnyUnitSpawned += Unit_OnAnyUnitSpawned;
-        //Unit.OnAnyUnitOutOfEnergy += Unit_OnAnyUnitDead;
+        Unit.OnAnyUnitOutOfEnergy += Unit_OnAnyUnitOutOfEnergy;
     }
 
     private void Unit_OnAnyUnitSpawned(object sender, EventArgs e)
@@ -38,20 +38,18 @@ public class UnitManager : MonoBehaviour
 
         unitList.Add(unit);
 
-        int teamId = unit.GetTeam();
-        if (!teamUnitListDict.ContainsKey(teamId))
+        Team team = unit.GetTeam();
+        if (!teamUnitListDict.ContainsKey(team))
         {
-            teamUnitListDict[teamId] = new List<Unit>();
+            teamUnitListDict[team] = new List<Unit>();
         }
-        teamUnitListDict[teamId].Add(unit);
+        teamUnitListDict[team].Add(unit);
     }
 
-    private void Unit_OnAnyUnitDead(object sender, EventArgs e)
+    private void Unit_OnAnyUnitOutOfEnergy(Unit unit)
     {
-        Unit unit = sender as Unit;
-
         unitList.Remove(unit);
-        int teamId = unit.GetTeam();
+        Team teamId = unit.GetTeam();
         if (teamUnitListDict.ContainsKey(teamId))
         {
             teamUnitListDict[teamId].Remove(unit);
@@ -63,7 +61,7 @@ public class UnitManager : MonoBehaviour
         return unitList;
     }
 
-    public List<Unit> GetTeamUnitList(int teamId)
+    public List<Unit> GetTeamUnitList(Team teamId)
     {
         if (teamUnitListDict.TryGetValue(teamId, out var teamList))
         {

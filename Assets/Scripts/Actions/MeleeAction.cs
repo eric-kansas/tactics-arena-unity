@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SwordAction : BaseAction
+public class MeleeAction : BaseAction
 {
 
     public static event EventHandler OnAnySwordHit;
@@ -71,7 +71,7 @@ public class SwordAction : BaseAction
 
     public override string GetActionName()
     {
-        return "Sword";
+        return "Melee";
     }
 
     public override EnemyAIAction GetEnemyAIAction(GridPosition gridPosition)
@@ -86,6 +86,10 @@ public class SwordAction : BaseAction
     public override List<GridPosition> GetValidActionGridPositionList()
     {
         List<GridPosition> validGridPositionList = new List<GridPosition>();
+        if (!unit.IsInArena())
+        {
+            return validGridPositionList;
+        }
 
         GridPosition unitGridPosition = unit.GetGridPosition();
 

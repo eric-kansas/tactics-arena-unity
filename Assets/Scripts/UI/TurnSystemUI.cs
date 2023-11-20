@@ -11,7 +11,6 @@ public class TurnSystemUI : MonoBehaviour
     [SerializeField] private Button endTurnBtn;
     [SerializeField] private TextMeshProUGUI turnNumberText;
     [SerializeField] private GameObject enemyTurnVisualGameObject;
-    [SerializeField] private int playerTeamIndex = 0;
 
     private void Start()
     {
@@ -41,12 +40,12 @@ public class TurnSystemUI : MonoBehaviour
 
     private void UpdateCurrentTeamVisual()
     {
-        enemyTurnVisualGameObject.SetActive(TurnSystem.Instance.GetCurrentTeam() != playerTeamIndex);
+        enemyTurnVisualGameObject.SetActive(TurnSystem.Instance.GetCurrentTeam() != Match.Instance.GetClientTeam());
     }
 
     private void UpdateEndTurnButtonVisibility()
     {
-        endTurnBtn.gameObject.SetActive(TurnSystem.Instance.GetCurrentTeam() == playerTeamIndex);
+        endTurnBtn.gameObject.SetActive(TurnSystem.Instance.GetCurrentTeam() == Match.Instance.GetClientTeam());
     }
 
 

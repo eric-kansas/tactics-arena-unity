@@ -69,6 +69,11 @@ public class MoveAction : BaseAction
     {
         List<GridPosition> validGridPositionList = new List<GridPosition>();
 
+        if (!unit.IsInArena())
+        {
+            return validGridPositionList;
+        }
+
         GridPosition unitGridPosition = unit.GetGridPosition();
 
         for (int x = -maxMoveDistance; x <= maxMoveDistance; x++)
@@ -127,7 +132,7 @@ public class MoveAction : BaseAction
 
     public override EnemyAIAction GetEnemyAIAction(GridPosition gridPosition)
     {
-        int targetCountAtGridPosition = unit.GetAction<ShootAction>().GetTargetCountAtPosition(gridPosition);
+        int targetCountAtGridPosition = unit.GetAction<RangeAction>().GetTargetCountAtPosition(gridPosition);
 
         return new EnemyAIAction
         {

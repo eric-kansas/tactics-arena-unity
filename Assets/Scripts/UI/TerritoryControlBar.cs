@@ -17,7 +17,7 @@ public class TerritoryControlBar : MonoBehaviour
         UpdateTerritoryBars();
     }
 
-    private void TerritorySystem_OnTerritoryScoreChanged(int team, int points)
+    private void TerritorySystem_OnTerritoryScoreChanged(Team team, int points)
     {
         UpdateTerritoryBars();
     }
@@ -27,7 +27,7 @@ public class TerritoryControlBar : MonoBehaviour
 
         float minFillAmount = 0.01f; // Define a minimum fill amount
 
-        team1BarImage.fillAmount = Mathf.Max(TerritorySystem.Instance.GetTeamTerritoryScoreNormalized(0), minFillAmount);
-        team2BarImage.fillAmount = Mathf.Max(TerritorySystem.Instance.GetTeamTerritoryScoreNormalized(1), minFillAmount);
+        team1BarImage.fillAmount = Mathf.Max(TerritorySystem.Instance.GetTeamTerritoryScoreNormalized(Match.Instance.GetClientTeam()), minFillAmount);
+        team2BarImage.fillAmount = Mathf.Max(TerritorySystem.Instance.GetTeamTerritoryScoreNormalized(Match.Instance.GetAwayTeam()), minFillAmount);
     }
 }

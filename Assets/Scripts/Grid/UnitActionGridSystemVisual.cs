@@ -27,8 +27,6 @@ public class UnitActionGridSystemVisual : MonoBehaviour
 {
 
     public static UnitActionGridSystemVisual Instance { get; private set; }
-
-
     [SerializeField] private Transform gridSystemVisualSinglePrefab;
     [SerializeField] private List<GridVisualTypeMaterial> gridVisualTypeMaterialList;
 
@@ -70,7 +68,13 @@ public class UnitActionGridSystemVisual : MonoBehaviour
         UnitActionSystem.Instance.OnSelectedActionChanged += UnitActionSystem_OnSelectedActionChanged;
         LevelGrid.Instance.OnAnyUnitMovedGridPosition += LevelGrid_OnAnyUnitMovedGridPosition;
         LevelGrid.Instance.OnElevationChanged += LevelGrid_OnElevationChange;
+        BaseAction.OnAnyActionCompleted += BaseAction_OnAnyActionCompleted;
 
+        UpdateGridVisual();
+    }
+
+    private void BaseAction_OnAnyActionCompleted(object sender, EventArgs e)
+    {
         UpdateGridVisual();
     }
 
@@ -156,6 +160,11 @@ public class UnitActionGridSystemVisual : MonoBehaviour
         Unit selectedUnit = UnitActionSystem.Instance.GetSelectedUnit();
         BaseAction selectedAction = UnitActionSystem.Instance.GetSelectedAction();
 
+        if (selectedAction == null)
+        {
+            return;
+        }
+
         GridVisualType gridVisualType;
 
         switch (selectedAction)
@@ -164,21 +173,25 @@ public class UnitActionGridSystemVisual : MonoBehaviour
             case MoveAction moveAction:
                 gridVisualType = GridVisualType.White;
                 break;
-            case SpinAction spinAction:
+            case FavorAction spinAction:
                 gridVisualType = GridVisualType.Blue;
                 break;
-            case ShootAction shootAction:
+            case RangeAction shootAction:
                 gridVisualType = GridVisualType.Red;
-
-                ShowGridPositionRange(selectedUnit.GetGridPosition(), shootAction.GetMaxShootDistance(), GridVisualType.RedSoft);
+                if (selectedUnit.IsInArena())
+                {
+                    ShowGridPositionRange(selectedUnit.GetGridPosition(), shootAction.GetMaxShootDistance(), GridVisualType.RedSoft);
+                }
                 break;
             case GrenadeAction grenadeAction:
                 gridVisualType = GridVisualType.Yellow;
                 break;
-            case SwordAction swordAction:
+            case MeleeAction swordAction:
                 gridVisualType = GridVisualType.Red;
-
-                ShowGridPositionRangeSquare(selectedUnit.GetGridPosition(), swordAction.GetMaxSwordDistance(), GridVisualType.RedSoft);
+                if (selectedUnit.IsInArena())
+                {
+                    ShowGridPositionRangeSquare(selectedUnit.GetGridPosition(), swordAction.GetMaxSwordDistance(), GridVisualType.RedSoft);
+                }
                 break;
             case InteractAction interactAction:
                 gridVisualType = GridVisualType.Blue;
