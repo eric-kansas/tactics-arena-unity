@@ -32,6 +32,7 @@ public class UnitActionGridSystemVisual : MonoBehaviour
 
 
     private GridSystemVisualSingle[,] gridSystemVisualSingleArray;
+    private Zone actionZone;
 
 
     private void Awake()
@@ -66,11 +67,28 @@ public class UnitActionGridSystemVisual : MonoBehaviour
         }
 
         UnitActionSystem.Instance.OnSelectedActionChanged += UnitActionSystem_OnSelectedActionChanged;
-        LevelGrid.Instance.OnAnyUnitMovedGridPosition += LevelGrid_OnAnyUnitMovedGridPosition;
-        LevelGrid.Instance.OnElevationChanged += LevelGrid_OnElevationChange;
+        UnitActionSystem.Instance.OnSelectedUnitChanged += UnitActionSystem_OnSelectedUnitChanged;
+
+
+        BaseAction.OnAnyActionStarted += BaseAction_OnAnyActionStarted;
         BaseAction.OnAnyActionCompleted += BaseAction_OnAnyActionCompleted;
 
+        LevelGrid.Instance.OnAnyUnitMovedGridPosition += LevelGrid_OnAnyUnitMovedGridPosition;
+        LevelGrid.Instance.OnElevationChanged += LevelGrid_OnElevationChange;
+
+
         UpdateGridVisual();
+    }
+
+    private void UnitActionSystem_OnSelectedUnitChanged(object sender, EventArgs e)
+    {
+        UpdateGridVisual();
+    }
+
+    private void BaseAction_OnAnyActionStarted(object sender, EventArgs e)
+    {
+        HideAllGridPosition();
+        HideBorder();
     }
 
     private void BaseAction_OnAnyActionCompleted(object sender, EventArgs e)
@@ -156,6 +174,7 @@ public class UnitActionGridSystemVisual : MonoBehaviour
     private void UpdateGridVisual()
     {
         HideAllGridPosition();
+        HideBorder();
 
         Unit selectedUnit = UnitActionSystem.Instance.GetSelectedUnit();
         BaseAction selectedAction = UnitActionSystem.Instance.GetSelectedAction();
@@ -164,6 +183,8 @@ public class UnitActionGridSystemVisual : MonoBehaviour
         {
             return;
         }
+
+        Debug.Log("selectedAction: " + selectedAction);
 
         GridVisualType gridVisualType;
 
@@ -200,6 +221,10 @@ public class UnitActionGridSystemVisual : MonoBehaviour
 
         ShowGridPositionList(
             selectedAction.GetValidActionGridPositionList(), gridVisualType);
+
+        // add zone highlight
+        actionZone = new Zone(selectedAction.GetValidActionGridPositionList());
+        actionZone.ShowBorder(Color.red);
     }
 
     private void UnitActionSystem_OnSelectedActionChanged(object sender, EventArgs e)
@@ -209,7 +234,7 @@ public class UnitActionGridSystemVisual : MonoBehaviour
 
     private void LevelGrid_OnAnyUnitMovedGridPosition(object sender, EventArgs e)
     {
-        UpdateGridVisual();
+        //UpdateGridVisual();
     }
 
     private Material GetGridVisualTypeMaterial(GridVisualType gridVisualType)
@@ -224,6 +249,14 @@ public class UnitActionGridSystemVisual : MonoBehaviour
 
         Debug.LogError("Could not find GridVisualTypeMaterial for GridVisualType " + gridVisualType);
         return null;
+    }
+
+    private void HideBorder()
+    {
+        if (actionZone != null)
+        {
+            actionZone.HideBorder();
+        }
     }
 
 }

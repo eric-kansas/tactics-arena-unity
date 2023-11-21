@@ -7,28 +7,52 @@ using System;
 public class SelectedUnitUI : MonoBehaviour
 {
 
-    [SerializeField] private TextMeshProUGUI playNameText;
+    [SerializeField] private GameObject container;
+
+    [SerializeField] private TextMeshProUGUI playerNameText;
+
+    [SerializeField] private TextMeshProUGUI levelText;
+    [SerializeField] private TextMeshProUGUI classText;
+
+    [SerializeField] private TextMeshProUGUI favorRoleText;
+
+    [SerializeField] private TextMeshProUGUI combatRoleText;
+
 
     private void Start()
     {
         UnitActionSystem.Instance.OnSelectedUnitChanged += UnitActionSystem_OnSelectedUnitChanged;
 
-        UpdateTurnText();
+        UpdateSelectedUnitText();
     }
 
     private void UnitActionSystem_OnSelectedUnitChanged(object sender, EventArgs e)
     {
-        UpdateTurnText();
+        UpdateSelectedUnitText();
     }
 
-    private void UpdateTurnText()
+    private void UpdateSelectedUnitText()
     {
-        Unit selectedUnitUI = UnitActionSystem.Instance.GetSelectedUnit();
-        if (selectedUnitUI == null)
+        Unit selectedUnit = UnitActionSystem.Instance.GetSelectedUnit();
+        if (selectedUnit == null)
         {
-            playNameText.text = "";
+            container.SetActive(false);
+            playerNameText.text = "";
+            levelText.text = "";
+            classText.text = "";
+            favorRoleText.text = "";
+            combatRoleText.text = "";
             return;
         }
-        playNameText.text = selectedUnitUI.name;
+
+        Player playerData = selectedUnit.GetPlayerData();
+        playerNameText.text = playerData.GetPlayerName();
+        levelText.text = "Level: " + playerData.GetLevel();
+        classText.text = "Class: " + playerData.GetPlayerClassDisplayText();
+        favorRoleText.text = "Favor: " + playerData.GetFavorRoleDisplayText();
+        combatRoleText.text = "Combat: " + playerData.GetCombatRoleDisplayText();
+        container.SetActive(true);
+
     }
+
 }

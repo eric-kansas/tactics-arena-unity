@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   teamName: The Sandlot
   players:
+  - {fileID: 11400000, guid: 866c804483c61cf4db5f96142297ab8e, type: 2}
+  - {fileID: 11400000, guid: 556883753d914864ba24ee85b0c3171d, type: 2}
   - {fileID: 11400000, guid: 79ced537e7aa6ce47a9c175c4758662f, type: 2}
-  - {fileID: 11400000, guid: 79ced537e7aa6ce47a9c175c4758662f, type: 2}
-  - {fileID: 11400000, guid: 79ced537e7aa6ce47a9c175c4758662f, type: 2}
-  - {fileID: 11400000, guid: 79ced537e7aa6ce47a9c175c4758662f, type: 2}
+  - {fileID: 11400000, guid: c8bd6de6cefaf5d499779a443de26f1f, type: 2}

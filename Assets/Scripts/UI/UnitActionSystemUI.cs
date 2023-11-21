@@ -24,6 +24,7 @@ public class UnitActionSystemUI : MonoBehaviour
         UnitActionSystem.Instance.OnSelectedUnitChanged += UnitActionSystem_OnSelectedUnitChanged;
         UnitActionSystem.Instance.OnSelectedActionChanged += UnitActionSystem_OnSelectedActionChanged;
         UnitActionSystem.Instance.OnActionStarted += UnitActionSystem_OnActionStarted;
+        BaseAction.OnAnyActionCompleted += BaseAction_OnAnyActionCompleted;
         TurnSystem.Instance.OnTurnChanged += TurnSystem_OnTurnChanged;
         Unit.OnAnyActionPointsChanged += Unit_OnAnyActionPointsChanged;
 
@@ -31,7 +32,6 @@ public class UnitActionSystemUI : MonoBehaviour
         CreateUnitActionButtons();
         UpdateSelectedVisual();
     }
-
 
     private void CreateUnitActionButtons()
     {
@@ -51,6 +51,10 @@ public class UnitActionSystemUI : MonoBehaviour
 
         foreach (BaseAction baseAction in selectedUnit.GetBaseActionArray())
         {
+            if (!baseAction.IsActionApplicable())
+            {
+                continue;
+            }
             Transform actionButtonTransform = Instantiate(actionButtonPrefab, actionButtonContainerTransform);
             ActionButtonUI actionButtonUI = actionButtonTransform.GetComponent<ActionButtonUI>();
             actionButtonUI.SetBaseAction(baseAction);
@@ -74,6 +78,12 @@ public class UnitActionSystemUI : MonoBehaviour
     private void UnitActionSystem_OnActionStarted(object sender, EventArgs e)
     {
         UpdateActionPoints();
+    }
+
+    private void BaseAction_OnAnyActionCompleted(object sender, EventArgs e)
+    {
+        CreateUnitActionButtons();
+        UpdateSelectedVisual();
     }
 
     private void UpdateSelectedVisual()

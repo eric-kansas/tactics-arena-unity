@@ -10,8 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5e3a975c01916b74b9a7745c9b1194c7, type: 3}
-  m_Name: Base Player
+  m_Name: Spectacular Striker Fighter
   m_EditorClassIdentifier: 
   playerName: Davies
+  level: 1
+  playerClass: 3
+  favorRole: 0
+  combatRole: 0
   abilities:
   - {fileID: 11400000, guid: bb4a4a5a189b76b4884840132c6c2edd, type: 2}

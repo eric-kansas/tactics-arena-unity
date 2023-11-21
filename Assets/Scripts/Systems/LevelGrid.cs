@@ -169,4 +169,9 @@ public class LevelGrid : MonoBehaviour
         Vector3 worldPosition = new Vector3(rect.center.x * cellSize, 1, rect.center.y * cellSize);
         return worldPosition;
     }
+
+    internal float GetCellSize()
+    {
+        return cellSize;
+    }
 }

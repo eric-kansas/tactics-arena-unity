@@ -55,7 +55,7 @@ public class ElevationAction : BaseAction
     {
         List<GridPosition> validGridPositionList = new List<GridPosition>();
 
-        if (!unit.IsInArena())
+        if (!IsActionApplicable())
         {
             return validGridPositionList;
         }

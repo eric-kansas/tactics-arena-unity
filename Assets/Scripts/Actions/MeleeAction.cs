@@ -86,7 +86,7 @@ public class MeleeAction : BaseAction
     public override List<GridPosition> GetValidActionGridPositionList()
     {
         List<GridPosition> validGridPositionList = new List<GridPosition>();
-        if (!unit.IsInArena())
+        if (!IsActionApplicable())
         {
             return validGridPositionList;
         }

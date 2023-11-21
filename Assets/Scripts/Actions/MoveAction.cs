@@ -69,7 +69,7 @@ public class MoveAction : BaseAction
     {
         List<GridPosition> validGridPositionList = new List<GridPosition>();
 
-        if (!unit.IsInArena())
+        if (!IsActionApplicable())
         {
             return validGridPositionList;
         }

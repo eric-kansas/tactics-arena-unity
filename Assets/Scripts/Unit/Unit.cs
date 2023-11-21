@@ -13,7 +13,7 @@ public class Unit : MonoBehaviour
     public static Action<Unit> OnAnyUnitExpendFavor;
 
     [SerializeField] private Team team;
-
+    private Player playerData;
     private GridPosition gridPosition;
     private HealthSystem healthSystem;
     private UnitFavor favorSystem;
@@ -48,7 +48,8 @@ public class Unit : MonoBehaviour
         baseActionArray = new BaseAction[0];
 
         this.team = team;
-        this.name = player.name;
+        playerData = player;
+
         foreach (var abilityData in player.GetAbilities())
         {
             Type abilityType = Type.GetType(abilityData.abilityBehaviourName);
@@ -237,6 +238,11 @@ public class Unit : MonoBehaviour
     public bool IsInArena()
     {
         return inArena;
+    }
+
+    public Player GetPlayerData()
+    {
+        return playerData;
     }
 
 }

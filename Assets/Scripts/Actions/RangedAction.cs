@@ -121,7 +121,7 @@ public class RangeAction : BaseAction
     public List<GridPosition> GetValidActionGridPositionList(GridPosition unitGridPosition)
     {
         List<GridPosition> validGridPositionList = new List<GridPosition>();
-        if (!unit.IsInArena())
+        if (!IsActionApplicable())
         {
             return validGridPositionList;
         }

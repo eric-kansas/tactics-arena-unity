@@ -15,7 +15,6 @@ public class UnitActionSystem : MonoBehaviour
     public event EventHandler<bool> OnBusyChanged;
     public event EventHandler OnActionStarted;
 
-
     [SerializeField] private Unit selectedUnit;
     [SerializeField] private LayerMask unitLayerMask;
 
@@ -75,6 +74,12 @@ public class UnitActionSystem : MonoBehaviour
         {
             GridPosition mouseGridPosition = LevelGrid.Instance.GetGridPosition(MouseWorld.GetPosition());
 
+            if (!selectedAction.IsActionApplicable())
+            {
+                // activiating from the wrong domain 
+                return;
+            }
+
             if (!selectedAction.IsValidActionGridPosition(mouseGridPosition))
             {
                 return;
@@ -87,12 +92,6 @@ public class UnitActionSystem : MonoBehaviour
 
             if (!selectedUnit.TrySpendActionPointsToTakeAction(selectedAction))
             {
-                return;
-            }
-
-            if (!selectedUnit.IsInArena())
-            {
-                // unit is not in arena
                 return;
             }
 
@@ -151,7 +150,7 @@ public class UnitActionSystem : MonoBehaviour
     private void SetSelectedUnit(Unit unit)
     {
         selectedUnit = unit;
-
+        selectedAction = null;
         //SetSelectedAction(unit.GetAction<MoveAction>());
 
         OnSelectedUnitChanged?.Invoke(this, EventArgs.Empty);
