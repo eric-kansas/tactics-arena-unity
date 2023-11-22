@@ -30,6 +30,14 @@ public class UnitActionSystem : MonoBehaviour
             return;
         }
         Instance = this;
+
+        BaseAction.OnAnyActionCompleted += BaseAction_OnAnyActionCompleted;
+
+    }
+
+    private void BaseAction_OnAnyActionCompleted(object sender, EventArgs e)
+    {
+        selectedAction = null;
     }
 
     private void Start()

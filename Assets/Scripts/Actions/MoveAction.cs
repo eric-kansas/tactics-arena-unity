@@ -11,7 +11,7 @@ public class MoveAction : BaseAction
 
 
 
-    [SerializeField] private int maxMoveDistance = 4;
+    [SerializeField] private int maxMoveDistance = 2;
 
     private List<Vector3> positionList;
     private int currentPositionIndex;
@@ -46,7 +46,6 @@ public class MoveAction : BaseAction
             }
         }
     }
-
 
     public override void TakeAction(GridPosition gridPosition, Action onActionComplete)
     {
@@ -110,8 +109,8 @@ public class MoveAction : BaseAction
                     continue;
                 }
 
-                int pathfindingDistanceMultiplier = 10;
-                if (Pathfinding.Instance.GetPathLength(unitGridPosition, testGridPosition) > maxMoveDistance * pathfindingDistanceMultiplier)
+                int pathfindingDistanceMultiplier = 1;
+                if (Pathfinding.Instance.GetPathLength(unitGridPosition, testGridPosition) >= (maxMoveDistance + 1) * pathfindingDistanceMultiplier)
                 {
                     // Path length is too long
                     continue;
