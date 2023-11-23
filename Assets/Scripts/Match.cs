@@ -2,29 +2,58 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+[Serializable]
+public class SpawnZone
+{
+    public Rect zoneRect; // Defines the area of the spawn zone
+    // Add other properties if needed, like team ID or specific spawn points within the zone
+}
+
 public class Match : MonoBehaviour
 {
     public static Match Instance { get; private set; }
+    [SerializeField] private GameObject unitPrefab; // Reference to the Unit prefab
 
     [SerializeField] private Team homeTeam;
     [SerializeField] private Team awayTeam;
-    [SerializeField] private GameObject unitPrefab; // Reference to the Unit prefab
+    [SerializeField] private List<SpawnZone> homeTeamSpawnZones;
+    [SerializeField] private List<SpawnZone> awayTeamSpawnZones;
+
+    // You can define the spawn zones here or load them from Scriptable Objects
+    private Dictionary<Team, List<Zone>> teamSpawnZones;
 
     private void Awake()
     {
         if (Instance != null)
         {
-            Debug.LogError("There's more than one UnitActionSystem! " + transform + " - " + Instance);
+            Debug.LogError("There's more than one Match! " + transform + " - " + Instance);
             Destroy(gameObject);
             return;
         }
         Instance = this;
+        teamSpawnZones = new Dictionary<Team, List<Zone>>();
     }
 
     private void Start()
     {
+
         SetupTeam(homeTeam);
         SetupTeam(awayTeam);
+
+        PopulateTeamSpawnZones(homeTeam, homeTeamSpawnZones);
+        PopulateTeamSpawnZones(awayTeam, awayTeamSpawnZones);
+    }
+
+    private void PopulateTeamSpawnZones(Team team, List<SpawnZone> spawnZones)
+    {
+        List<Zone> teamZonePositions = new List<Zone>();
+        foreach (SpawnZone zone in spawnZones)
+        {
+            teamZonePositions.Add(new Zone(zone.zoneRect));
+        }
+
+        teamSpawnZones[team] = teamZonePositions;
     }
 
     private void SetupTeam(Team team)
@@ -86,5 +115,30 @@ public class Match : MonoBehaviour
         {
             return Color.blue;
         }
+    }
+
+    public static List<GridPosition> GetGridPositionsFromRect(Rect rect)
+    {
+        List<GridPosition> gridPositions = new List<GridPosition>();
+
+        // Iterate over the rectangle area
+        for (int x = Mathf.FloorToInt(rect.xMin); x < Mathf.CeilToInt(rect.xMax); x++)
+        {
+            for (int z = Mathf.FloorToInt(rect.yMin); z < Mathf.CeilToInt(rect.yMax); z++)
+            {
+                gridPositions.Add(new GridPosition(x, z));
+            }
+        }
+
+        return gridPositions;
+    }
+
+    public List<Zone> GetSpawnZonesForTeam(Team team)
+    {
+        if (teamSpawnZones.TryGetValue(team, out var spawnPositions))
+        {
+            return spawnPositions;
+        }
+        return new List<Zone>(); // Return an empty list if no spawn zones are found
     }
 }

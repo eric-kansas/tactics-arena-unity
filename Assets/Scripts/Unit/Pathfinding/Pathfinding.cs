@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class Pathfinding : MonoBehaviour
@@ -8,14 +9,13 @@ public class Pathfinding : MonoBehaviour
     public static Pathfinding Instance { get; private set; }
 
 
-    private const int MOVE_STRAIGHT_COST = 10;
-    private const int MOVE_DIAGONAL_COST = 14;
-    private const int ELEVATION_CHANGE_COST = 20; // or any other value based on your game design
+    private const int MOVE_STRAIGHT_COST = 1;
+    private const int MOVE_DIAGONAL_COST = 100;
+    private const int ELEVATION_CHANGE_COST = 1; // or any other value based on your game design
 
 
     [SerializeField] private Transform gridDebugObjectPrefab;
     [SerializeField] private LayerMask obstaclesLayerMask;
-
 
     private int width;
     private int height;
@@ -127,8 +127,6 @@ public class Pathfinding : MonoBehaviour
                 int elevationChangeCost = GetElevationChangeCost(currentNode, neighbourElevation);
 
                 int tentativeGCost = currentNode.GetGCost() + CalculateDistance(currentNode.GetGridPosition(), neighbourNode.GetGridPosition()) + terrainMovementCost + elevationChangeCost;
-
-
                 if (tentativeGCost < neighbourNode.GetGCost())
                 {
                     neighbourNode.SetCameFromPathNode(currentNode);
@@ -189,6 +187,10 @@ public class Pathfinding : MonoBehaviour
     private int GetElevationChangeCost(PathNode currentNode, int targetElevation)
     {
         int currentElevation = LevelGrid.Instance.GetElevationAtGridPosition(currentNode.GetGridPosition());
+        if (targetElevation - currentElevation <= 0)
+        {
+            return 0;
+        }
         return Mathf.Abs(targetElevation - currentElevation) * ELEVATION_CHANGE_COST;
     }
 
@@ -207,33 +209,33 @@ public class Pathfinding : MonoBehaviour
         {
             // Left
             neighbourList.Add(GetNode(gridPosition.x - 1, gridPosition.z + 0));
-            if (gridPosition.z - 1 >= 0)
-            {
-                // Left Down
-                neighbourList.Add(GetNode(gridPosition.x - 1, gridPosition.z - 1));
-            }
+            // if (gridPosition.z - 1 >= 0)
+            // {
+            //     // Left Down
+            //     neighbourList.Add(GetNode(gridPosition.x - 1, gridPosition.z - 1));
+            // }
 
-            if (gridPosition.z + 1 < gridSystem.GetHeight())
-            {
-                // Left Up
-                neighbourList.Add(GetNode(gridPosition.x - 1, gridPosition.z + 1));
-            }
+            // if (gridPosition.z + 1 < gridSystem.GetHeight())
+            // {
+            //     // Left Up
+            //     neighbourList.Add(GetNode(gridPosition.x - 1, gridPosition.z + 1));
+            // }
         }
 
         if (gridPosition.x + 1 < gridSystem.GetWidth())
         {
             // Right
             neighbourList.Add(GetNode(gridPosition.x + 1, gridPosition.z + 0));
-            if (gridPosition.z - 1 >= 0)
-            {
-                // Right Down
-                neighbourList.Add(GetNode(gridPosition.x + 1, gridPosition.z - 1));
-            }
-            if (gridPosition.z + 1 < gridSystem.GetHeight())
-            {
-                // Right Up
-                neighbourList.Add(GetNode(gridPosition.x + 1, gridPosition.z + 1));
-            }
+            // if (gridPosition.z - 1 >= 0)
+            // {
+            //     // Right Down
+            //     neighbourList.Add(GetNode(gridPosition.x + 1, gridPosition.z - 1));
+            // }
+            // if (gridPosition.z + 1 < gridSystem.GetHeight())
+            // {
+            //     // Right Up
+            //     neighbourList.Add(GetNode(gridPosition.x + 1, gridPosition.z + 1));
+            // }
         }
 
         if (gridPosition.z - 1 >= 0)
@@ -289,7 +291,11 @@ public class Pathfinding : MonoBehaviour
 
     public int GetPathLength(GridPosition startGridPosition, GridPosition endGridPosition)
     {
-        FindPath(startGridPosition, endGridPosition, out int pathLength);
+        List<GridPosition> path = FindPath(startGridPosition, endGridPosition, out int pathLength);
+        // foreach (GridPosition pos in path)
+        // {
+        //     Debug.Log(pos.ToString());
+        // }
         return pathLength;
     }
 

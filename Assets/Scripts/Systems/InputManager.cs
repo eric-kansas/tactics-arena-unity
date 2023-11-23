@@ -35,12 +35,30 @@ public class InputManager : MonoBehaviour
 #endif
     }
 
-    public bool IsMouseButtonDownThisFrame()
+    public bool IsLeftMouseButtonDownThisFrame()
     {
 #if USE_NEW_INPUT_SYSTEM
-        return playerInputActions.Player.Click.WasPressedThisFrame();
+        return playerInputActions.Player.LeftClick.WasPressedThisFrame();
 #else
         return Input.GetMouseButtonDown(0);
+#endif
+    }
+
+    public bool IsRightMouseButtonDownThisFrame()
+    {
+#if USE_NEW_INPUT_SYSTEM
+        return playerInputActions.Player.RightClick.WasPressedThisFrame();
+#else
+        return Input.GetMouseButtonDown(1);
+#endif
+    }
+
+    public bool IsConfirmButtonDownThisFrame()
+    {
+#if USE_NEW_INPUT_SYSTEM
+        return playerInputActions.Player.Confirm.WasPressedThisFrame();
+#else
+        return Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)
 #endif
     }
 

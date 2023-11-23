@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
-    private const int ACTION_POINTS_MAX = 3;
+    private const int ACTION_POINTS_MAX = 1;
 
     public static event EventHandler OnAnyActionPointsChanged;
     public static event EventHandler OnAnyUnitSpawned;
@@ -13,13 +13,13 @@ public class Unit : MonoBehaviour
     public static Action<Unit> OnAnyUnitExpendFavor;
 
     [SerializeField] private Team team;
-
+    private Player playerData;
     private GridPosition gridPosition;
     private HealthSystem healthSystem;
     private UnitFavor favorSystem;
     private BaseAction[] baseActionArray;
     private int actionPoints = ACTION_POINTS_MAX;
-    private bool inArena = true;
+    [SerializeField] private bool inArena = true;
 
     private void Awake()
     {
@@ -48,7 +48,8 @@ public class Unit : MonoBehaviour
         baseActionArray = new BaseAction[0];
 
         this.team = team;
-        this.name = player.name;
+        playerData = player;
+
         foreach (var abilityData in player.GetAbilities())
         {
             Type abilityType = Type.GetType(abilityData.abilityBehaviourName);
@@ -237,6 +238,11 @@ public class Unit : MonoBehaviour
     public bool IsInArena()
     {
         return inArena;
+    }
+
+    public Player GetPlayerData()
+    {
+        return playerData;
     }
 
 }

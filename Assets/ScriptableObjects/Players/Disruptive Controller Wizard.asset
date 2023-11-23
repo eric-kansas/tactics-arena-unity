@@ -9,10 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26cfa43e5f4f532438de0675d1143a4b, type: 3}
-  m_Name: Base Team 1
+  m_Script: {fileID: 11500000, guid: 5e3a975c01916b74b9a7745c9b1194c7, type: 3}
+  m_Name: Disruptive Controller Wizard
   m_EditorClassIdentifier: 
-  teamName: The Sandlot
-  players:
-  - {fileID: 11400000, guid: 79ced537e7aa6ce47a9c175c4758662f, type: 2}
-  - {fileID: 11400000, guid: 79ced537e7aa6ce47a9c175c4758662f, type: 2}
+  playerName: Matt
+  level: 1
+  playerClass: 2
+  favorRole: 2
+  combatRole: 3
+  abilities:
+  - {fileID: 11400000, guid: bb4a4a5a189b76b4884840132c6c2edd, type: 2}

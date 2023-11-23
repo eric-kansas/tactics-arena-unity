@@ -6,15 +6,20 @@ using UnityEngine;
 public class MoveAction : BaseAction
 {
 
+    private static GameObject traveralPathVisualPrefab;
+    public static void SetTraversalPathVisualPrefab(GameObject prefab)
+    {
+        traveralPathVisualPrefab = prefab;
+    }
+
     public event EventHandler OnStartMoving;
     public event EventHandler OnStopMoving;
 
-
-
-    [SerializeField] private int maxMoveDistance = 4;
+    [SerializeField] private int maxMoveDistance = 5;
 
     private List<Vector3> positionList;
     private int currentPositionIndex;
+    private GameObject traveralPathVisualInstance;
 
     private void Update()
     {
@@ -41,12 +46,45 @@ public class MoveAction : BaseAction
             if (currentPositionIndex >= positionList.Count)
             {
                 OnStopMoving?.Invoke(this, EventArgs.Empty);
-
+                ClearPreview();
                 ActionComplete();
             }
         }
     }
 
+    public override void PreviewAction(GridPosition gridPosition)
+    {
+        List<GridPosition> pathGridPositionList = Pathfinding.Instance.FindPath(unit.GetGridPosition(), gridPosition, out int pathLength);
+        if (traveralPathVisualInstance == null)
+        {
+            CreateTraveralPathVisual();
+        }
+
+        var traveralPathVisual = traveralPathVisualInstance.GetComponent<TraveralPathVisual>();
+        traveralPathVisual.Setup(pathGridPositionList);
+        traveralPathVisual.ShowPath(Color.green);
+    }
+
+    public override void ClearPreview()
+    {
+        if (traveralPathVisualInstance != null)
+        {
+            GameObject.Destroy(traveralPathVisualInstance);
+            traveralPathVisualInstance = null;
+        }
+    }
+
+    private void CreateTraveralPathVisual()
+    {
+        if (traveralPathVisualPrefab != null)
+        {
+            traveralPathVisualInstance = GameObject.Instantiate(traveralPathVisualPrefab);
+        }
+        else
+        {
+            Debug.LogError("Traversal visual prefab is not assigned!");
+        }
+    }
 
     public override void TakeAction(GridPosition gridPosition, Action onActionComplete)
     {
@@ -69,7 +107,7 @@ public class MoveAction : BaseAction
     {
         List<GridPosition> validGridPositionList = new List<GridPosition>();
 
-        if (!unit.IsInArena())
+        if (!IsActionApplicable())
         {
             return validGridPositionList;
         }
@@ -110,8 +148,8 @@ public class MoveAction : BaseAction
                     continue;
                 }
 
-                int pathfindingDistanceMultiplier = 10;
-                if (Pathfinding.Instance.GetPathLength(unitGridPosition, testGridPosition) > maxMoveDistance * pathfindingDistanceMultiplier)
+                int pathfindingDistanceMultiplier = 1;
+                if (Pathfinding.Instance.GetPathLength(unitGridPosition, testGridPosition) >= (maxMoveDistance + 1) * pathfindingDistanceMultiplier)
                 {
                     // Path length is too long
                     continue;

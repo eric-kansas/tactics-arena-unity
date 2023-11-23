@@ -3,6 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum ActionUsage
+{
+    Arena,
+    Reserves,
+    Both
+}
+
+
 public abstract class BaseAction : MonoBehaviour
 {
 
@@ -12,6 +20,7 @@ public abstract class BaseAction : MonoBehaviour
 
     protected Unit unit;
     protected bool isActive;
+    protected ActionUsage actionUsage = ActionUsage.Arena;
     protected Action onActionComplete;
 
     protected virtual void Awake()
@@ -39,6 +48,13 @@ public abstract class BaseAction : MonoBehaviour
     public virtual int GetActionPointsCost()
     {
         return 1;
+    }
+    public virtual void PreviewAction(GridPosition gridPosition)
+    {
+    }
+
+    public virtual void ClearPreview()
+    {
     }
 
     protected void ActionStart(Action onActionComplete)
@@ -85,6 +101,20 @@ public abstract class BaseAction : MonoBehaviour
             return null;
         }
 
+    }
+
+    public bool IsActionApplicable()
+    {
+        if (actionUsage == ActionUsage.Both) return true;
+
+        bool isInArena = unit.IsInArena();
+        return (actionUsage == ActionUsage.Arena && isInArena) ||
+               (actionUsage == ActionUsage.Reserves && !isInArena);
+    }
+
+    public ActionUsage GetActionUsage()
+    {
+        return actionUsage;
     }
 
     public abstract EnemyAIAction GetEnemyAIAction(GridPosition gridPosition);
