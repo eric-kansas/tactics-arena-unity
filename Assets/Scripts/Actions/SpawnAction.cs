@@ -23,6 +23,9 @@ public class SpawnAction : BaseAction
         }
 
         transform.position = LevelGrid.Instance.GetWorldPosition(targetGridPosition);
+
+        GridPosition gridPosition = LevelGrid.Instance.GetGridPosition(transform.position);
+        LevelGrid.Instance.AddUnitAtGridPosition(gridPosition, unit);
         unit.SetInArena(true);
         ActionComplete();
     }
@@ -38,7 +41,23 @@ public class SpawnAction : BaseAction
         List<GridPosition> result = new List<GridPosition>();
         foreach (Zone zone in Match.Instance.GetSpawnZonesForTeam(unit.GetTeam()))
         {
-            result.AddRange(zone.GridPositions());
+            foreach (GridPosition pos in zone.GridPositions())
+            {
+
+                if (!LevelGrid.Instance.IsValidGridPosition(pos))
+                {
+                    continue;
+                }
+
+                if (LevelGrid.Instance.HasAnyUnitOnGridPosition(pos))
+                {
+                    // Grid Position is empty, no Unit
+                    continue;
+                }
+
+                result.Add(pos);
+            }
+
         }
         return result;
     }
@@ -51,12 +70,11 @@ public class SpawnAction : BaseAction
 
     public override EnemyAIAction GetEnemyAIAction(GridPosition gridPosition)
     {
-        int targetCountAtGridPosition = unit.GetAction<RangeAction>().GetTargetCountAtPosition(gridPosition);
 
         return new EnemyAIAction
         {
             gridPosition = gridPosition,
-            actionValue = targetCountAtGridPosition * 10,
+            actionValue = 100,
         };
     }
 

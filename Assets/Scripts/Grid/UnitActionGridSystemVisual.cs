@@ -224,7 +224,7 @@ public class UnitActionGridSystemVisual : MonoBehaviour
 
         // add zone highlight
         actionZone = new Zone(selectedAction.GetValidActionGridPositionList());
-        actionZone.ShowBorder(Color.red);
+        actionZone.ShowBorder(Color.blue);
     }
 
     private void UnitActionSystem_OnSelectedActionChanged(object sender, EventArgs e)

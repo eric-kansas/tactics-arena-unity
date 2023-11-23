@@ -98,6 +98,12 @@ public class EnemyAI : MonoBehaviour
                 continue;
             }
 
+            if (!baseAction.IsActionApplicable())
+            {
+                // Activating from the wrong domain
+                continue;
+            }
+
             if (bestEnemyAIAction == null)
             {
                 bestEnemyAIAction = baseAction.GetBestEnemyAIAction();

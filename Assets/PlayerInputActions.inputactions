@@ -33,9 +33,27 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Click",
+                    "name": "LeftClick",
                     "type": "Button",
                     "id": "b190ecd2-fd61-4c73-88f8-1cf0c4d542a4",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RightClick",
+                    "type": "Button",
+                    "id": "3799c261-f060-4ec9-abb3-3db57717117f",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Confirm",
+                    "type": "Button",
+                    "id": "1f24f88c-d370-42ec-bc33-91b5e92a7e16",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -204,7 +222,40 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Click",
+                    "action": "LeftClick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8dbeac71-fc8e-4296-a915-ab383fb1747b",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightClick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6e31c73b-362e-46a4-a145-b77040c7a41b",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Confirm",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "08f3561a-b1e0-4e7c-8573-28236b0cb24a",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Confirm",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

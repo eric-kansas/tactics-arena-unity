@@ -4,6 +4,10 @@ using UnityEngine;
 public class Zone
 {
     private static GameObject borderVisualPrefab;
+    public static void SetBorderVisualPrefab(GameObject prefab)
+    {
+        borderVisualPrefab = prefab;
+    }
 
     private HashSet<GridPosition> gridPositionsSet;
     private List<GridPosition> gridPositions;
@@ -27,11 +31,7 @@ public class Zone
         // no need to verify -- built from rect
     }
 
-    // Static method to set the prefab
-    public static void SetBorderVisualPrefab(GameObject prefab)
-    {
-        borderVisualPrefab = prefab;
-    }
+
 
     private List<GridPosition> ConvertRectToGridPositions(Rect rect)
     {

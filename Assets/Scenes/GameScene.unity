@@ -10868,7 +10868,7 @@ GameObject:
   - component: {fileID: 1443458918}
   - component: {fileID: 1443458919}
   m_Layer: 0
-  m_Name: ZoneSystem
+  m_Name: LoadPrefabs
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10902,6 +10902,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   borderVisualPrefab: {fileID: 3962196174379554511, guid: 604698b1331af544f8041334e2250285,
+    type: 3}
+  traversalPathVisualPrefab: {fileID: 3962196174379554511, guid: 74e9013054a566b43b3cb02d292fead4,
     type: 3}
 --- !u!4 &1495110780 stripped
 Transform:
@@ -13409,8 +13411,8 @@ MonoBehaviour:
   awayTeamSpawnZones:
   - zoneRect:
       serializedVersion: 2
-      x: 10
-      y: 10
+      x: 3
+      y: 3
       width: 3
       height: 3
 --- !u!4 &1999668592

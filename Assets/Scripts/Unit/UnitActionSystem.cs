@@ -20,6 +20,9 @@ public class UnitActionSystem : MonoBehaviour
 
     private BaseAction selectedAction;
     private bool isBusy;
+    private bool isPreviewingAction = false;
+    private GridPosition actionPreviewGridPosition;
+
 
     private void Awake()
     {
@@ -62,6 +65,12 @@ public class UnitActionSystem : MonoBehaviour
             return;
         }
 
+        if (InputManager.Instance.IsRightMouseButtonDownThisFrame())
+        {
+            ClearActionPreview();
+            return;
+        }
+
         if (TryHandleUnitSelection())
         {
             return;
@@ -77,14 +86,19 @@ public class UnitActionSystem : MonoBehaviour
 
     private void HandleSelectedAction()
     {
+        if (InputManager.Instance.IsConfirmButtonDownThisFrame() && isPreviewingAction)
+        {
+            ConfirmAction();
+            return;
+        }
 
-        if (InputManager.Instance.IsMouseButtonDownThisFrame())
+        if (InputManager.Instance.IsLeftMouseButtonDownThisFrame())
         {
             GridPosition mouseGridPosition = LevelGrid.Instance.GetGridPosition(MouseWorld.GetPosition());
 
             if (!selectedAction.IsActionApplicable())
             {
-                // activiating from the wrong domain 
+                // Activating from the wrong domain
                 return;
             }
 
@@ -98,18 +112,38 @@ public class UnitActionSystem : MonoBehaviour
                 return;
             }
 
-            if (!selectedUnit.TrySpendActionPointsToTakeAction(selectedAction))
+            if (mouseGridPosition == actionPreviewGridPosition)
             {
-                return;
+                ConfirmAction();
             }
 
-            SetBusy();
-            selectedAction.TakeAction(mouseGridPosition, ClearBusy);
+            PreviewAction(mouseGridPosition);
 
-            OnActionStarted?.Invoke(this, EventArgs.Empty);
         }
     }
 
+    private void PreviewAction(GridPosition gridPosition)
+    {
+        selectedAction.ClearPreview();
+
+        actionPreviewGridPosition = gridPosition;
+        isPreviewingAction = true;
+
+        selectedAction.PreviewAction(gridPosition);
+    }
+
+    private void ConfirmAction()
+    {
+        if (!selectedUnit.TrySpendActionPointsToTakeAction(selectedAction))
+        {
+            return;
+        }
+
+        SetBusy();
+        selectedAction.TakeAction(actionPreviewGridPosition, ClearBusy);
+        OnActionStarted?.Invoke(this, EventArgs.Empty);
+        isPreviewingAction = false;
+    }
 
     private void SetBusy()
     {
@@ -127,7 +161,7 @@ public class UnitActionSystem : MonoBehaviour
 
     private bool TryHandleUnitSelection()
     {
-        if (InputManager.Instance.IsMouseButtonDownThisFrame())
+        if (InputManager.Instance.IsLeftMouseButtonDownThisFrame())
         {
             Ray ray = Camera.main.ScreenPointToRay(InputManager.Instance.GetMouseScreenPosition());
             if (Physics.Raycast(ray, out RaycastHit raycastHit, float.MaxValue, unitLayerMask))
@@ -166,9 +200,23 @@ public class UnitActionSystem : MonoBehaviour
 
     public void SetSelectedAction(BaseAction baseAction)
     {
+        if (selectedAction != null && selectedAction != baseAction)
+        {
+            ClearActionPreview();
+        }
         selectedAction = baseAction;
-
         OnSelectedActionChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void ClearActionPreview()
+    {
+        if (isPreviewingAction)
+        {
+            // Clear the preview visuals
+            // Optionally call a method on the current action to clear its preview
+            selectedAction.ClearPreview();
+            isPreviewingAction = false;
+        }
     }
 
     public Unit GetSelectedUnit()

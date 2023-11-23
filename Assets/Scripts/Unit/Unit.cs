@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
-    private const int ACTION_POINTS_MAX = 5;
+    private const int ACTION_POINTS_MAX = 1;
 
     public static event EventHandler OnAnyActionPointsChanged;
     public static event EventHandler OnAnyUnitSpawned;
@@ -19,7 +19,7 @@ public class Unit : MonoBehaviour
     private UnitFavor favorSystem;
     private BaseAction[] baseActionArray;
     private int actionPoints = ACTION_POINTS_MAX;
-    private bool inArena = true;
+    [SerializeField] private bool inArena = true;
 
     private void Awake()
     {

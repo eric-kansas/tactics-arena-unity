@@ -49,6 +49,13 @@ public abstract class BaseAction : MonoBehaviour
     {
         return 1;
     }
+    public virtual void PreviewAction(GridPosition gridPosition)
+    {
+    }
+
+    public virtual void ClearPreview()
+    {
+    }
 
     protected void ActionStart(Action onActionComplete)
     {
