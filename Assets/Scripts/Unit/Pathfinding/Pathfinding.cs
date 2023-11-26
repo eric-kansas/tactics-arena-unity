@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +11,6 @@ public class Pathfinding : MonoBehaviour
 
 
     private const int MOVE_STRAIGHT_COST = 1;
-    private const int MOVE_DIAGONAL_COST = 100;
     private const int ELEVATION_CHANGE_COST = 1; // or any other value based on your game design
 
 
@@ -32,6 +32,11 @@ public class Pathfinding : MonoBehaviour
         }
         Instance = this;
 
+    }
+
+    public void Start()
+    {
+        Setup(LevelGrid.Instance.GetWidth(), LevelGrid.Instance.GetHeight(), LevelGrid.Instance.GetCellSize());
     }
 
     public void Setup(int width, int height, float cellSize)
@@ -64,7 +69,17 @@ public class Pathfinding : MonoBehaviour
         }
     }
 
-    public List<GridPosition> FindPath(GridPosition startGridPosition, GridPosition endGridPosition, out int pathLength)
+    private int CalculatePerceivedRisk(PathNode fromNode, PathNode toNode)
+    {
+        (bool didTrigger, Unit enemey) = LevelGrid.Instance.TriggersOpportunityAttack(fromNode.GetGridPosition(), toNode.GetGridPosition());
+        if (didTrigger)
+        {
+            return 100; // High perceived risk for opportunity attack moves
+        }
+        return 0; // No extra perceived risk
+    }
+
+    public List<GridPosition> FindPath(Team team, GridPosition startGridPosition, GridPosition endGridPosition, out int pathLength, int maxMoveDistance)
     {
         List<PathNode> openList = new List<PathNode>();
         List<PathNode> closedList = new List<PathNode>();
@@ -82,8 +97,18 @@ public class Pathfinding : MonoBehaviour
 
                 pathNode.SetGCost(int.MaxValue);
                 pathNode.SetHCost(0);
+                pathNode.SetPerceivedRisk(0);
                 pathNode.CalculateFCost();
                 pathNode.ResetCameFromPathNode();
+                if (LevelGrid.Instance.GetUnitAtGridPosition(gridPosition))
+                {
+                    pathNode.SetIsWalkable(false);
+                }
+                else
+                {
+                    pathNode.SetIsWalkable(true);
+
+                }
             }
         }
 
@@ -118,6 +143,11 @@ public class Pathfinding : MonoBehaviour
                     continue;
                 }
 
+                if (!FogOfWarSystem.Instance.IsVisible(team, neighbourNode.GetGridPosition()))
+                {
+                    closedList.Add(neighbourNode);
+                    continue;
+                }
                 int neighbourElevation = LevelGrid.Instance.GetElevationAtGridPosition(neighbourNode.GetGridPosition());
                 TerrainType neighbourTerrainType = LevelGrid.Instance.GetTerrainTypeAtGridPosition(neighbourNode.GetGridPosition());
 
@@ -127,16 +157,23 @@ public class Pathfinding : MonoBehaviour
                 int elevationChangeCost = GetElevationChangeCost(currentNode, neighbourElevation);
 
                 int tentativeGCost = currentNode.GetGCost() + CalculateDistance(currentNode.GetGridPosition(), neighbourNode.GetGridPosition()) + terrainMovementCost + elevationChangeCost;
-                if (tentativeGCost < neighbourNode.GetGCost())
+                if (tentativeGCost <= maxMoveDistance)
                 {
-                    neighbourNode.SetCameFromPathNode(currentNode);
-                    neighbourNode.SetGCost(tentativeGCost);
-                    neighbourNode.SetHCost(CalculateDistance(neighbourNode.GetGridPosition(), endGridPosition));
-                    neighbourNode.CalculateFCost();
+                    int perceivedRisk = CalculatePerceivedRisk(currentNode, neighbourNode);
+                    int totalCost = tentativeGCost + perceivedRisk; // Combine actual cost and perceived risk
 
-                    if (!openList.Contains(neighbourNode))
+                    if (totalCost < neighbourNode.GetGCost() + neighbourNode.GetPerceivedRisk())
                     {
-                        openList.Add(neighbourNode);
+                        neighbourNode.SetCameFromPathNode(currentNode);
+                        neighbourNode.SetGCost(tentativeGCost); // Actual movement cost
+                        neighbourNode.SetPerceivedRisk(perceivedRisk); // Set perceived risk
+                        neighbourNode.SetHCost(CalculateDistance(neighbourNode.GetGridPosition(), endGridPosition));
+                        neighbourNode.CalculateFCost();
+
+                        if (!openList.Contains(neighbourNode))
+                        {
+                            openList.Add(neighbourNode);
+                        }
                     }
                 }
             }
@@ -152,8 +189,7 @@ public class Pathfinding : MonoBehaviour
         GridPosition gridPositionDistance = gridPositionA - gridPositionB;
         int xDistance = Mathf.Abs(gridPositionDistance.x);
         int zDistance = Mathf.Abs(gridPositionDistance.z);
-        int remaining = Mathf.Abs(xDistance - zDistance);
-        return MOVE_DIAGONAL_COST * Mathf.Min(xDistance, zDistance) + MOVE_STRAIGHT_COST * remaining;
+        return MOVE_STRAIGHT_COST * (xDistance + zDistance);
     }
 
     private PathNode GetLowestFCostPathNode(List<PathNode> pathNodeList)
@@ -209,33 +245,12 @@ public class Pathfinding : MonoBehaviour
         {
             // Left
             neighbourList.Add(GetNode(gridPosition.x - 1, gridPosition.z + 0));
-            // if (gridPosition.z - 1 >= 0)
-            // {
-            //     // Left Down
-            //     neighbourList.Add(GetNode(gridPosition.x - 1, gridPosition.z - 1));
-            // }
-
-            // if (gridPosition.z + 1 < gridSystem.GetHeight())
-            // {
-            //     // Left Up
-            //     neighbourList.Add(GetNode(gridPosition.x - 1, gridPosition.z + 1));
-            // }
         }
 
         if (gridPosition.x + 1 < gridSystem.GetWidth())
         {
             // Right
             neighbourList.Add(GetNode(gridPosition.x + 1, gridPosition.z + 0));
-            // if (gridPosition.z - 1 >= 0)
-            // {
-            //     // Right Down
-            //     neighbourList.Add(GetNode(gridPosition.x + 1, gridPosition.z - 1));
-            // }
-            // if (gridPosition.z + 1 < gridSystem.GetHeight())
-            // {
-            //     // Right Up
-            //     neighbourList.Add(GetNode(gridPosition.x + 1, gridPosition.z + 1));
-            // }
         }
 
         if (gridPosition.z - 1 >= 0)
@@ -284,18 +299,14 @@ public class Pathfinding : MonoBehaviour
         return gridSystem.GetGridObject(gridPosition).IsWalkable();
     }
 
-    public bool HasPath(GridPosition startGridPosition, GridPosition endGridPosition)
+    public bool HasPath(Team team, GridPosition startGridPosition, GridPosition endGridPosition, int maxMoveDistance)
     {
-        return FindPath(startGridPosition, endGridPosition, out int pathLength) != null;
+        return FindPath(team, startGridPosition, endGridPosition, out int pathLength, maxMoveDistance) != null;
     }
 
-    public int GetPathLength(GridPosition startGridPosition, GridPosition endGridPosition)
+    public int GetPathLength(Team team, GridPosition startGridPosition, GridPosition endGridPosition, int maxMoveDistance)
     {
-        List<GridPosition> path = FindPath(startGridPosition, endGridPosition, out int pathLength);
-        // foreach (GridPosition pos in path)
-        // {
-        //     Debug.Log(pos.ToString());
-        // }
+        List<GridPosition> path = FindPath(team, startGridPosition, endGridPosition, out int pathLength, maxMoveDistance);
         return pathLength;
     }
 

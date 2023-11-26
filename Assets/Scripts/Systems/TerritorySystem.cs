@@ -77,7 +77,7 @@ public class TerritorySystem : MonoBehaviour
     private void Start()
     {
         LevelGrid.Instance.OnAnyUnitMovedGridPosition += LevelGrid_OnAnyUnitMovedGridPosition;
-        Unit.OnAnyUnitSpawned += Unit_OnAnyUnitSpawned;
+        Unit.OnAnyUnitInitialized += Unit_OnAnyUnitSpawned;
 
         TurnSystem.Instance.OnTurnChanged += TurnSystem_OnTurnChanged;
     }
@@ -159,7 +159,7 @@ public class TerritorySystem : MonoBehaviour
         HashSet<Team> teamsInZone = new HashSet<Team>();
         Rect zoneRect = zones[zoneID];
 
-        foreach (Unit tempUnit in UnitManager.Instance.GetUnitList())
+        foreach (Unit tempUnit in UnitManager.Instance.GetArenaUnitList())
         {
             if (zoneRect.Contains(tempUnit.GetGridPosition().ToVector2()))
             {

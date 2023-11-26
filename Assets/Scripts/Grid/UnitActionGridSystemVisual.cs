@@ -48,6 +48,28 @@ public class UnitActionGridSystemVisual : MonoBehaviour
 
     private void Start()
     {
+        BuildGrid();
+        UnitActionSystem.Instance.OnSelectedActionChanged += UnitActionSystem_OnSelectedActionChanged;
+        UnitActionSystem.Instance.OnSelectedUnitChanged += UnitActionSystem_OnSelectedUnitChanged;
+
+
+        BaseAction.OnAnyActionStarted += BaseAction_OnAnyActionStarted;
+        BaseAction.OnAnyActionCompleted += BaseAction_OnAnyActionCompleted;
+
+        LevelGrid.Instance.OnAnyUnitMovedGridPosition += LevelGrid_OnAnyUnitMovedGridPosition;
+        LevelGrid.Instance.OnElevationChanged += LevelGrid_OnElevationChange;
+        FogOfWarSystem.OnTeamVisbilityChanged += FogOfWarSystem_OnTeamVisbilityChanged;
+
+
+        UpdateGridVisual();
+    }
+    private void FogOfWarSystem_OnTeamVisbilityChanged(Team team)
+    {
+        UpdateGrid();
+    }
+
+    private void BuildGrid()
+    {
         gridSystemVisualSingleArray = new GridSystemVisualSingle[
             LevelGrid.Instance.GetWidth(),
             LevelGrid.Instance.GetHeight()
@@ -60,24 +82,24 @@ public class UnitActionGridSystemVisual : MonoBehaviour
                 GridPosition gridPosition = new GridPosition(x, z);
 
                 Transform gridSystemVisualSingleTransform =
-                    Instantiate(gridSystemVisualSinglePrefab, LevelGrid.Instance.GetWorldPosition(gridPosition), Quaternion.identity);
+                    Instantiate(gridSystemVisualSinglePrefab, FogOfWarSystem.Instance.GetPerceivedWorldPosition(gridPosition), Quaternion.identity);
 
                 gridSystemVisualSingleArray[x, z] = gridSystemVisualSingleTransform.GetComponent<GridSystemVisualSingle>();
             }
         }
+    }
 
-        UnitActionSystem.Instance.OnSelectedActionChanged += UnitActionSystem_OnSelectedActionChanged;
-        UnitActionSystem.Instance.OnSelectedUnitChanged += UnitActionSystem_OnSelectedUnitChanged;
+    private void UpdateGrid()
+    {
+        for (int x = 0; x < LevelGrid.Instance.GetWidth(); x++)
+        {
+            for (int z = 0; z < LevelGrid.Instance.GetHeight(); z++)
+            {
+                GridPosition gridPosition = new GridPosition(x, z);
 
-
-        BaseAction.OnAnyActionStarted += BaseAction_OnAnyActionStarted;
-        BaseAction.OnAnyActionCompleted += BaseAction_OnAnyActionCompleted;
-
-        LevelGrid.Instance.OnAnyUnitMovedGridPosition += LevelGrid_OnAnyUnitMovedGridPosition;
-        LevelGrid.Instance.OnElevationChanged += LevelGrid_OnElevationChange;
-
-
-        UpdateGridVisual();
+                gridSystemVisualSingleArray[x, z].transform.position = FogOfWarSystem.Instance.GetPerceivedWorldPosition(gridPosition);
+            }
+        }
     }
 
     private void UnitActionSystem_OnSelectedUnitChanged(object sender, EventArgs e)
@@ -98,7 +120,7 @@ public class UnitActionGridSystemVisual : MonoBehaviour
 
     private void LevelGrid_OnElevationChange(GridPosition position, int arg2)
     {
-        gridSystemVisualSingleArray[position.x, position.z].transform.position = LevelGrid.Instance.GetWorldPosition(position);
+        gridSystemVisualSingleArray[position.x, position.z].transform.position = FogOfWarSystem.Instance.GetPerceivedWorldPosition(position);
     }
 
     public void HideAllGridPosition()

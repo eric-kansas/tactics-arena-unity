@@ -6,33 +6,59 @@ using UnityEngine;
 public class MoveAction : BaseAction
 {
 
-    private static GameObject traveralPathVisualPrefab;
-    public static void SetTraversalPathVisualPrefab(GameObject prefab)
-    {
-        traveralPathVisualPrefab = prefab;
-    }
-
-    public event EventHandler OnStartMoving;
-    public event EventHandler OnStopMoving;
+    public static Action OnAnyStopMoving;
 
     [SerializeField] private int maxMoveDistance = 5;
 
+    private static GameObject traversalPathVisualPrefab;
     private List<Vector3> positionList;
+    private GameObject traversalPathVisualInstance;
     private int currentPositionIndex;
-    private GameObject traveralPathVisualInstance;
+
+    private bool isWaitingForEventResponse = false;
+    private bool shouldContinueMoving = true;
+    private bool attackMissed;
+    private MeleeAction meleeAction;
+
+    public static event Action<Unit> OnOpportunityAttack;
+    public event EventHandler OnStartMoving;
+    public event EventHandler OnStopMoving;
+
+    protected void Start()
+    {
+        maxMoveDistance = unit.GetStats().MoveValue;
+    }
+
+    public static void SetTraversalPathVisualPrefab(GameObject prefab)
+    {
+        traversalPathVisualPrefab = prefab;
+    }
 
     private void Update()
     {
-        if (!isActive)
+        if (!isActive || isWaitingForEventResponse)
         {
             return;
         }
 
+        if (currentPositionIndex < positionList.Count && shouldContinueMoving)
+        {
+            HandleMovement();
+        }
+
+        if (currentPositionIndex >= positionList.Count || !shouldContinueMoving)
+        {
+            FinalizeMove();
+        }
+    }
+
+    private void HandleMovement()
+    {
         Vector3 targetPosition = positionList[currentPositionIndex];
         Vector3 moveDirection = (targetPosition - transform.position).normalized;
 
         float rotateSpeed = 10f;
-        transform.forward = Vector3.Lerp(transform.forward, moveDirection, Time.deltaTime * rotateSpeed);
+        transform.forward = Vector3.Slerp(transform.forward, moveDirection, Time.deltaTime * rotateSpeed);
 
         float stoppingDistance = .1f;
         if (Vector3.Distance(transform.position, targetPosition) > stoppingDistance)
@@ -42,43 +68,89 @@ public class MoveAction : BaseAction
         }
         else
         {
+            CheckForSpecialConditions(currentPositionIndex);
             currentPositionIndex++;
-            if (currentPositionIndex >= positionList.Count)
+        }
+    }
+
+    private void FinalizeMove()
+    {
+        OnStopMoving?.Invoke(this, EventArgs.Empty);
+        ClearPreview();
+        ActionComplete();
+    }
+
+    private void CheckForSpecialConditions(int positionIndex)
+    {
+        if (positionIndex < positionList.Count - 1)
+        {
+            GridPosition currentGridPosition = LevelGrid.Instance.GetGridPosition(positionList[positionIndex]);
+            GridPosition nextGridPosition = LevelGrid.Instance.GetGridPosition(positionList[positionIndex + 1]);
+
+            // Check if moving from currentGridPosition to nextGridPosition triggers any special condition
+            (bool wouldTrigger, Unit enemey) = LevelGrid.Instance.TriggersOpportunityAttack(currentGridPosition, nextGridPosition);
+
+            if (wouldTrigger)
             {
-                OnStopMoving?.Invoke(this, EventArgs.Empty);
-                ClearPreview();
-                ActionComplete();
+                meleeAction = enemey.GetAction<MeleeAction>();
+                meleeAction.OnAttackMissed += MeleeAction_OnAttackMissed;
+                enemey.GetAction<MeleeAction>().TakeAction(currentGridPosition, meleeActionComplete);
+                isWaitingForEventResponse = true;
             }
         }
     }
 
+    private void MeleeAction_OnAttackMissed(object sender, EventArgs e)
+    {
+        attackMissed = true;
+    }
+
+    private void meleeActionComplete()
+    {
+        // If the player was hit, stop moving.
+        shouldContinueMoving = attackMissed;
+
+        // Reset the flag for future attacks.
+        attackMissed = false;
+
+        // Unsubscribe from the event and reset the melee action.
+        if (meleeAction != null)
+        {
+            meleeAction.OnAttackMissed -= MeleeAction_OnAttackMissed;
+            meleeAction = null;
+        }
+
+        // Resume the update loop.
+        isWaitingForEventResponse = false;
+    }
+
     public override void PreviewAction(GridPosition gridPosition)
     {
-        List<GridPosition> pathGridPositionList = Pathfinding.Instance.FindPath(unit.GetGridPosition(), gridPosition, out int pathLength);
-        if (traveralPathVisualInstance == null)
+        List<GridPosition> pathGridPositionList = Pathfinding.Instance.FindPath(unit.GetTeam(), unit.GetGridPosition(), gridPosition, out int pathLength, maxMoveDistance);
+        if (traversalPathVisualInstance == null)
         {
             CreateTraveralPathVisual();
         }
 
-        var traveralPathVisual = traveralPathVisualInstance.GetComponent<TraveralPathVisual>();
-        traveralPathVisual.Setup(pathGridPositionList);
+        var traveralPathVisual = traversalPathVisualInstance.GetComponent<TraveralPathVisual>();
+        traveralPathVisual.Setup(unit.GetTeam(), pathGridPositionList);
         traveralPathVisual.ShowPath(Color.green);
     }
 
     public override void ClearPreview()
     {
-        if (traveralPathVisualInstance != null)
+        if (traversalPathVisualInstance != null)
         {
-            GameObject.Destroy(traveralPathVisualInstance);
-            traveralPathVisualInstance = null;
+            GameObject.Destroy(traversalPathVisualInstance);
+            traversalPathVisualInstance = null;
         }
     }
 
     private void CreateTraveralPathVisual()
     {
-        if (traveralPathVisualPrefab != null)
+        if (traversalPathVisualPrefab != null)
         {
-            traveralPathVisualInstance = GameObject.Instantiate(traveralPathVisualPrefab);
+            traversalPathVisualInstance = GameObject.Instantiate(traversalPathVisualPrefab);
         }
         else
         {
@@ -88,7 +160,7 @@ public class MoveAction : BaseAction
 
     public override void TakeAction(GridPosition gridPosition, Action onActionComplete)
     {
-        List<GridPosition> pathGridPositionList = Pathfinding.Instance.FindPath(unit.GetGridPosition(), gridPosition, out int pathLength);
+        List<GridPosition> pathGridPositionList = Pathfinding.Instance.FindPath(unit.GetTeam(), unit.GetGridPosition(), gridPosition, out int pathLength, maxMoveDistance);
 
         currentPositionIndex = 0;
         positionList = new List<Vector3>();
@@ -113,10 +185,15 @@ public class MoveAction : BaseAction
         }
 
         GridPosition unitGridPosition = unit.GetGridPosition();
-
-        for (int x = -maxMoveDistance; x <= maxMoveDistance; x++)
+        int moveDistance = maxMoveDistance;
+        if (unit.IsProne())
         {
-            for (int z = -maxMoveDistance; z <= maxMoveDistance; z++)
+            moveDistance /= 2;
+        }
+
+        for (int x = -moveDistance; x <= moveDistance; x++)
+        {
+            for (int z = -moveDistance; z <= moveDistance; z++)
             {
                 GridPosition offsetGridPosition = new GridPosition(x, z);
                 GridPosition testGridPosition = unitGridPosition + offsetGridPosition;
@@ -143,15 +220,8 @@ public class MoveAction : BaseAction
                     continue;
                 }
 
-                if (!Pathfinding.Instance.HasPath(unitGridPosition, testGridPosition))
+                if (!Pathfinding.Instance.HasPath(unit.GetTeam(), unitGridPosition, testGridPosition, moveDistance))
                 {
-                    continue;
-                }
-
-                int pathfindingDistanceMultiplier = 1;
-                if (Pathfinding.Instance.GetPathLength(unitGridPosition, testGridPosition) >= (maxMoveDistance + 1) * pathfindingDistanceMultiplier)
-                {
-                    // Path length is too long
                     continue;
                 }
 
@@ -170,13 +240,18 @@ public class MoveAction : BaseAction
 
     public override EnemyAIAction GetEnemyAIAction(GridPosition gridPosition)
     {
-        int targetCountAtGridPosition = unit.GetAction<RangeAction>().GetTargetCountAtPosition(gridPosition);
+        int targetCountAtGridPosition = unit.GetAction<MeleeAction>().GetTargetCountAtPosition(gridPosition);
 
         return new EnemyAIAction
         {
             gridPosition = gridPosition,
-            actionValue = targetCountAtGridPosition * 10,
+            actionValue = (targetCountAtGridPosition * 2) + 10,
         };
+    }
+
+    public void SetMaxMove(int max)
+    {
+        maxMoveDistance = max;
     }
 
 }

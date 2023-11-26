@@ -122,7 +122,7 @@ MonoBehaviour:
   unit: {fileID: 7601346721002605746}
   healthBarImage: {fileID: 4322703991833475411}
   favorBarImage: {fileID: 2040806249857028061}
-  healthSystem: {fileID: -1178977004828849864}
+  unitEnergySystem: {fileID: -1178977004828849864}
   favorSystem: {fileID: 291267548018764453}
 --- !u!114 &3110045966855423436
 MonoBehaviour:
@@ -798,6 +798,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   team: {fileID: 0}
   inArena: 1
+  renderer: {fileID: 7535684240227392754}
 --- !u!65 &7313912752346062244
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -849,7 +850,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a589cc751a36c6448d4579e76ae2507, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 100
+  energy: 100
+  energyMax: 0
 --- !u!114 &291267548018764453
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1428,6 +1430,12 @@ PrefabInstance:
 --- !u!95 &7505571265498249468 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 95787105524477528, guid: 2f3e27eecb190e44a9af50723c394274,
+    type: 3}
+  m_PrefabInstance: {fileID: 7601346721586583204}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &7535684240227392754 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 137720934533220950, guid: 2f3e27eecb190e44a9af50723c394274,
     type: 3}
   m_PrefabInstance: {fileID: 7601346721586583204}
   m_PrefabAsset: {fileID: 0}

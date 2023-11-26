@@ -10,7 +10,7 @@ public class MeleeAction : BaseAction
 
     public event EventHandler OnSwordActionStarted;
     public event EventHandler OnSwordActionCompleted;
-
+    public event EventHandler OnAttackMissed;
 
     private enum State
     {
@@ -22,7 +22,6 @@ public class MeleeAction : BaseAction
     private State state;
     private float stateTimer;
     private Unit targetUnit;
-
 
     private void Update()
     {
@@ -59,8 +58,15 @@ public class MeleeAction : BaseAction
                 state = State.SwingingSwordAfterHit;
                 float afterHitStateTime = 0.5f;
                 stateTimer = afterHitStateTime;
-                targetUnit.Damage(100);
-                OnAnySwordHit?.Invoke(this, EventArgs.Empty);
+                if (DoesAttackHit(targetUnit))
+                {
+                    targetUnit.Damage(CalculateDamage()); // Damage the target if the attack hits
+                    OnAnySwordHit?.Invoke(this, EventArgs.Empty);
+                }
+                else
+                {
+                    OnAttackMissed?.Invoke(this, EventArgs.Empty); // Invoke the miss event
+                }
                 break;
             case State.SwingingSwordAfterHit:
                 OnSwordActionCompleted?.Invoke(this, EventArgs.Empty);
@@ -68,6 +74,33 @@ public class MeleeAction : BaseAction
                 break;
         }
     }
+
+    private int CalculateDamage()
+    {
+        return 30;
+    }
+
+    private bool DoesAttackHit(Unit target)
+    {
+        System.Random random = new System.Random();
+        int attackRoll = random.Next(1, 21);
+        int armorCheck = target.CalculateArmorClass();
+
+        attackRoll = attackRoll + AttckModifers() - AttackDemodifiers();
+
+        return attackRoll >= armorCheck;
+    }
+
+    private int AttckModifers()
+    {
+        return unit.GetPlayerData().GetStats().Strength;
+    }
+
+    private int AttackDemodifiers()
+    {
+        return 0;
+    }
+
 
     public override string GetActionName()
     {
@@ -85,13 +118,17 @@ public class MeleeAction : BaseAction
 
     public override List<GridPosition> GetValidActionGridPositionList()
     {
+        GridPosition unitGridPosition = unit.GetGridPosition();
+        return GetValidActionGridPositionList(unitGridPosition);
+    }
+
+    public List<GridPosition> GetValidActionGridPositionList(GridPosition unitGridPosition)
+    {
         List<GridPosition> validGridPositionList = new List<GridPosition>();
         if (!IsActionApplicable())
         {
             return validGridPositionList;
         }
-
-        GridPosition unitGridPosition = unit.GetGridPosition();
 
         for (int x = -maxSwordDistance; x <= maxSwordDistance; x++)
         {
@@ -142,6 +179,11 @@ public class MeleeAction : BaseAction
     public int GetMaxSwordDistance()
     {
         return maxSwordDistance;
+    }
+
+    public int GetTargetCountAtPosition(GridPosition gridPosition)
+    {
+        return GetValidActionGridPositionList(gridPosition).Count;
     }
 
 }

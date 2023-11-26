@@ -6,6 +6,8 @@ public class TraveralPathVisual : MonoBehaviour
     private LineRenderer lineRenderer;
     private MoveCostDisplayer moveCostDisplayer;
     private List<GridPosition> path;
+    private Team team;
+    public int MAX_MOVE_DISTANCE = 20;
 
     void Awake()
     {
@@ -15,9 +17,10 @@ public class TraveralPathVisual : MonoBehaviour
         moveCostDisplayer = GetComponent<MoveCostDisplayer>();
     }
 
-    public void Setup(List<GridPosition> path)
+    public void Setup(Team team, List<GridPosition> path)
     {
         this.path = path;
+        this.team = team;
         UpdatePathPoints();
     }
 
@@ -88,7 +91,7 @@ public class TraveralPathVisual : MonoBehaviour
             // display cost
             if (lastlocation.HasValue)
             {
-                Pathfinding.Instance.FindPath(lastlocation.Value, path[i], out cost);
+                Pathfinding.Instance.FindPath(team, lastlocation.Value, path[i], out cost, MAX_MOVE_DISTANCE);
                 moveCostDisplayer.CreateMoveCost(transform, LevelGrid.Instance.GetWorldPosition(path[i]), cost);
             }
 
@@ -96,7 +99,7 @@ public class TraveralPathVisual : MonoBehaviour
         }
 
         // add for last stop
-        Pathfinding.Instance.FindPath(lastlocation.Value, path[path.Count - 1], out cost);
+        Pathfinding.Instance.FindPath(team, lastlocation.Value, path[path.Count - 1], out cost, MAX_MOVE_DISTANCE);
         moveCostDisplayer.CreateMoveCost(transform, LevelGrid.Instance.GetWorldPosition(path[path.Count - 1]), cost);
 
         lineRenderer.positionCount = points.Count;

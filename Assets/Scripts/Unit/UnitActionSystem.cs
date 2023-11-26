@@ -139,10 +139,10 @@ public class UnitActionSystem : MonoBehaviour
             return;
         }
 
+        isPreviewingAction = false;
         SetBusy();
         selectedAction.TakeAction(actionPreviewGridPosition, ClearBusy);
         OnActionStarted?.Invoke(this, EventArgs.Empty);
-        isPreviewingAction = false;
     }
 
     private void SetBusy()
@@ -213,8 +213,10 @@ public class UnitActionSystem : MonoBehaviour
         if (isPreviewingAction)
         {
             // Clear the preview visuals
-            // Optionally call a method on the current action to clear its preview
-            selectedAction.ClearPreview();
+            if (selectedAction != null)
+            {
+                selectedAction.ClearPreview();
+            }
             isPreviewingAction = false;
         }
     }

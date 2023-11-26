@@ -13,7 +13,7 @@ public class UnitWorldUI : MonoBehaviour
     [SerializeField] private Image healthBarImage;
     [SerializeField] private Image favorBarImage;
 
-    [SerializeField] private HealthSystem healthSystem;
+    [SerializeField] private UnitEnergySystem unitEnergySystem;
     [SerializeField] private UnitFavor favorSystem;
 
     private float minFillAmount = 0.01f;
@@ -22,8 +22,8 @@ public class UnitWorldUI : MonoBehaviour
     private void Start()
     {
         Unit.OnAnyActionPointsChanged += Unit_OnAnyActionPointsChanged;
-        healthSystem.OnDamaged += HealthSystem_OnDamaged;
-        healthSystem.OnHealed += HealthSystem_OnHealed;
+        unitEnergySystem.OnDamaged += UnitEnergySystem_OnDamaged;
+        unitEnergySystem.OnHealed += UnitEnergySystem_OnHealed;
 
         favorSystem.OnAdded += FavorSystem_OnAdded;
         favorSystem.OnRemoved += FavorSystem_OnRemoved;
@@ -60,15 +60,15 @@ public class UnitWorldUI : MonoBehaviour
 
     private void UpdateHealthBar()
     {
-        healthBarImage.fillAmount = Mathf.Max(healthSystem.GetHealthNormalized(), minFillAmount);
+        healthBarImage.fillAmount = Mathf.Max(unitEnergySystem.GetEnergyNormalized(), minFillAmount);
     }
 
-    private void HealthSystem_OnDamaged(object sender, EventArgs e)
+    private void UnitEnergySystem_OnDamaged(object sender, EventArgs e)
     {
         UpdateHealthBar();
     }
 
-    private void HealthSystem_OnHealed(object sender, EventArgs e)
+    private void UnitEnergySystem_OnHealed(object sender, EventArgs e)
     {
         UpdateHealthBar();
     }

@@ -13,6 +13,9 @@ public class Player : ScriptableObject
 
     [SerializeField] private CombatRole combatRole;
 
+    [SerializeField] private Stats stats;
+    [SerializeField] private Gear gear;
+
     [SerializeField] private List<AbilityData> abilities;
 
     public List<AbilityData> GetAbilities()
@@ -45,6 +48,10 @@ public class Player : ScriptableObject
         return combatRole;
     }
 
+    public Stats GetStats()
+    {
+        return stats;
+    }
     public string GetPlayerClassDisplayText()
     {
         switch (playerClass)
@@ -98,6 +105,11 @@ public class Player : ScriptableObject
             default:
                 return favorRole.ToString();
         }
+    }
+
+    internal Gear GetGear()
+    {
+        return gear;
     }
 }
 

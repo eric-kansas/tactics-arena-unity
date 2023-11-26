@@ -22,9 +22,17 @@ public class TerritoryGridSystemVisual : MonoBehaviour
             return;
         }
         Instance = this;
+
     }
 
     private void Start()
+    {
+        RenderZones();
+
+        FogOfWarSystem.OnTeamVisbilityChanged += FogOfWarSystem_OnTeamVisbilityChanged;
+    }
+
+    private void RenderZones()
     {
         Dictionary<int, Rect> zones = TerritorySystem.Instance.GetZones();
 
@@ -42,7 +50,7 @@ public class TerritoryGridSystemVisual : MonoBehaviour
                 {
                     GridPosition gridPosition = new GridPosition((int)rect.x + x, (int)rect.y + z);
 
-                    Vector3 pos = LevelGrid.Instance.GetWorldPosition(gridPosition);
+                    Vector3 pos = FogOfWarSystem.Instance.GetPerceivedWorldPosition(gridPosition);
 
                     Transform gridSystemVisualSingleTransform = Instantiate(gridSystemVisualSinglePrefab, pos, Quaternion.identity);
 
@@ -51,9 +59,12 @@ public class TerritoryGridSystemVisual : MonoBehaviour
                     gridSystemVisualSingleArray[x, z].Show(GetGridVisualTypeMaterial(zoneEntry.Key));
                 }
             }
-
-
         }
+    }
+
+    private void FogOfWarSystem_OnTeamVisbilityChanged(Team team)
+    {
+        RenderZones();
     }
 
     private Material GetGridVisualTypeMaterial(int zone)

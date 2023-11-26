@@ -18,6 +18,10 @@ public class LevelGrid : MonoBehaviour
 
     public event Action<GridPosition, int> OnElevationChanged;
 
+    private float elevationScaleFactor = 0.5f;
+
+    public float ElevationScaleFactor => elevationScaleFactor;
+
     [SerializeField] private Transform gridDebugObjectPrefab;
     [SerializeField] private int width;
     [SerializeField] private int height;
@@ -50,14 +54,14 @@ public class LevelGrid : MonoBehaviour
         Array terrainTypes = Enum.GetValues(typeof(TerrainType));
         TerrainType randomTerrain = TerrainType.Snow;//(TerrainType)terrainTypes.GetValue(UnityEngine.Random.Range(0, terrainTypes.Length));
 
-        int randomElevation = UnityEngine.Random.Range(1, 5);
+        int randomElevation = UnityEngine.Random.Range(1, 8);
 
         return (randomTerrain, randomElevation);
     }
 
     private void Start()
     {
-        Pathfinding.Instance.Setup(width, height, cellSize);
+        //Pathfinding.Instance.Setup(width, height, cellSize);
     }
 
     public void AddUnitAtGridPosition(GridPosition gridPosition, Unit unit)
@@ -100,7 +104,6 @@ public class LevelGrid : MonoBehaviour
 
         int elevation = GetElevationAtGridPosition(gridPosition);
 
-        float elevationScaleFactor = 0.5f;
         basePosition.y += elevation * elevationScaleFactor;
 
         return basePosition;
@@ -173,5 +176,42 @@ public class LevelGrid : MonoBehaviour
     internal float GetCellSize()
     {
         return cellSize;
+    }
+
+    public (bool, Unit) TriggersOpportunityAttack(GridPosition fromPos, GridPosition toPos)
+    {
+        // Get all neighbor positions of the fromNode, including diagonals
+        List<GridPosition> neighborPositions = GridUtil.GetAllNeighborPositions(fromPos);
+        Unit enemy = null;
+        foreach (var neighborPos in neighborPositions)
+        {
+            // Check if there's an enemy unit at the neighbor position
+            if (HasEnemyUnitAtGridPosition(neighborPos))
+            {
+                // Check if the toNode is not adjacent to this enemy unit
+                if (!GridUtil.IsAdjacent(neighborPos, toPos))
+                {
+                    enemy = GetUnitAtGridPosition(neighborPos);
+                    return (true, enemy); // Moving from fromNode to toNode triggers an opportunity attack
+                }
+            }
+        }
+
+        return (false, enemy); // No opportunity attack triggered
+    }
+
+    internal bool HasEnemyUnitAtGridPosition(GridPosition pos)
+    {
+        if (!IsValidGridPosition(pos))
+        {
+            return false;
+        }
+
+        Unit unit = GetUnitAtGridPosition(pos);
+        if (unit != null && unit.GetTeam() != TurnSystem.Instance.GetCurrentTeam())
+        {
+            return true;
+        }
+        return false;
     }
 }

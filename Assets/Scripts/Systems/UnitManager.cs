@@ -9,7 +9,7 @@ public class UnitManager : MonoBehaviour
     public static UnitManager Instance { get; private set; }
 
 
-    private List<Unit> unitList;
+    private List<Unit> arenaUnitList;
     private Dictionary<Team, List<Unit>> teamUnitListDict;
 
     private void Awake()
@@ -22,21 +22,21 @@ public class UnitManager : MonoBehaviour
         }
         Instance = this;
 
-        unitList = new List<Unit>();
+        arenaUnitList = new List<Unit>();
         teamUnitListDict = new Dictionary<Team, List<Unit>>();
     }
 
     private void Start()
     {
-        Unit.OnAnyUnitSpawned += Unit_OnAnyUnitSpawned;
+        Unit.OnAnyUnitInitialized += Unit_OnAnyUnitInitialized;
         Unit.OnAnyUnitOutOfEnergy += Unit_OnAnyUnitOutOfEnergy;
     }
 
-    private void Unit_OnAnyUnitSpawned(object sender, EventArgs e)
+    private void Unit_OnAnyUnitInitialized(object sender, EventArgs e)
     {
         Unit unit = sender as Unit;
 
-        unitList.Add(unit);
+        arenaUnitList.Add(unit);
 
         Team team = unit.GetTeam();
         if (!teamUnitListDict.ContainsKey(team))
@@ -48,17 +48,12 @@ public class UnitManager : MonoBehaviour
 
     private void Unit_OnAnyUnitOutOfEnergy(Unit unit)
     {
-        unitList.Remove(unit);
-        Team teamId = unit.GetTeam();
-        if (teamUnitListDict.ContainsKey(teamId))
-        {
-            teamUnitListDict[teamId].Remove(unit);
-        }
+        arenaUnitList.Remove(unit);
     }
 
-    public List<Unit> GetUnitList()
+    public List<Unit> GetArenaUnitList()
     {
-        return unitList;
+        return arenaUnitList;
     }
 
     public List<Unit> GetTeamUnitList(Team teamId)
@@ -68,6 +63,19 @@ public class UnitManager : MonoBehaviour
             return teamList;
         }
         return new List<Unit>(); // Return empty list if the team does not exist
+    }
+
+    public List<Unit> GetTeamArenaUnitList(Team teamId)
+    {
+        List<Unit> arenaUnits = new List<Unit>();
+        foreach (Unit unit in GetTeamUnitList(teamId))
+        {
+            if (unit.IsInArena())
+            {
+                arenaUnits.Add(unit);
+            }
+        }
+        return arenaUnits;
     }
 
 }
