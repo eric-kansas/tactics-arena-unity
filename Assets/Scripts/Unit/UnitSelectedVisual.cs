@@ -43,7 +43,4 @@ public class UnitSelectedVisual : MonoBehaviour
     {
         UnitActionSystem.Instance.OnSelectedUnitChanged -= UnitActionSystem_OnSelectedUnitChanged;
     }
-
-
-
 }

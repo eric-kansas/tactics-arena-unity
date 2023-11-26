@@ -18,10 +18,10 @@ public class Zone
     {
         this.gridPositions = gridPositions;
         this.gridPositionsSet = new HashSet<GridPosition>(gridPositions);
-        if (!VerifyZone())
-        {
-            Debug.LogWarning("Zone verification failed. The zone might not be closed.");
-        }
+        // if (!VerifyAndCleanZone())
+        // {
+        //     Debug.LogWarning("Zone verification failed. The zone might not be closed.");
+        // }
     }
 
     public Zone(Rect rect)
@@ -46,39 +46,40 @@ public class Zone
         return positions;
     }
 
-    private bool VerifyZone()
+    private bool VerifyAndCleanZone()
     {
         if (gridPositions.Count == 0) return false;
 
-        HashSet<GridPosition> filledPositions = new HashSet<GridPosition>();
-        Queue<GridPosition> positionsToCheck = new Queue<GridPosition>();
+        HashSet<GridPosition> mainSegment = new HashSet<GridPosition>();
+        HashSet<GridPosition> visited = new HashSet<GridPosition>();
+        Queue<GridPosition> toVisit = new Queue<GridPosition>();
 
-        // Start flood fill from each boundary position
-        foreach (var boundaryPosition in GetBoundaryPositions())
+        // Start from the first grid position
+        toVisit.Enqueue(gridPositions[0]);
+
+        while (toVisit.Count > 0)
         {
-            if (!filledPositions.Contains(boundaryPosition))
-            {
-                positionsToCheck.Enqueue(boundaryPosition);
+            var current = toVisit.Dequeue();
+            if (!visited.Add(current)) continue;
 
-                while (positionsToCheck.Count > 0)
+            mainSegment.Add(current);
+
+            foreach (var neighbor in GetNeighbors(current))
+            {
+                if (gridPositionsSet.Contains(neighbor) && !visited.Contains(neighbor))
                 {
-                    var currentPosition = positionsToCheck.Dequeue();
-                    if (filledPositions.Add(currentPosition))
-                    {
-                        foreach (var neighbor in GetNeighbors(currentPosition))
-                        {
-                            if (gridPositionsSet.Contains(neighbor) && !filledPositions.Contains(neighbor))
-                            {
-                                positionsToCheck.Enqueue(neighbor);
-                            }
-                        }
-                    }
+                    toVisit.Enqueue(neighbor);
                 }
             }
         }
 
-        return filledPositions.Count == gridPositions.Count;
+        // Remove isolated segments
+        gridPositions.RemoveAll(pos => !mainSegment.Contains(pos));
+        gridPositionsSet.IntersectWith(mainSegment);
+
+        return mainSegment.Count == gridPositions.Count;
     }
+
 
 
     public List<GridPosition> GetBoundaryPositions()

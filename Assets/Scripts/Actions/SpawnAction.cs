@@ -5,8 +5,9 @@ using UnityEngine;
 
 public class SpawnAction : BaseAction
 {
-    public event EventHandler OnStartSpawn;
-    public event EventHandler OnStopSpawn;
+    public static event Action<Unit> OnAnyStartSpawn;
+    public event Action<Unit> OnStopSpawn;
+
     private GridPosition targetGridPosition;
 
     protected override void Awake()
@@ -23,10 +24,8 @@ public class SpawnAction : BaseAction
         }
 
         transform.position = LevelGrid.Instance.GetWorldPosition(targetGridPosition);
-
-        GridPosition gridPosition = LevelGrid.Instance.GetGridPosition(transform.position);
-        LevelGrid.Instance.AddUnitAtGridPosition(gridPosition, unit);
         unit.SetInArena(true);
+
         ActionComplete();
     }
 
@@ -34,6 +33,7 @@ public class SpawnAction : BaseAction
     {
         targetGridPosition = gridPosition;
         ActionStart(onActionComplete);
+        OnAnyStartSpawn?.Invoke(unit);
     }
 
     public override List<GridPosition> GetValidActionGridPositionList()
@@ -51,7 +51,7 @@ public class SpawnAction : BaseAction
 
                 if (LevelGrid.Instance.HasAnyUnitOnGridPosition(pos))
                 {
-                    // Grid Position is empty, no Unit
+                    // Grid Position has Unit
                     continue;
                 }
 

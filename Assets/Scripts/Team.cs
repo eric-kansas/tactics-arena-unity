@@ -6,6 +6,7 @@ using UnityEngine;
 public class Team : ScriptableObject
 {
     [SerializeField] private string teamName;
+    [SerializeField] private Material teamMaterial;
     [SerializeField] private List<Player> players;
 
     public void AddPlayer(Player player)
@@ -16,6 +17,11 @@ public class Team : ScriptableObject
     public List<Player> GetPlayers()
     {
         return players;
+    }
+
+    public Material GetMaterial()
+    {
+        return teamMaterial;
     }
 
 }

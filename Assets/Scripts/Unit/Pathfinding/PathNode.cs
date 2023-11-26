@@ -9,12 +9,17 @@ public class PathNode
     private int gCost;
     private int hCost;
     private int fCost;
+    private int perceivedRisk;
+
+
     private PathNode cameFromPathNode;
     private bool isWalkable = true;
 
     public PathNode(GridPosition gridPosition)
     {
         this.gridPosition = gridPosition;
+        this.perceivedRisk = 0;
+
     }
 
     public override string ToString()
@@ -49,7 +54,7 @@ public class PathNode
 
     public void CalculateFCost()
     {
-        fCost = gCost + hCost;
+        fCost = gCost + hCost + perceivedRisk;
     }
 
     public void ResetCameFromPathNode()
@@ -80,5 +85,17 @@ public class PathNode
     public void SetIsWalkable(bool isWalkable)
     {
         this.isWalkable = isWalkable;
+    }
+
+
+
+    public int GetPerceivedRisk()
+    {
+        return perceivedRisk;
+    }
+
+    public void SetPerceivedRisk(int risk)
+    {
+        this.perceivedRisk = risk;
     }
 }

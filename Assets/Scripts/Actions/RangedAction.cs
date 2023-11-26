@@ -102,7 +102,36 @@ public class RangeAction : BaseAction
             shootingUnit = unit
         });
 
-        targetUnit.Damage(40);
+        if (DoesAttackHit(targetUnit))
+        {
+            targetUnit.Damage(CalculateDamage());
+        }
+    }
+
+    private int CalculateDamage()
+    {
+        return 30;
+    }
+
+    private bool DoesAttackHit(Unit target)
+    {
+        System.Random random = new System.Random();
+        int attackRoll = random.Next(1, 21);
+        int armorCheck = target.CalculateArmorClass();
+
+        attackRoll = attackRoll + AttckModifers() - AttackDemodifiers();
+
+        return attackRoll >= armorCheck;
+    }
+
+    private int AttckModifers()
+    {
+        return unit.GetPlayerData().GetStats().Agility;
+    }
+
+    private int AttackDemodifiers()
+    {
+        return 0;
     }
 
 

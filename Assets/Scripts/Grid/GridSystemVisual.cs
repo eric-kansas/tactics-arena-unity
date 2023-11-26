@@ -45,6 +45,18 @@ public class ActionGridSystemVisual : MonoBehaviour
 
     private void Start()
     {
+        BuildGrid();
+
+        UnitActionSystem.Instance.OnSelectedActionChanged += UnitActionSystem_OnSelectedActionChanged;
+        LevelGrid.Instance.OnAnyUnitMovedGridPosition += LevelGrid_OnAnyUnitMovedGridPosition;
+        LevelGrid.Instance.OnElevationChanged += LevelGrid_OnElevationChange;
+        FogOfWarSystem.OnTeamVisbilityChanged += FogOfWarSystem_OnTeamVisbilityChanged;
+
+        UpdateGridVisual();
+    }
+
+    private void BuildGrid()
+    {
         gridSystemVisualSingleArray = new GridSystemVisualSingle[
             LevelGrid.Instance.GetWidth(),
             LevelGrid.Instance.GetHeight()
@@ -57,22 +69,21 @@ public class ActionGridSystemVisual : MonoBehaviour
                 GridPosition gridPosition = new GridPosition(x, z);
 
                 Transform gridSystemVisualSingleTransform =
-                    Instantiate(gridSystemVisualSinglePrefab, LevelGrid.Instance.GetWorldPosition(gridPosition), Quaternion.identity);
+                    Instantiate(gridSystemVisualSinglePrefab, FogOfWarSystem.Instance.GetPerceivedWorldPosition(gridPosition), Quaternion.identity);
 
                 gridSystemVisualSingleArray[x, z] = gridSystemVisualSingleTransform.GetComponent<GridSystemVisualSingle>();
             }
         }
+    }
 
-        UnitActionSystem.Instance.OnSelectedActionChanged += UnitActionSystem_OnSelectedActionChanged;
-        LevelGrid.Instance.OnAnyUnitMovedGridPosition += LevelGrid_OnAnyUnitMovedGridPosition;
-        LevelGrid.Instance.OnElevationChanged += LevelGrid_OnElevationChange;
-
-        UpdateGridVisual();
+    private void FogOfWarSystem_OnTeamVisbilityChanged(Team team)
+    {
+        BuildGrid();
     }
 
     private void LevelGrid_OnElevationChange(GridPosition position, int arg2)
     {
-        gridSystemVisualSingleArray[position.x, position.z].transform.position = LevelGrid.Instance.GetWorldPosition(position);
+        gridSystemVisualSingleArray[position.x, position.z].transform.position = FogOfWarSystem.Instance.GetPerceivedWorldPosition(position);
     }
 
     public void HideAllGridPosition()

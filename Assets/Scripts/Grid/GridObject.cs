@@ -114,4 +114,9 @@ public class GridObject
         return elevation;
     }
 
+    public GridPosition GetGridPosition()
+    {
+        return gridPosition;
+    }
+
 }

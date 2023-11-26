@@ -5,21 +5,24 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
-    private const int ACTION_POINTS_MAX = 1;
+    private const int ACTION_POINTS_MAX = 5;
 
     public static event EventHandler OnAnyActionPointsChanged;
-    public static event EventHandler OnAnyUnitSpawned;
+    public static event EventHandler OnAnyUnitInitialized;
     public static Action<Unit> OnAnyUnitOutOfEnergy;
     public static Action<Unit> OnAnyUnitExpendFavor;
 
     [SerializeField] private Team team;
     private Player playerData;
     private GridPosition gridPosition;
-    private HealthSystem healthSystem;
+    private UnitEnergySystem unitEnergySystem;
     private UnitFavor favorSystem;
     private BaseAction[] baseActionArray;
     private int actionPoints = ACTION_POINTS_MAX;
     [SerializeField] private bool inArena = true;
+    [SerializeField] private SkinnedMeshRenderer renderer;
+
+    private bool isProne;
 
     private void Awake()
     {
@@ -30,25 +33,29 @@ public class Unit : MonoBehaviour
     {
         //gridPosition = LevelGrid.Instance.GetGridPosition(transform.position);
         //LevelGrid.Instance.AddUnitAtGridPosition(gridPosition, this);
-
         //transform.position = LevelGrid.Instance.GetWorldPosition(gridPosition);
 
         LevelGrid.Instance.OnElevationChanged += LevelGrid_OnElevationChange;
         TurnSystem.Instance.OnTurnChanged += TurnSystem_OnTurnChanged;
 
-        healthSystem.OnDead += HealthSystem_OnDead;
+        unitEnergySystem.OnOutOfEnergy += EnergySystem_OnOutOfEnergy;
 
-        OnAnyUnitSpawned?.Invoke(this, EventArgs.Empty);
+        OnAnyUnitInitialized?.Invoke(this, EventArgs.Empty);
     }
 
     public void Setup(Team team, Player player)
     {
-        healthSystem = GetComponent<HealthSystem>();
+        unitEnergySystem = GetComponent<UnitEnergySystem>();
         favorSystem = GetComponent<UnitFavor>();
         baseActionArray = new BaseAction[0];
 
         this.team = team;
         playerData = player;
+
+        unitEnergySystem.SetMaxHealth(CalculateMaxEnergy());
+
+        MoveAction moveAction = GetComponent<MoveAction>();
+        moveAction.SetMaxMove(playerData.GetStats().MoveValue);
 
         foreach (var abilityData in player.GetAbilities())
         {
@@ -63,8 +70,9 @@ public class Unit : MonoBehaviour
             }
         }
 
-        // Re-fetch the baseActionArray to include the newly added abilities
         baseActionArray = GetComponents<BaseAction>();
+
+        renderer.material = team.GetMaterial();
     }
 
     private void Update()
@@ -74,7 +82,6 @@ public class Unit : MonoBehaviour
             GridPosition newGridPosition = LevelGrid.Instance.GetGridPosition(transform.position);
             if (newGridPosition != gridPosition)
             {
-                // Unit changed Grid Position
                 GridPosition oldGridPosition = gridPosition;
                 gridPosition = newGridPosition;
 
@@ -177,12 +184,12 @@ public class Unit : MonoBehaviour
 
     public void Heal(int healAmount)
     {
-        healthSystem.Heal(healAmount);
+        unitEnergySystem.Heal(healAmount);
     }
 
     public void Damage(int damageAmount)
     {
-        healthSystem.Damage(damageAmount);
+        unitEnergySystem.Damage(damageAmount);
     }
 
     public void AddFavor(int favorAmount)
@@ -198,26 +205,30 @@ public class Unit : MonoBehaviour
         OnAnyUnitExpendFavor?.Invoke(this);
     }
 
-    private void HealthSystem_OnDead(object sender, EventArgs e)
+    private void EnergySystem_OnOutOfEnergy(object sender, EventArgs e)
     {
-        actionPoints = 0;
+        actionPoints = 1;
         LevelGrid.Instance.RemoveUnitAtGridPosition(gridPosition, this);
         inArena = false;
         gridPosition = ReserveGridSystem.Instance.AddUnit(GetTeam(), this);
         transform.position = ReserveGridSystem.Instance.GetWorldPosition(GetTeam(), gridPosition);
-        //Destroy(gameObject);
 
         OnAnyUnitOutOfEnergy?.Invoke(this);
     }
 
-    public int GetMaxHealth()
+    public int GetEnergy()
     {
-        return healthSystem.GetMaxHealth();
+        return unitEnergySystem.GetEnergy();
+    }
+
+    public int GetMaxEnergy()
+    {
+        return unitEnergySystem.GetMaxEnergy();
     }
 
     public float GetHealthNormalized()
     {
-        return healthSystem.GetHealthNormalized();
+        return unitEnergySystem.GetEnergyNormalized();
     }
 
     public int GetMaxFavor()
@@ -240,9 +251,35 @@ public class Unit : MonoBehaviour
         return inArena;
     }
 
+    public bool IsProne()
+    {
+        return isProne;
+    }
+
     public Player GetPlayerData()
     {
         return playerData;
     }
 
+    internal Stats GetStats()
+    {
+        return playerData.GetStats();
+    }
+
+    private int CalculateMaxEnergy()
+    {
+        // Example calculation: base HP + (Constitution * factor)
+        int baseHP = 10;
+        int factor = 10;
+        return baseHP + (playerData.GetStats().Endurance * factor);
+    }
+
+    public int CalculateArmorClass()
+    {
+        // Example calculation based on Dexterity and equipment
+        int baseArmorClass = 10;
+        int dexterityBonus = playerData.GetStats().Agility / 2;
+        int equipmentArmorBonus = playerData.GetGear().GetTotalArmorBonus();
+        return baseArmorClass + dexterityBonus + equipmentArmorBonus;
+    }
 }

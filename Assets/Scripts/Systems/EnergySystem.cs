@@ -51,14 +51,17 @@ public class EnergySystem : MonoBehaviour
             teamEnergies.Add(team, new TeamEnergy(1000, 1000));
         }
 
-        Unit.OnAnyUnitOutOfEnergy += Unit_OnAnyUnitOutOfEnergy;
+        SpawnAction.OnAnyStartSpawn += SpawnAction_OnAnyStartSpawn;
     }
 
-    private void Unit_OnAnyUnitOutOfEnergy(Unit unit)
+    private void SpawnAction_OnAnyStartSpawn(Unit unit)
     {
+
+        int energyDifference = unit.GetMaxEnergy() - unit.GetEnergy();
+
         // subtract energy from team
         TeamEnergy teamEnergy = teamEnergies[unit.GetTeam()];
-        teamEnergy.amount -= (int)unit.GetMaxHealth();
+        teamEnergy.amount -= energyDifference;
 
         if (teamEnergy.amount <= 0)
         {
@@ -66,7 +69,7 @@ public class EnergySystem : MonoBehaviour
         }
 
         teamEnergies[unit.GetTeam()] = teamEnergy;
-        unit.Heal(unit.GetMaxHealth());
+        unit.Heal(energyDifference);
 
         OnAnyTeamEnergyChange?.Invoke(unit.GetTeam());
     }

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-public class PathfindingGridDebugObject : GridDebugObject
+public class TerrainGridDebugObject : GridDebugObject
 {
 
     [SerializeField] private TextMeshPro terrainText;
     [SerializeField] private TextMeshPro elevationText;
-    [SerializeField] private Transform elevationPrefabTransform;
+    [SerializeField] private GameObject fogOfWarObject;
     [SerializeField] private MeshRenderer prefabMeshRenderer;
     [SerializeField] private Material[] terrainMaterials; // Assuming you have materials for each terrain type
 
@@ -24,17 +24,20 @@ public class PathfindingGridDebugObject : GridDebugObject
     {
         base.Update();
         terrainText.text = gridObject.GetTerrainType().ToString();
-        elevationText.text = gridObject.GetElevation().ToString();
+
+        bool seePosition = FogOfWarSystem.Instance.IsVisible(Match.Instance.GetClientTeam(), gridObject.GetGridPosition());
+        int elevation = FogOfWarSystem.Instance.GetKnownElevation(Match.Instance.GetClientTeam(), gridObject.GetGridPosition());
+        fogOfWarObject.SetActive(!seePosition);
+
+        elevationText.text = elevation.ToString();
 
         // Update the prefab's material based on terrain type
         int terrainIndex = (int)gridObject.GetTerrainType();
         prefabMeshRenderer.material = terrainMaterials[terrainIndex];
 
-        float elevationScaleFactor = 0.5f; // Adjust this factor as needed
-
         transform.localScale = new Vector3(
             transform.localScale.x,
-            gridObject.GetElevation() * elevationScaleFactor,
+            elevation * LevelGrid.Instance.ElevationScaleFactor,
             transform.localScale.z
         );
     }

@@ -22,9 +22,27 @@ public class FavorAction : BaseAction
         totalSpinAmount += spinAddAmount;
         if (totalSpinAmount >= 360f)
         {
-            unit.AddFavor(50);
+            unit.AddFavor(CalculateFavor());
             ActionComplete();
         }
+    }
+
+    private int CalculateFavor()
+    {
+        System.Random random = new System.Random();
+        int favorRoll = random.Next(1, 21);
+
+        favorRoll = favorRoll + FavorModifers() - FavorDemodifiers();
+        return favorRoll;
+    }
+    private int FavorModifers()
+    {
+        return unit.GetPlayerData().GetStats().Charisma;
+    }
+
+    private int FavorDemodifiers()
+    {
+        return 0;
     }
 
     public override void TakeAction(GridPosition gridPosition, Action onActionComplete)
