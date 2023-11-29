@@ -23,7 +23,7 @@ MonoBehaviour:
     endurance: 3
     agility: 3
     intelligence: 3
-    perception: 3
+    perception: 5
     charisma: 3
   gear:
     helm: {fileID: 0}

@@ -17,29 +17,42 @@ public class GridCell
 public class FogOfWarSystem : MonoBehaviour
 {
     public static FogOfWarSystem Instance { get; private set; }
-
-    public static Action<Team> OnTeamVisbilityChanged;
+    public static event Action<Team> OnTeamVisibilityChanged;
 
     [SerializeField] private LayerMask terrainPlaneLayerMask;
     private GridCell[,] grid;
-    private HashSet<GridPosition> currentlyVisibleCells;
-    private Dictionary<Team, HashSet<GridPosition>> visibilityByTeam;
-    private Dictionary<Team, Dictionary<GridPosition, int>> knownElevationByTeam;
+    private HashSet<GridPosition> currentlyVisibleCells = new HashSet<GridPosition>();
 
+    private Dictionary<Team, HashSet<GridPosition>> visibilityByTeam = new Dictionary<Team, HashSet<GridPosition>>();
+    private Dictionary<Team, Dictionary<GridPosition, int>> knownElevationByTeam = new Dictionary<Team, Dictionary<GridPosition, int>>();
 
     private void Awake()
     {
         if (Instance != null)
         {
-            Debug.LogError("There's more than one UnitManager! " + transform + " - " + Instance);
+            Debug.LogError("There's more than one FogOfWarSystem! " + transform + " - " + Instance);
             Destroy(gameObject);
             return;
         }
         Instance = this;
+        SubscribeToEvents();
+    }
 
-        LevelGrid.Instance.OnAnyUnitMovedGridPosition += LevelGrid_OnAnyUnitMovedGridPositionEventArgs;
+    private void SubscribeToEvents()
+    {
         BaseAction.OnAnyActionCompleted += BaseAction_OnAnyActionCompleted;
+        LevelGrid.Instance.OnAnyUnitMovedGridPosition += LevelGrid_OnAnyUnitMovedGridPositionEventArgs;
+    }
 
+    public void Start()
+    {
+        visibilityByTeam[Match.Instance.GetClientTeam()] = new HashSet<GridPosition>();
+        visibilityByTeam[Match.Instance.GetAwayTeam()] = new HashSet<GridPosition>();
+
+        knownElevationByTeam[Match.Instance.GetClientTeam()] = new Dictionary<GridPosition, int>();
+        knownElevationByTeam[Match.Instance.GetAwayTeam()] = new Dictionary<GridPosition, int>();
+
+        InitializeGrid();
     }
 
     private void BaseAction_OnAnyActionCompleted(object sender, EventArgs e)
@@ -47,29 +60,12 @@ public class FogOfWarSystem : MonoBehaviour
         UpdateVisibilityForTeam(Match.Instance.GetClientTeam());
     }
 
-    private void LevelGrid_OnAnyUnitMovedGridPositionEventArgs(object sender, LevelGrid.OnAnyUnitMovedGridPositionEventArgs e)
+    private void LevelGrid_OnAnyUnitMovedGridPositionEventArgs(LevelGrid.OnAnyUnitMovedGridPositionEventArgs e)
     {
         UpdateVisibilityForTeam(Match.Instance.GetClientTeam());
     }
 
-    public void Start()
-    {
-        visibilityByTeam = new Dictionary<Team, HashSet<GridPosition>>();
-        visibilityByTeam[Match.Instance.GetClientTeam()] = new HashSet<GridPosition>();
-        visibilityByTeam[Match.Instance.GetAwayTeam()] = new HashSet<GridPosition>();
-
-        knownElevationByTeam = new Dictionary<Team, Dictionary<GridPosition, int>>();
-        knownElevationByTeam[Match.Instance.GetClientTeam()] = new Dictionary<GridPosition, int>();
-        knownElevationByTeam[Match.Instance.GetAwayTeam()] = new Dictionary<GridPosition, int>();
-
-        currentlyVisibleCells = new HashSet<GridPosition>();
-        grid = new GridCell[LevelGrid.Instance.GetWidth(), LevelGrid.Instance.GetHeight()];
-        InitializeGrid();
-    }
-    public bool IsVisible(Team team, GridPosition pos)
-    {
-        return visibilityByTeam[team].Contains(pos);
-    }
+    public bool IsVisible(Team team, GridPosition pos) => visibilityByTeam[team].Contains(pos);
 
     public int GetKnownElevation(Team team, GridPosition gridPosition)
     {
@@ -82,83 +78,73 @@ public class FogOfWarSystem : MonoBehaviour
 
     private void InitializeGrid()
     {
-        for (int x = 0; x < grid.GetLength(0); x++)
+        int width = LevelGrid.Instance.GetWidth();
+        int height = LevelGrid.Instance.GetHeight();
+        grid = new GridCell[width, height];
+        for (int x = 0; x < width; x++)
         {
-            for (int z = 0; z < grid.GetLength(1); z++)
+            for (int z = 0; z < height; z++)
             {
-                grid[x, z] = new GridCell
-                {
-                    Elevation = 1,
-                    Visibility = VisibilityState.Obscured
-                };
+                grid[x, z] = new GridCell { Elevation = 1, Visibility = VisibilityState.Obscured };
             }
         }
     }
 
     private void UpdateVisibilityForTeam(Team team)
     {
-        Debug.Log("UpdateVisibilityForTeam");
-        // Clear previous visibility for the team
+        ClearPreviousVisibility(team);
+        foreach (var unit in UnitManager.Instance.GetTeamArenaUnitList(team))
+        {
+            UpdateVisibilityForUnit(team, unit.GetGridPosition(), unit.GetPlayerData().GetStats().Perception + 2);
+        }
+        OnTeamVisibilityChanged?.Invoke(team);
+    }
+
+    private void ClearPreviousVisibility(Team team)
+    {
         foreach (var pos in visibilityByTeam[team])
         {
             grid[pos.x, pos.z].Visibility = VisibilityState.Obscured;
         }
         visibilityByTeam[team].Clear();
-
-        // Update visibility based on positions of all units on this team
-        foreach (var unit in UnitManager.Instance.GetTeamArenaUnitList(team))
-        {
-            UpdateVisibilityForUnit(team, unit.GetGridPosition(), unit.GetPlayerData().GetStats().Perception + 2);
-        }
-        OnTeamVisbilityChanged?.Invoke(team);
     }
+
+
 
     private void UpdateVisibilityForUnit(Team team, GridPosition unitPosition, int visibilityRadius)
     {
-        // Set previously visible cells to obscured
-        foreach (var pos in currentlyVisibleCells)
-        {
-            grid[pos.x, pos.z].Visibility = VisibilityState.Obscured;
-        }
-
-        currentlyVisibleCells.Clear();
-
-        // Calculate new visibility
+        HashSet<GridPosition> currentlyVisibleCells = new HashSet<GridPosition>();
         for (int x = -visibilityRadius; x <= visibilityRadius; x++)
         {
             for (int z = -visibilityRadius; z <= visibilityRadius; z++)
             {
-                int gridX = unitPosition.x + x;
-                int gridZ = unitPosition.z + z;
-                GridPosition checkPos = new GridPosition(gridX, gridZ);
+                GridPosition checkPos = new GridPosition(unitPosition.x + x, unitPosition.z + z);
                 if (LevelGrid.Instance.IsValidGridPosition(checkPos) && IsWithinVisibilityRadius(unitPosition, checkPos, visibilityRadius))
                 {
                     if (HasLineOfSight(unitPosition, checkPos))
                     {
-                        grid[gridX, gridZ].Visibility = VisibilityState.Visible;
-                        grid[gridX, gridZ].Elevation = LevelGrid.Instance.GetElevationAtGridPosition(checkPos);
+                        UpdateCellVisibility(team, checkPos);
                         currentlyVisibleCells.Add(checkPos);
                     }
                 }
             }
         }
-        // Add visible cells to the team's visibility set
         visibilityByTeam[team].UnionWith(currentlyVisibleCells);
-        foreach (var pos in currentlyVisibleCells)
-        {
-            int currentElevation = LevelGrid.Instance.GetElevationAtGridPosition(pos);
-            if (!knownElevationByTeam[team].TryGetValue(pos, out int knownElevation) || currentElevation > knownElevation)
-            {
-                knownElevationByTeam[team][pos] = currentElevation;
-            }
-        }
     }
 
-    private bool IsWithinVisibilityRadius(GridPosition unitPosition, GridPosition pos, int visibilityRadius)
+    private void UpdateCellVisibility(Team team, GridPosition checkPos)
     {
-        int dx = unitPosition.x - pos.x;
-        int dz = unitPosition.z - pos.z;
-        return (dx * dx + dz * dz) <= (visibilityRadius * visibilityRadius);
+        grid[checkPos.x, checkPos.z].Visibility = VisibilityState.Visible;
+        grid[checkPos.x, checkPos.z].Elevation = LevelGrid.Instance.GetElevationAtGridPosition(checkPos);
+        int currentElevation = LevelGrid.Instance.GetElevationAtGridPosition(checkPos);
+        knownElevationByTeam[team][checkPos] = currentElevation;
+    }
+
+    private bool IsWithinVisibilityRadius(GridPosition fromPos, GridPosition toPos, int radius)
+    {
+        int dx = fromPos.x - toPos.x;
+        int dz = fromPos.z - toPos.z;
+        return (dx * dx + dz * dz) <= (radius * radius);
     }
 
     private List<GridPosition> GetLine(GridPosition start, GridPosition end)
@@ -208,24 +194,59 @@ public class FogOfWarSystem : MonoBehaviour
 
     private bool DoesElevationBlockSight(int startElev, int endElev, int cellElev, GridPosition cellPos, GridPosition startPos, GridPosition endPos)
     {
+        // Existing calculations
         float distanceStartToEnd = Vector2.Distance(new Vector2(startPos.x, startPos.z), new Vector2(endPos.x, endPos.z));
         float distanceStartToCell = Vector2.Distance(new Vector2(startPos.x, startPos.z), new Vector2(cellPos.x, cellPos.z));
-
-        // Calculate the expected elevation at the cell position if there were no elevation changes
         float linearInterpolatedElevation = Mathf.Lerp(startElev, endElev, distanceStartToCell / distanceStartToEnd);
+        float elevationThreshold = LevelGrid.Instance.ElevationScaleFactor * 4;
 
-        // Consider some threshold for elevation differences
-        float elevationThreshold = LevelGrid.Instance.ElevationScaleFactor * 4; // This value depends on your game's scale
-
-        // Check if the cell's elevation is significantly higher than the linear interpolated elevation
+        // Direct obstruction
         if (cellElev > linearInterpolatedElevation + elevationThreshold)
         {
-            return true; // Elevation blocks sight
+            return true;
         }
 
-        // Additional complexity: You could add checks for specific types of terrain or objects that might be at the cell
+        // Additional check for diagonal obstruction
+        if (IsDiagonal(startPos, endPos))
+        {
+            if (IsDiagonalObstructed(startPos, cellPos, startElev))
+            {
+                return true;
+            }
+        }
 
-        return false; // Elevation does not block sight
+        return false;
+    }
+
+    private bool IsDiagonal(GridPosition fromPos, GridPosition toPos)
+    {
+        return fromPos.x != toPos.x && fromPos.z != toPos.z;
+    }
+
+    private bool IsDiagonalObstructed(GridPosition startPos, GridPosition diagPos, int observerElev)
+    {
+        int diagElev = LevelGrid.Instance.GetElevationAtGridPosition(diagPos);
+
+        // Get the elevations of the adjacent positions
+        int adjElev1 = LevelGrid.Instance.GetElevationAtGridPosition(new GridPosition(diagPos.x, startPos.z));
+        int adjElev2 = LevelGrid.Instance.GetElevationAtGridPosition(new GridPosition(startPos.x, diagPos.z));
+
+        // Define an elevation threshold
+        int elevationThreshold = 2; // Adjust this based on game design
+
+        // Check if both adjacent elevations are higher than the diagonal elevation
+        bool bothAdjHigherThanDiag = adjElev1 > diagElev + elevationThreshold && adjElev2 > diagElev + elevationThreshold;
+
+        // Check if observer elevation is not sufficiently higher than adjacent elevations
+        bool observerNotHighEnough = observerElev + elevationThreshold < adjElev1 && observerElev + elevationThreshold < adjElev2;
+
+        if (bothAdjHigherThanDiag && observerNotHighEnough)
+        {
+            // Both adjacent positions are higher and the observer is not high enough to see over them
+            return true;
+        }
+
+        return false; // Line of sight is not obstructed
     }
 
     internal Vector3 GetPerceivedWorldPosition(GridPosition gridPosition)

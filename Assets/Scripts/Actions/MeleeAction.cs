@@ -3,14 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MeleeAction : BaseAction
+public class MeleeAction : BaseAction, IOpportunityAttack
 {
 
-    public static event EventHandler OnAnySwordHit;
+    public static event Action OnAnySwordHit;
 
-    public event EventHandler OnSwordActionStarted;
-    public event EventHandler OnSwordActionCompleted;
-    public event EventHandler OnAttackMissed;
+    public event Action OnSwordActionStarted;
+    public event Action OnSwordActionCompleted;
+    public event Action OnAttackMissed;
 
     private enum State
     {
@@ -22,6 +22,7 @@ public class MeleeAction : BaseAction
     private State state;
     private float stateTimer;
     private Unit targetUnit;
+
 
     private void Update()
     {
@@ -61,15 +62,15 @@ public class MeleeAction : BaseAction
                 if (DoesAttackHit(targetUnit))
                 {
                     targetUnit.Damage(CalculateDamage()); // Damage the target if the attack hits
-                    OnAnySwordHit?.Invoke(this, EventArgs.Empty);
+                    OnAnySwordHit?.Invoke();
                 }
                 else
                 {
-                    OnAttackMissed?.Invoke(this, EventArgs.Empty); // Invoke the miss event
+                    OnAttackMissed?.Invoke(); // Invoke the miss event
                 }
                 break;
             case State.SwingingSwordAfterHit:
-                OnSwordActionCompleted?.Invoke(this, EventArgs.Empty);
+                OnSwordActionCompleted?.Invoke();
                 ActionComplete();
                 break;
         }
@@ -171,7 +172,7 @@ public class MeleeAction : BaseAction
         float beforeHitStateTime = 0.7f;
         stateTimer = beforeHitStateTime;
 
-        OnSwordActionStarted?.Invoke(this, EventArgs.Empty);
+        OnSwordActionStarted?.Invoke();
 
         ActionStart(onActionComplete);
     }

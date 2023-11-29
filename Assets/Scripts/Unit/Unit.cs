@@ -17,6 +17,7 @@ public class Unit : MonoBehaviour
     private GridPosition gridPosition;
     private UnitEnergySystem unitEnergySystem;
     private UnitFavor favorSystem;
+    private Perk[] basePerkArray;
     private BaseAction[] baseActionArray;
     private int actionPoints = ACTION_POINTS_MAX;
     [SerializeField] private bool inArena = true;
@@ -24,10 +25,6 @@ public class Unit : MonoBehaviour
 
     private bool isProne;
 
-    private void Awake()
-    {
-
-    }
 
     private void Start()
     {
@@ -54,9 +51,6 @@ public class Unit : MonoBehaviour
 
         unitEnergySystem.SetMaxHealth(CalculateMaxEnergy());
 
-        MoveAction moveAction = GetComponent<MoveAction>();
-        moveAction.SetMaxMove(playerData.GetStats().MoveValue);
-
         foreach (var abilityData in player.GetAbilities())
         {
             Type abilityType = Type.GetType(abilityData.abilityBehaviourName);
@@ -71,6 +65,21 @@ public class Unit : MonoBehaviour
         }
 
         baseActionArray = GetComponents<BaseAction>();
+
+        foreach (var perkData in player.GetPerks())
+        {
+            Type perkType = Type.GetType(perkData.perkBehaviourName);
+            if (perkType != null)
+            {
+                gameObject.AddComponent(perkType);
+            }
+            else
+            {
+                Debug.LogError("Ability type not found: " + perkData.perkBehaviourName);
+            }
+        }
+
+        basePerkArray = GetComponents<Perk>();
 
         renderer.material = team.GetMaterial();
     }
@@ -90,13 +99,13 @@ public class Unit : MonoBehaviour
         }
     }
 
-    public T GetAction<T>() where T : BaseAction
+    public T GetAction<T>() where T : class
     {
         foreach (BaseAction baseAction in baseActionArray)
         {
-            if (baseAction is T)
+            if (baseAction is T action)
             {
-                return (T)baseAction;
+                return action;
             }
         }
         return null;
@@ -207,6 +216,10 @@ public class Unit : MonoBehaviour
 
     private void EnergySystem_OnOutOfEnergy(object sender, EventArgs e)
     {
+        if (DeathPrevention())
+        {
+            return;
+        }
         actionPoints = 1;
         LevelGrid.Instance.RemoveUnitAtGridPosition(gridPosition, this);
         inArena = false;
@@ -214,6 +227,19 @@ public class Unit : MonoBehaviour
         transform.position = ReserveGridSystem.Instance.GetWorldPosition(GetTeam(), gridPosition);
 
         OnAnyUnitOutOfEnergy?.Invoke(this);
+    }
+
+    public bool DeathPrevention()
+    {
+        foreach (Perk perk in basePerkArray)
+        {
+            if (perk.CanPreventDeath(this))
+            {
+                perk.ApplyEffect(this);
+                return true;
+            }
+        }
+        return false;
     }
 
     public int GetEnergy()
@@ -268,7 +294,6 @@ public class Unit : MonoBehaviour
 
     private int CalculateMaxEnergy()
     {
-        // Example calculation: base HP + (Constitution * factor)
         int baseHP = 10;
         int factor = 10;
         return baseHP + (playerData.GetStats().Endurance * factor);
@@ -280,6 +305,17 @@ public class Unit : MonoBehaviour
         int baseArmorClass = 10;
         int dexterityBonus = playerData.GetStats().Agility / 2;
         int equipmentArmorBonus = playerData.GetGear().GetTotalArmorBonus();
-        return baseArmorClass + dexterityBonus + equipmentArmorBonus;
+        int perksArmorBonus = GetTotalArmorBonusFromPerks();
+        return baseArmorClass + dexterityBonus + equipmentArmorBonus + perksArmorBonus;
+    }
+
+    public int GetTotalArmorBonusFromPerks()
+    {
+        int totalBonus = 0;
+        foreach (Perk perk in basePerkArray)
+        {
+            totalBonus += perk.GetArmorClassBonus();
+        }
+        return totalBonus;
     }
 }

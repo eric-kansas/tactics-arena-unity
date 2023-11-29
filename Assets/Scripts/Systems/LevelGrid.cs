@@ -8,7 +8,7 @@ public class LevelGrid : MonoBehaviour
 
     public static LevelGrid Instance { get; private set; }
 
-    public event EventHandler<OnAnyUnitMovedGridPositionEventArgs> OnAnyUnitMovedGridPosition;
+    public Action<OnAnyUnitMovedGridPositionEventArgs> OnAnyUnitMovedGridPosition;
     public class OnAnyUnitMovedGridPositionEventArgs : EventArgs
     {
         public Unit unit;
@@ -88,7 +88,7 @@ public class LevelGrid : MonoBehaviour
 
         AddUnitAtGridPosition(toGridPosition, unit);
 
-        OnAnyUnitMovedGridPosition?.Invoke(this, new OnAnyUnitMovedGridPositionEventArgs
+        OnAnyUnitMovedGridPosition?.Invoke(new OnAnyUnitMovedGridPositionEventArgs
         {
             unit = unit,
             fromGridPosition = fromGridPosition,

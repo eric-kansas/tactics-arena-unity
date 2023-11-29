@@ -55,11 +55,11 @@ public class TerritorySystem : MonoBehaviour
         Instance = this;
 
         zones = new Dictionary<int, Rect>{
-            { 0, new(2,2,3,3) },
-            { 1, new(10,2,3,3) },
-            { 2, new(2,10,3,3) },
-            { 3, new(10,10,3,3) },
-            { 4 , new(6,6,3,3) },
+            { 0, new(2,2,4,4) },
+            { 1, new(14,2,4,4) },
+            { 2, new(2,14,4,4) },
+            { 3, new(14,14,4,4) },
+            { 4 , new(8,8,4,4) },
         };
 
         territoryScores = new Dictionary<Team, TerritoryScore>{
@@ -125,7 +125,7 @@ public class TerritorySystem : MonoBehaviour
         UpdateTerritoryControlBasedOnUnitMovement(unit.GetGridPosition(), unit);
     }
 
-    private void LevelGrid_OnAnyUnitMovedGridPosition(object sender, LevelGrid.OnAnyUnitMovedGridPositionEventArgs args)
+    private void LevelGrid_OnAnyUnitMovedGridPosition(LevelGrid.OnAnyUnitMovedGridPositionEventArgs args)
     {
         UpdateTerritoryControlBasedOnUnitMovement(args.fromGridPosition, args.unit);
         UpdateTerritoryControlBasedOnUnitMovement(args.toGridPosition, args.unit);

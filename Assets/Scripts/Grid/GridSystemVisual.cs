@@ -41,17 +41,20 @@ public class ActionGridSystemVisual : MonoBehaviour
             return;
         }
         Instance = this;
+        SubscribeToEvents();
+    }
+
+    private void SubscribeToEvents()
+    {
+        UnitActionSystem.Instance.OnSelectedActionChanged += UnitActionSystem_OnSelectedActionChanged;
+        LevelGrid.Instance.OnAnyUnitMovedGridPosition += LevelGrid_OnAnyUnitMovedGridPosition;
+        LevelGrid.Instance.OnElevationChanged += LevelGrid_OnElevationChange;
+        FogOfWarSystem.OnTeamVisibilityChanged += FogOfWarSystem_OnTeamVisibilityChanged;
     }
 
     private void Start()
     {
         BuildGrid();
-
-        UnitActionSystem.Instance.OnSelectedActionChanged += UnitActionSystem_OnSelectedActionChanged;
-        LevelGrid.Instance.OnAnyUnitMovedGridPosition += LevelGrid_OnAnyUnitMovedGridPosition;
-        LevelGrid.Instance.OnElevationChanged += LevelGrid_OnElevationChange;
-        FogOfWarSystem.OnTeamVisbilityChanged += FogOfWarSystem_OnTeamVisbilityChanged;
-
         UpdateGridVisual();
     }
 
@@ -76,7 +79,7 @@ public class ActionGridSystemVisual : MonoBehaviour
         }
     }
 
-    private void FogOfWarSystem_OnTeamVisbilityChanged(Team team)
+    private void FogOfWarSystem_OnTeamVisibilityChanged(Team team)
     {
         BuildGrid();
     }
@@ -151,8 +154,7 @@ public class ActionGridSystemVisual : MonoBehaviour
     {
         foreach (GridPosition gridPosition in gridPositionList)
         {
-            gridSystemVisualSingleArray[gridPosition.x, gridPosition.z].
-                Show(GetGridVisualTypeMaterial(gridVisualType));
+            gridSystemVisualSingleArray[gridPosition.x, gridPosition.z].Show(GetGridVisualTypeMaterial(gridVisualType));
         }
     }
 
@@ -205,7 +207,7 @@ public class ActionGridSystemVisual : MonoBehaviour
         UpdateGridVisual();
     }
 
-    private void LevelGrid_OnAnyUnitMovedGridPosition(object sender, EventArgs e)
+    private void LevelGrid_OnAnyUnitMovedGridPosition(LevelGrid.OnAnyUnitMovedGridPositionEventArgs args)
     {
         UpdateGridVisual();
     }

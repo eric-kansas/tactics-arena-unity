@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Base Team
   m_EditorClassIdentifier: 
   teamName: The Sandlot
-  teamMaterial: {fileID: 2100000, guid: 673443bdcb7bf2f47be93ce60e68966f, type: 2}
+  teamMaterial: {fileID: 2100000, guid: 7d22fc6b9a431b043a917fb89a80bcfc, type: 2}
+  teamColor: {r: 0.8238993, g: 0, b: 0, a: 1}
   players:
   - {fileID: 11400000, guid: 866c804483c61cf4db5f96142297ab8e, type: 2}
   - {fileID: 11400000, guid: 556883753d914864ba24ee85b0c3171d, type: 2}

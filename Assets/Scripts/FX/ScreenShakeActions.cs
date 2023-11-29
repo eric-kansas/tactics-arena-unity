@@ -14,7 +14,7 @@ public class ScreenShakeActions : MonoBehaviour
         MeleeAction.OnAnySwordHit += SwordAction_OnAnySwordHit;
     }
 
-    private void SwordAction_OnAnySwordHit(object sender, EventArgs e)
+    private void SwordAction_OnAnySwordHit()
     {
         ScreenShake.Instance.Shake(2f);
     }

@@ -15,8 +15,10 @@ public class Player : ScriptableObject
 
     [SerializeField] private Stats stats;
     [SerializeField] private Gear gear;
+    [SerializeField] private List<PerkData> perks;
 
     [SerializeField] private List<AbilityData> abilities;
+
 
     public List<AbilityData> GetAbilities()
     {
@@ -110,6 +112,11 @@ public class Player : ScriptableObject
     internal Gear GetGear()
     {
         return gear;
+    }
+
+    internal List<PerkData> GetPerks()
+    {
+        return perks;
     }
 }
 
