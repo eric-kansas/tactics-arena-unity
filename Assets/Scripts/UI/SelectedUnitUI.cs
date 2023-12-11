@@ -26,7 +26,7 @@ public class SelectedUnitUI : MonoBehaviour
         UpdateSelectedUnitText();
     }
 
-    private void UnitActionSystem_OnSelectedUnitChanged(object sender, EventArgs e)
+    private void UnitActionSystem_OnSelectedUnitChanged()
     {
         UpdateSelectedUnitText();
     }

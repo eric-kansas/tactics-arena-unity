@@ -209,7 +209,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &720044716939228713
 RectTransform:
   m_ObjectHideFlags: 0
@@ -416,13 +416,8 @@ MonoBehaviour:
   elevationText: {fileID: 8921636996736113337}
   fogOfWarObject: {fileID: 1427079562695598789}
   prefabMeshRenderer: {fileID: 7561359008379650601}
-  terrainMaterials:
-  - {fileID: 2100000, guid: 1e75d51d555dec54b90544819dd5e13a, type: 2}
-  - {fileID: 2100000, guid: 5abb3d18170c7cc4b8ce3577ef8b5ed8, type: 2}
-  - {fileID: 2100000, guid: a3cd22eceea5e8548b10cdb5d9b49a25, type: 2}
-  - {fileID: 2100000, guid: 6968e89851431104b8f931c37d69356b, type: 2}
-  - {fileID: 2100000, guid: 4930c6ffa5b9b9f4098249a43abf8506, type: 2}
-  - {fileID: 2100000, guid: 6615f1708a4932646adcdc55932feefa, type: 2}
+  terrainColorMapping: {fileID: 11400000, guid: 34c978e91e2c756458966d4695e0aefe,
+    type: 2}
 --- !u!1 &5953755169855357887
 GameObject:
   m_ObjectHideFlags: 0
@@ -440,7 +435,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3291445401587595303
 RectTransform:
   m_ObjectHideFlags: 0
@@ -611,7 +606,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &6594948373211850794
 RectTransform:
   m_ObjectHideFlags: 0
@@ -899,10 +894,6 @@ PrefabInstance:
     - target: {fileID: 1346524299210880, guid: fcc4229f634be704aa0dd336ad33c2b5, type: 3}
       propertyPath: m_Name
       value: SM_Buildings_Block_1x1_01
-      objectReference: {fileID: 0}
-    - target: {fileID: 1346524299210880, guid: fcc4229f634be704aa0dd336ad33c2b5, type: 3}
-      propertyPath: m_Layer
-      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4084504788478774, guid: fcc4229f634be704aa0dd336ad33c2b5, type: 3}
       propertyPath: m_LocalPosition.x

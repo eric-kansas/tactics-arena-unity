@@ -11,6 +11,8 @@ public enum VisibilityState
 public class GridCell
 {
     public int Elevation { get; set; }
+    public TerrainType Terrain { get; set; }
+
     public VisibilityState Visibility { get; set; }
 }
 
@@ -24,6 +26,8 @@ public class FogOfWarSystem : MonoBehaviour
     private HashSet<GridPosition> currentlyVisibleCells = new HashSet<GridPosition>();
 
     private Dictionary<Team, HashSet<GridPosition>> visibilityByTeam = new Dictionary<Team, HashSet<GridPosition>>();
+    private Dictionary<Team, Dictionary<GridPosition, TerrainType?>> knownTerrainByTeam = new Dictionary<Team, Dictionary<GridPosition, TerrainType?>>();
+
     private Dictionary<Team, Dictionary<GridPosition, int>> knownElevationByTeam = new Dictionary<Team, Dictionary<GridPosition, int>>();
 
     private void Awake()
@@ -52,6 +56,10 @@ public class FogOfWarSystem : MonoBehaviour
         knownElevationByTeam[Match.Instance.GetClientTeam()] = new Dictionary<GridPosition, int>();
         knownElevationByTeam[Match.Instance.GetAwayTeam()] = new Dictionary<GridPosition, int>();
 
+        knownTerrainByTeam[Match.Instance.GetClientTeam()] = new Dictionary<GridPosition, TerrainType?>();
+        knownTerrainByTeam[Match.Instance.GetAwayTeam()] = new Dictionary<GridPosition, TerrainType?>();
+
+
         InitializeGrid();
     }
 
@@ -73,7 +81,7 @@ public class FogOfWarSystem : MonoBehaviour
         {
             return knownElevation;
         }
-        return 1; // Default elevation if not known
+        return -1; // Default elevation if not known
     }
 
     private void InitializeGrid()
@@ -95,7 +103,7 @@ public class FogOfWarSystem : MonoBehaviour
         ClearPreviousVisibility(team);
         foreach (var unit in UnitManager.Instance.GetTeamArenaUnitList(team))
         {
-            UpdateVisibilityForUnit(team, unit.GetGridPosition(), unit.GetPlayerData().GetStats().Perception + 2);
+            UpdateVisibilityForUnit(team, unit.GetGridPosition(), ModifiersCalculator.SightDistance(unit));
         }
         OnTeamVisibilityChanged?.Invoke(team);
     }
@@ -136,8 +144,13 @@ public class FogOfWarSystem : MonoBehaviour
     {
         grid[checkPos.x, checkPos.z].Visibility = VisibilityState.Visible;
         grid[checkPos.x, checkPos.z].Elevation = LevelGrid.Instance.GetElevationAtGridPosition(checkPos);
+        grid[checkPos.x, checkPos.z].Terrain = LevelGrid.Instance.GetTerrainTypeAtGridPosition(checkPos);
+
         int currentElevation = LevelGrid.Instance.GetElevationAtGridPosition(checkPos);
+        TerrainType currentTerrain = LevelGrid.Instance.GetTerrainTypeAtGridPosition(checkPos);
+
         knownElevationByTeam[team][checkPos] = currentElevation;
+        knownTerrainByTeam[team][checkPos] = currentTerrain;
     }
 
     private bool IsWithinVisibilityRadius(GridPosition fromPos, GridPosition toPos, int radius)
@@ -172,7 +185,7 @@ public class FogOfWarSystem : MonoBehaviour
         return line;
     }
 
-    private bool HasLineOfSight(GridPosition fromPos, GridPosition toPos)
+    public bool HasLineOfSight(GridPosition fromPos, GridPosition toPos)
     {
         List<GridPosition> line = GetLine(fromPos, toPos);
 
@@ -198,7 +211,7 @@ public class FogOfWarSystem : MonoBehaviour
         float distanceStartToEnd = Vector2.Distance(new Vector2(startPos.x, startPos.z), new Vector2(endPos.x, endPos.z));
         float distanceStartToCell = Vector2.Distance(new Vector2(startPos.x, startPos.z), new Vector2(cellPos.x, cellPos.z));
         float linearInterpolatedElevation = Mathf.Lerp(startElev, endElev, distanceStartToCell / distanceStartToEnd);
-        float elevationThreshold = LevelGrid.Instance.ElevationScaleFactor * 4;
+        float elevationThreshold = LevelGrid.Instance.elevationScaleFactor * 4;
 
         // Direct obstruction
         if (cellElev > linearInterpolatedElevation + elevationThreshold)
@@ -252,7 +265,16 @@ public class FogOfWarSystem : MonoBehaviour
     internal Vector3 GetPerceivedWorldPosition(GridPosition gridPosition)
     {
         Vector3 worldPos = LevelGrid.Instance.GetWorldPosition(gridPosition);
-        worldPos.y = grid[gridPosition.x, gridPosition.z].Elevation * LevelGrid.Instance.ElevationScaleFactor;
+        worldPos.y = grid[gridPosition.x, gridPosition.z].Elevation * LevelGrid.Instance.elevationScaleFactor;
         return worldPos;
+    }
+
+    public TerrainType? GetKnownTerrain(Team team, GridPosition gridPosition)
+    {
+        if (knownTerrainByTeam[team].TryGetValue(gridPosition, out TerrainType? knownTerrain))
+        {
+            return knownTerrain;
+        }
+        return null;
     }
 }

@@ -122,8 +122,18 @@ public class MoveAction : BaseAction
         (bool wouldTrigger, Unit enemy) = LevelGrid.Instance.TriggersOpportunityAttack(current, next);
         if (wouldTrigger)
         {
+            // perform dodge 
+            PerformDodge();
             TriggerOpportunityAttack(enemy, current);
         }
+    }
+
+    private void PerformDodge()
+    {
+        System.Random random = new System.Random();
+        int dodgeRoll = random.Next(1, 21);
+        dodgeRoll += ModifiersCalculator.DodgeModifer(unit);
+        Debug.Log("Roll: " + dodgeRoll);
     }
 
     private void TriggerOpportunityAttack(Unit enemy, GridPosition position)
@@ -168,7 +178,7 @@ public class MoveAction : BaseAction
         rotateToUprightOnNextUpdate = true;
         FireMoveActionStopped();
         ClearPreview();
-        ActionComplete();
+        ActionComplete(GameEvent.UnitChangedGridPosition);
     }
 
     protected virtual void FireMoveActionStarted()
@@ -183,7 +193,7 @@ public class MoveAction : BaseAction
 
     public override void PreviewAction(GridPosition gridPosition)
     {
-        List<GridPosition> pathGridPositionList = Pathfinding.Instance.FindPath(unit.GetTeam(), unit.GetGridPosition(), gridPosition, out int pathLength, GetMoveValue());
+        List<GridPosition> pathGridPositionList = Pathfinding.Instance.FindPath(unit.GetTeam(), unit.GetGridPosition(), gridPosition, out int pathLength, GetMoveSpeed());
         if (traversalPathVisualInstance == null)
         {
             CreateTraveralPathVisual();
@@ -213,7 +223,7 @@ public class MoveAction : BaseAction
         }
 
         GridPosition unitGridPosition = unit.GetGridPosition();
-        int moveDistance = GetMoveValue();
+        int moveDistance = GetMoveSpeed();
         if (unit.IsProne())
         {
             moveDistance /= 2;
@@ -266,11 +276,10 @@ public class MoveAction : BaseAction
         return LevelGrid.Instance.GetGridPosition(position);
     }
 
-    private int GetMoveValue()
+    private int GetMoveSpeed()
     {
-        return unit.GetStats().MoveValue;
+        return ModifiersCalculator.MoveSpeed(unit);
     }
-
 
     private void CreateTraveralPathVisual()
     {
@@ -292,7 +301,7 @@ public class MoveAction : BaseAction
     // Overridden and Interface Methods
     public override void TakeAction(GridPosition gridPosition, Action onActionComplete)
     {
-        List<GridPosition> pathGridPositionList = Pathfinding.Instance.FindPath(unit.GetTeam(), unit.GetGridPosition(), gridPosition, out int pathLength, GetMoveValue());
+        List<GridPosition> pathGridPositionList = Pathfinding.Instance.FindPath(unit.GetTeam(), unit.GetGridPosition(), gridPosition, out int pathLength, GetMoveSpeed());
 
         currentPositionIndex = 0;
         positionList = new List<Vector3>();

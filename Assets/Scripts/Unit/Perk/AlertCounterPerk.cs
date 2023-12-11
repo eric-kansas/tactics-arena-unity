@@ -1,6 +1,18 @@
+using System;
+
 public class AlertCounterPerk : Perk
 {
     private bool hasCounterAvailable = true;
+
+    public AlertCounterPerk()
+    {
+        TurnSystem.Instance.OnTurnChanged += TurnSystem_OnTurnChanged;
+    }
+
+    private void TurnSystem_OnTurnChanged(object sender, EventArgs e)
+    {
+        ResetPerk();
+    }
 
     public override void ApplyEffect(Unit unit, Unit attacker)
     {
@@ -12,7 +24,7 @@ public class AlertCounterPerk : Perk
         }
     }
 
-    public override void ResetPerk()
+    private void ResetPerk()
     {
         hasCounterAvailable = true; // Reset the perk at the start of each turn/round
     }

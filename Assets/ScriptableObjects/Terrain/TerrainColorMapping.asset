@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: TerrainColorMapping
+  m_EditorClassIdentifier: Assembly-CSharp::TerrainColorMapping
+  terrainColors:
+  - terrainType: 0
+    color: {r: 0.63529414, g: 0.77254903, b: 0.13725491, a: 0}
+    material: {fileID: 2100000, guid: 8e5f19419f995b640916d5e867f3facd, type: 2}
+  - terrainType: 1
+    color: {r: 0.48235294, g: 0.7137255, b: 0.38039216, a: 0}
+    material: {fileID: 2100000, guid: 253e874f8a7e4be4f99cb234f9fecab9, type: 2}
+  - terrainType: 2
+    color: {r: 0.8901961, g: 0.8117647, b: 0.34117648, a: 0}
+    material: {fileID: 2100000, guid: b82674377c6e404459806e14a0d10029, type: 2}
+  - terrainType: 3
+    color: {r: 0.043137256, g: 0.4, b: 0.13725491, a: 0}
+    material: {fileID: 2100000, guid: 151503e0577241e419a95e3583c50d1e, type: 2}
+  - terrainType: 4
+    color: {r: 0.21960784, g: 0.4627451, b: 0.11372549, a: 0}
+    material: {fileID: 2100000, guid: 7dc2336d37c84da4d94599d918a465b0, type: 2}
+  - terrainType: 5
+    color: {r: 0.54509807, g: 0.5254902, b: 0.50980395, a: 0}
+    material: {fileID: 2100000, guid: ff0355a5fe963ab4497cca6ef9602138, type: 2}
+  - terrainType: 6
+    color: {r: 0.50980395, g: 0.42352942, b: 0.20392157, a: 0}
+    material: {fileID: 2100000, guid: c639d12cc97632242975ee94e6fc5d91, type: 2}
+  - terrainType: 7
+    color: {r: 0.8, g: 0.46666667, b: 0.13333334, a: 0}
+    material: {fileID: 2100000, guid: 3a3267aac30f81647be09100f27462b1, type: 2}
+  - terrainType: 8
+    color: {r: 0.92941177, g: 0.7882353, b: 0.6862745, a: 0}
+    material: {fileID: 2100000, guid: e014782d7c7864644be593c684d1b4b6, type: 2}
+  - terrainType: 9
+    color: {r: 0.8627451, g: 0.8862745, b: 0.9411765, a: 0}
+    material: {fileID: 2100000, guid: 0dc6b70a7c08eb0468d3e98768d35aea, type: 2}
+  - terrainType: 10
+    color: {r: 0.6862745, g: 0.93333334, b: 0.93333334, a: 0}
+    material: {fileID: 2100000, guid: 4ca5097e5870a1a4594788fa907e1e1a, type: 2}
+  - terrainType: 11
+    color: {r: 1, g: 1, b: 1, a: 0}
+    material: {fileID: 2100000, guid: 1f2a4a04a4848874e9be9a51f959f410, type: 2}
+  - terrainType: 12
+    color: {r: 0.10980392, g: 0.6392157, b: 0.9254902, a: 0}
+    material: {fileID: 2100000, guid: 09e0abf28233f504380f9b241536269e, type: 2}
+  - terrainType: 13
+    color: {r: 0.33333334, g: 0.41960785, b: 0.18431373, a: 0}
+    material: {fileID: 2100000, guid: 177662b97c7bdf2449e57fe7cf2265e5, type: 2}
+  - terrainType: 14
+    color: {r: 0.18431373, g: 0.30980393, b: 0.30980393, a: 0}
+    material: {fileID: 2100000, guid: 142189198a0e308468a64781547019b0, type: 2}
+  - terrainType: 15
+    color: {r: 1, g: 0.972549, b: 0.8627451, a: 0}
+    material: {fileID: 2100000, guid: 3471686c35209c54897b9f20d438d8fc, type: 2}
+  - terrainType: 16
+    color: {r: 1, g: 0.49803922, b: 0.3137255, a: 0}
+    material: {fileID: 2100000, guid: 9726760c57b5a7546a3cec961c4a5215, type: 2}
+  - terrainType: 17
+    color: {r: 0, g: 0.98039216, b: 0.6039216, a: 0}
+    material: {fileID: 2100000, guid: 33eef69276d30ab4cbc7f2a78e9bc15a, type: 2}
+  - terrainType: 18
+    color: {r: 0.69803923, g: 0.13333334, b: 0.13333334, a: 0}
+    material: {fileID: 2100000, guid: 666c7e94b826a7e4c8bee2384c663d4d, type: 2}

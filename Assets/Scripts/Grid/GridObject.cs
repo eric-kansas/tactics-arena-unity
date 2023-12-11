@@ -4,12 +4,30 @@ using UnityEngine;
 
 public enum TerrainType
 {
-    Plain,
-    Forest,
-    Mountain,
-    Water,
-    Desert,
-    Snow
+    // Natural Landscapes
+    Plain,        // Grasslands, open fields
+    Meadow,       // Grasslands, often with flowers
+    Savanna,      // Grasslands with sparse trees
+    Forest,       // Dense woodlands, thick foliage
+    Taiga,        // Coniferous forests, subarctic
+    Mountain,     // High altitude, rocky terrain
+    Hills,        // Gentle slopes, less steep than mountains
+    Badlands,     // Eroded rock formations
+    Desert,       // Arid, sandy landscapes
+    Tundra,       // Cold, treeless plains
+    Glacier,      // Icy, frozen landscapes
+    Snow,         // Cold, snow-covered areas
+
+    // Water Bodies and Wetlands
+    Water,        // Lakes, rivers, oceans
+    Swamp,        // Wetlands, marshy areas
+    Marsh,        // Wetlands, often waterlogged
+    Sand,        // Sandy shores, coastal areas
+    CoralReef,    // Marine ecosystems, underwater
+    Oasis,        // Fertile areas in deserts
+
+    // Special Terrains
+    LavaField     // Molten lava areas
 }
 
 public class GridObject

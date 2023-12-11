@@ -53,7 +53,7 @@ public class UnitWorldUI : MonoBehaviour
         actionPointsText.text = unit.GetActionPoints().ToString();
     }
 
-    private void Unit_OnAnyActionPointsChanged(object sender, EventArgs e)
+    private void Unit_OnAnyActionPointsChanged()
     {
         UpdateActionPointsText();
     }

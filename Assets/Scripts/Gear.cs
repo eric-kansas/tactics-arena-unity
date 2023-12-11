@@ -23,10 +23,16 @@ public class Gear
     }
 
     // Method to calculate total attack bonus
-    internal int GetTotalAttackBonus()
+    internal int GetTotalPhysicalAttackBonus()
     {
-        return GetEquipmentAttackBonus(helm) + GetEquipmentAttackBonus(chestPlate) +
-               GetEquipmentAttackBonus(weapon) + GetEquipmentAttackBonus(ring);
+        return GetEquipmentPhysicalAttackBonus(helm) + GetEquipmentPhysicalAttackBonus(chestPlate) +
+               GetEquipmentPhysicalAttackBonus(weapon) + GetEquipmentPhysicalAttackBonus(ring);
+    }
+
+    internal int GetTotalMagicalAttackBonus()
+    {
+        return GetEquipmentMagicalAttackBonus(helm) + GetEquipmentMagicalAttackBonus(chestPlate) +
+               GetEquipmentMagicalAttackBonus(weapon) + GetEquipmentMagicalAttackBonus(ring);
     }
 
     // Utility methods for calculating bonuses from an equipment piece
@@ -35,8 +41,13 @@ public class Gear
         return equipment != null ? equipment.ArmorBonus : 0;
     }
 
-    private int GetEquipmentAttackBonus(Equipment equipment)
+    private int GetEquipmentPhysicalAttackBonus(Equipment equipment)
     {
-        return equipment != null ? equipment.AttackBonus : 0;
+        return equipment != null ? equipment.PhysicalAttackBonus : 0;
+    }
+
+    private int GetEquipmentMagicalAttackBonus(Equipment equipment)
+    {
+        return equipment != null ? equipment.MagicalAttackBonus : 0;
     }
 }

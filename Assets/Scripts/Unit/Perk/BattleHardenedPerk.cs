@@ -1,7 +1,13 @@
 public class BattleHardenedPerk : Perk
 {
-    public override int GetArmorClassBonus()
+
+    public override int GetDerivedStatModifier(DerivedStatModifierType modifierType)
     {
-        return 1;
+        if (modifierType == DerivedStatModifierType.PhysicalArmor)
+        {
+            return 1;
+        }
+        return 0;
     }
+
 }

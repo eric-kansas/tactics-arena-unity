@@ -32,10 +32,8 @@ public class UnitManager : MonoBehaviour
         Unit.OnAnyUnitOutOfEnergy += Unit_OnAnyUnitOutOfEnergy;
     }
 
-    private void Unit_OnAnyUnitInitialized(object sender, EventArgs e)
+    private void Unit_OnAnyUnitInitialized(Unit unit)
     {
-        Unit unit = sender as Unit;
-
         arenaUnitList.Add(unit);
 
         Team team = unit.GetTeam();

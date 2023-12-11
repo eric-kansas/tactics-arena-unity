@@ -39,7 +39,6 @@ public class TurnSystem : MonoBehaviour
         }
 
         currentTeam = Match.Instance.GetClientTeam();
-        Debug.Log(currentTeam);
     }
 
 

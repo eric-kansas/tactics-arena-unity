@@ -59,12 +59,12 @@ public class UnitActionGridSystemVisual : MonoBehaviour
         FogOfWarSystem.OnTeamVisibilityChanged += FogOfWarSystem_OnTeamVisibilityChanged;
     }
 
-    private void UnitActionSystem_OnSelectedUnitChanged(object sender, EventArgs e)
+    private void UnitActionSystem_OnSelectedUnitChanged()
     {
         UpdateGridVisual();
     }
 
-    private void UnitActionSystem_OnSelectedActionChanged(object sender, EventArgs e)
+    private void UnitActionSystem_OnSelectedActionChanged()
     {
         UpdateGridVisual();
     }
@@ -245,10 +245,12 @@ public class UnitActionGridSystemVisual : MonoBehaviour
                 break;
         }
 
-        ShowGridPositionList(selectedAction.GetValidActionGridPositionList(), gridVisualType);
+        List<GridPosition> validActionGridPositionList = selectedAction.GetValidActionGridPositionList();
+        ShowGridPositionList(validActionGridPositionList, gridVisualType);
 
         // add zone highlight
-        actionZone = new Zone(selectedAction.GetValidActionGridPositionList());
+        validActionGridPositionList.Add(selectedUnit.GetGridPosition());
+        actionZone = new Zone(validActionGridPositionList);
         actionZone.ShowBorder(Color.blue);
     }
 

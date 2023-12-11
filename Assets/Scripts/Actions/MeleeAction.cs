@@ -5,43 +5,42 @@ using UnityEngine;
 
 public class MeleeAction : BaseAction, IOpportunityAttack
 {
-
+    // events
     public static event Action OnAnySwordHit;
-
     public event Action OnSwordActionStarted;
     public event Action OnSwordActionCompleted;
     public event Action OnAttackMissed;
 
+    // state
     private enum State
     {
         SwingingSwordBeforeHit,
         SwingingSwordAfterHit,
     }
 
-    private int maxSwordDistance = 1;
     private State state;
     private float stateTimer;
     private Unit targetUnit;
 
+    private int maxSwordDistance = 1;
 
     private void Update()
     {
-        if (!isActive)
-        {
-            return;
-        }
+        if (!isActive) return;
 
         stateTimer -= Time.deltaTime;
+        HandleState();
+    }
 
+    private void HandleState()
+    {
         switch (state)
         {
             case State.SwingingSwordBeforeHit:
-                Vector3 aimDir = (targetUnit.GetWorldPosition() - unit.GetWorldPosition()).normalized;
-
-                float rotateSpeed = 10f;
-                transform.forward = Vector3.Lerp(transform.forward, aimDir, Time.deltaTime * rotateSpeed);
+                HandleSwingingSwordBeforeHit();
                 break;
             case State.SwingingSwordAfterHit:
+                HandleSwingingSwordAfterHit();
                 break;
         }
 
@@ -49,6 +48,19 @@ public class MeleeAction : BaseAction, IOpportunityAttack
         {
             NextState();
         }
+    }
+
+    private void HandleSwingingSwordBeforeHit()
+    {
+        Vector3 aimDir = (targetUnit.GetWorldPosition() - unit.GetWorldPosition()).normalized;
+
+        float rotateSpeed = 10f;
+        transform.forward = Vector3.Lerp(transform.forward, aimDir, Time.deltaTime * rotateSpeed);
+    }
+
+    private void HandleSwingingSwordAfterHit()
+    {
+
     }
 
     private void NextState()
@@ -71,7 +83,7 @@ public class MeleeAction : BaseAction, IOpportunityAttack
                 break;
             case State.SwingingSwordAfterHit:
                 OnSwordActionCompleted?.Invoke();
-                ActionComplete();
+                ActionComplete(GameEvent.AttackHit);
                 break;
         }
     }
@@ -85,23 +97,13 @@ public class MeleeAction : BaseAction, IOpportunityAttack
     {
         System.Random random = new System.Random();
         int attackRoll = random.Next(1, 21);
-        int armorCheck = target.CalculateArmorClass();
+        int armorCheck = ModifiersCalculator.PhysicalArmor(target);
+        int modifier = ModifiersCalculator.PhysicalHitModifier(unit, target);
 
-        attackRoll = attackRoll + AttckModifers() - AttackDemodifiers();
+        attackRoll += modifier;
 
         return attackRoll >= armorCheck;
     }
-
-    private int AttckModifers()
-    {
-        return unit.GetPlayerData().GetStats().Strength;
-    }
-
-    private int AttackDemodifiers()
-    {
-        return 0;
-    }
-
 
     public override string GetActionName()
     {

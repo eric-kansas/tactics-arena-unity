@@ -21,7 +21,7 @@ public class SpecialAction : BaseAction
         if (totalSpinAmount >= 360f)
         {
             unit.UseFavor();
-            ActionComplete();
+            ActionComplete(GameEvent.TeamFavorChanged);
         }
     }
 

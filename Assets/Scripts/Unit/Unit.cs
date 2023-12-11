@@ -1,55 +1,54 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
-    private const int ACTION_POINTS_MAX = 5;
+    private const int ACTION_POINTS_MAX = 2;
 
-    public static event EventHandler OnAnyActionPointsChanged;
-    public static event EventHandler OnAnyUnitInitialized;
+    public static event Action OnAnyActionPointsChanged;
+    public static event Action<Unit> OnAnyUnitInitialized;
     public static Action<Unit> OnAnyUnitOutOfEnergy;
     public static Action<Unit> OnAnyUnitExpendFavor;
 
     [SerializeField] private Team team;
+    [SerializeField] private LayerMask unitLayerMask; // If used
+    [SerializeField] private SkinnedMeshRenderer unitRenderer;
+
     private Player playerData;
     private GridPosition gridPosition;
     private UnitEnergySystem unitEnergySystem;
     private UnitFavor favorSystem;
     private Perk[] basePerkArray;
+    private StatusEffect[] baseStatusEffectArray;
     private BaseAction[] baseActionArray;
     private int actionPoints = ACTION_POINTS_MAX;
-    [SerializeField] private bool inArena = true;
-    [SerializeField] private SkinnedMeshRenderer renderer;
-
+    private bool inArena = true;
     private bool isProne;
-
 
     private void Start()
     {
-        //gridPosition = LevelGrid.Instance.GetGridPosition(transform.position);
-        //LevelGrid.Instance.AddUnitAtGridPosition(gridPosition, this);
-        //transform.position = LevelGrid.Instance.GetWorldPosition(gridPosition);
-
         LevelGrid.Instance.OnElevationChanged += LevelGrid_OnElevationChange;
         TurnSystem.Instance.OnTurnChanged += TurnSystem_OnTurnChanged;
 
         unitEnergySystem.OnOutOfEnergy += EnergySystem_OnOutOfEnergy;
 
-        OnAnyUnitInitialized?.Invoke(this, EventArgs.Empty);
+        OnAnyUnitInitialized?.Invoke(this);
     }
 
     public void Setup(Team team, Player player)
     {
         unitEnergySystem = GetComponent<UnitEnergySystem>();
         favorSystem = GetComponent<UnitFavor>();
+        basePerkArray = GetComponents<Perk>();
         baseActionArray = new BaseAction[0];
+        baseStatusEffectArray = new StatusEffect[0];
 
         this.team = team;
         playerData = player;
 
-        unitEnergySystem.SetMaxHealth(CalculateMaxEnergy());
+        unitEnergySystem.SetMaxHealth(ModifiersCalculator.MaxEnergy(this));
+        favorSystem.SetMaxFavor(ModifiersCalculator.MaxFavor(this));
 
         foreach (var abilityData in player.GetAbilities())
         {
@@ -79,9 +78,9 @@ public class Unit : MonoBehaviour
             }
         }
 
-        basePerkArray = GetComponents<Perk>();
 
-        renderer.material = team.GetMaterial();
+
+        unitRenderer.material = team.GetMaterial();
     }
 
     private void Update()
@@ -151,11 +150,29 @@ public class Unit : MonoBehaviour
         }
     }
 
+    internal bool CanTakeAction(BaseAction baseAction)
+    {
+        return CanSpendActionPointsToTakeAction(baseAction) && baseAction.MeetsRequirements(GetGridPosition());
+    }
+
+    internal bool CanTakeAnyActions()
+    {
+        foreach (BaseAction baseAction in baseActionArray)
+        {
+            if (CanTakeAction(baseAction))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private void SpendActionPoints(int amount)
     {
         actionPoints -= amount;
 
-        OnAnyActionPointsChanged?.Invoke(this, EventArgs.Empty);
+        OnAnyActionPointsChanged?.Invoke();
     }
 
     public int GetActionPoints()
@@ -167,9 +184,39 @@ public class Unit : MonoBehaviour
     {
         if (TurnSystem.Instance.GetCurrentTeam() == GetTeam() && inArena)
         {
+            // right now restore all action points
             actionPoints = ACTION_POINTS_MAX;
 
-            OnAnyActionPointsChanged?.Invoke(this, EventArgs.Empty);
+            UpdateModifers(GameEvent.TurnStart);
+
+            ApplyFavorAttrition();
+
+            OnAnyActionPointsChanged?.Invoke();
+        }
+    }
+
+    private void ApplyFavorAttrition()
+    {
+        System.Random random = new System.Random();
+        int favorAttrition = random.Next(1, 9);
+        favorAttrition += ModifiersCalculator.FavorAttritionModifer(this);
+        favorSystem.Remove(favorAttrition);
+    }
+
+    public void UpdateModifers(GameEvent gameEvent)
+    {
+        // try update gear
+
+        // try update and apply perks
+        foreach (Perk perk in basePerkArray)
+        {
+            perk.TryApplyEffect(gameEvent, this, null);
+        }
+
+        // try update and apply status effects
+        foreach (StatusEffect statusEffect in baseStatusEffectArray)
+        {
+            statusEffect.TryApplyEffect(gameEvent, this, null);
         }
     }
 
@@ -233,9 +280,9 @@ public class Unit : MonoBehaviour
     {
         foreach (Perk perk in basePerkArray)
         {
-            if (perk.CanPreventDeath(this))
+            if (perk.MeetsConditions(GameEvent.UnitEnergyDepleted, this, null))
             {
-                perk.ApplyEffect(this);
+                perk.ApplyEffect(this); // right now only checks for first one
                 return true;
             }
         }
@@ -292,30 +339,34 @@ public class Unit : MonoBehaviour
         return playerData.GetStats();
     }
 
-    private int CalculateMaxEnergy()
-    {
-        int baseHP = 10;
-        int factor = 10;
-        return baseHP + (playerData.GetStats().Endurance * factor);
-    }
-
-    public int CalculateArmorClass()
-    {
-        // Example calculation based on Dexterity and equipment
-        int baseArmorClass = 10;
-        int dexterityBonus = playerData.GetStats().Agility / 2;
-        int equipmentArmorBonus = playerData.GetGear().GetTotalArmorBonus();
-        int perksArmorBonus = GetTotalArmorBonusFromPerks();
-        return baseArmorClass + dexterityBonus + equipmentArmorBonus + perksArmorBonus;
-    }
-
     public int GetTotalArmorBonusFromPerks()
     {
         int totalBonus = 0;
         foreach (Perk perk in basePerkArray)
         {
-            totalBonus += perk.GetArmorClassBonus();
+            totalBonus += 0; //perk.GetArmorClassBonus();
         }
         return totalBonus;
+    }
+
+    public Perk[] GetPerks()
+    {
+        return basePerkArray;
+    }
+
+    public StatusEffect[] GetStatusEffects()
+    {
+        return baseStatusEffectArray;
+    }
+
+
+    internal void AddStatus(StatusEffect status)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void RemoveStatus(StatusEffect status)
+    {
+        throw new NotImplementedException();
     }
 }

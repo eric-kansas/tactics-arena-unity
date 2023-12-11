@@ -83,7 +83,7 @@ public class RangeAction : BaseAction
                 stateTimer = coolOffStateTime;
                 break;
             case State.Cooloff:
-                ActionComplete();
+                ActionComplete(GameEvent.AttackHit);
                 break;
         }
     }
@@ -117,21 +117,14 @@ public class RangeAction : BaseAction
     {
         System.Random random = new System.Random();
         int attackRoll = random.Next(1, 21);
-        int armorCheck = target.CalculateArmorClass();
+        int armorCheck = ModifiersCalculator.PhysicalArmor(target);
+        Debug.Log("Roll: " + attackRoll);
+        int modifier = ModifiersCalculator.PhysicalHitModifier(unit, target);
 
-        attackRoll = attackRoll + AttckModifers() - AttackDemodifiers();
+        attackRoll += modifier;
+
 
         return attackRoll >= armorCheck;
-    }
-
-    private int AttckModifers()
-    {
-        return unit.GetPlayerData().GetStats().Agility;
-    }
-
-    private int AttackDemodifiers()
-    {
-        return 0;
     }
 
     public override string GetActionName()

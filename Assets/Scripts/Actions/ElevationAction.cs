@@ -33,7 +33,7 @@ public class ElevationAction : BaseAction
             }
         }
 
-        ActionComplete();
+        ActionComplete(GameEvent.GridElevationChanged);
 
     }
 

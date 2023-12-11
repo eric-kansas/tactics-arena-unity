@@ -80,7 +80,7 @@ public class InteractAction : BaseAction
 
     private void OnInteractComplete()
     {
-        ActionComplete();
+        ActionComplete(GameEvent.AttackHit); // not used right now
     }
 
 }

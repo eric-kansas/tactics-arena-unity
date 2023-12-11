@@ -65,10 +65,12 @@ public abstract class BaseAction : MonoBehaviour
         OnAnyActionStarted?.Invoke(this, EventArgs.Empty);
     }
 
-    protected void ActionComplete()
+    protected void ActionComplete(GameEvent gameEvent)
     {
         isActive = false;
         onActionComplete();
+
+        unit.UpdateModifers(gameEvent);
 
         OnAnyActionCompleted?.Invoke(this, EventArgs.Empty);
     }

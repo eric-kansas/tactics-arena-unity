@@ -202,7 +202,7 @@ public class ActionGridSystemVisual : MonoBehaviour
             selectedAction.GetValidActionGridPositionList(), gridVisualType);
     }
 
-    private void UnitActionSystem_OnSelectedActionChanged(object sender, EventArgs e)
+    private void UnitActionSystem_OnSelectedActionChanged()
     {
         UpdateGridVisual();
     }

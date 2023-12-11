@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -9,11 +10,10 @@ public class UnitActionSystem : MonoBehaviour
 
     public static UnitActionSystem Instance { get; private set; }
 
-
-    public event EventHandler OnSelectedUnitChanged;
-    public event EventHandler OnSelectedActionChanged;
-    public event EventHandler<bool> OnBusyChanged;
-    public event EventHandler OnActionStarted;
+    public event Action OnSelectedUnitChanged;
+    public event Action OnSelectedActionChanged;
+    public event Action<bool> OnBusyChanged;
+    public event Action OnActionStarted;
 
     [SerializeField] private Unit selectedUnit;
     [SerializeField] private LayerMask unitLayerMask;
@@ -34,18 +34,12 @@ public class UnitActionSystem : MonoBehaviour
         }
         Instance = this;
 
-        BaseAction.OnAnyActionCompleted += BaseAction_OnAnyActionCompleted;
-
-    }
-
-    private void BaseAction_OnAnyActionCompleted(object sender, EventArgs e)
-    {
-        selectedAction = null;
     }
 
     private void Start()
     {
-        //SetSelectedUnit(selectedUnit);
+        BaseAction.OnAnyActionCompleted += BaseAction_OnAnyActionCompleted;
+        TurnSystem.Instance.OnTurnChanged += TurnSystem_OnTurnChanged;
     }
 
     private void Update()
@@ -82,6 +76,31 @@ public class UnitActionSystem : MonoBehaviour
         }
 
         HandleSelectedAction();
+    }
+
+
+    private void BaseAction_OnAnyActionCompleted(object sender, EventArgs e)
+    {
+        if (TurnSystem.Instance.IsPlayerTurn())
+        {
+            if (!selectedUnit.CanTakeAnyActions())
+            {
+                selectedAction = null;
+                SelectNextAvailableUnit();
+            }
+        }
+    }
+
+    private void TurnSystem_OnTurnChanged(object sender, EventArgs e)
+    {
+        if (TurnSystem.Instance.IsPlayerTurn())
+        {
+            SelectNextAvailableUnit();
+        }
+        else
+        {
+            SetSelectedUnit(null);
+        }
     }
 
     private void HandleSelectedAction()
@@ -142,21 +161,21 @@ public class UnitActionSystem : MonoBehaviour
         isPreviewingAction = false;
         SetBusy();
         selectedAction.TakeAction(actionPreviewGridPosition, ClearBusy);
-        OnActionStarted?.Invoke(this, EventArgs.Empty);
+        OnActionStarted?.Invoke();
     }
 
     private void SetBusy()
     {
         isBusy = true;
 
-        OnBusyChanged?.Invoke(this, isBusy);
+        OnBusyChanged?.Invoke(isBusy);
     }
 
     private void ClearBusy()
     {
         isBusy = false;
 
-        OnBusyChanged?.Invoke(this, isBusy);
+        OnBusyChanged?.Invoke(isBusy);
     }
 
     private bool TryHandleUnitSelection()
@@ -193,9 +212,8 @@ public class UnitActionSystem : MonoBehaviour
     {
         selectedUnit = unit;
         selectedAction = null;
-        //SetSelectedAction(unit.GetAction<MoveAction>());
 
-        OnSelectedUnitChanged?.Invoke(this, EventArgs.Empty);
+        OnSelectedUnitChanged?.Invoke();
     }
 
     public void SetSelectedAction(BaseAction baseAction)
@@ -205,7 +223,20 @@ public class UnitActionSystem : MonoBehaviour
             ClearActionPreview();
         }
         selectedAction = baseAction;
-        OnSelectedActionChanged?.Invoke(this, EventArgs.Empty);
+        OnSelectedActionChanged?.Invoke();
+    }
+
+    private void SelectNextAvailableUnit()
+    {
+        // Example logic to iterate over units and find the next available one
+        foreach (Unit unit in UnitManager.Instance.GetTeamUnitList(TurnSystem.Instance.GetCurrentTeam()))
+        {
+            if (unit.CanTakeAnyActions())
+            {
+                SetSelectedUnit(unit);
+                return;
+            }
+        }
     }
 
     private void ClearActionPreview()

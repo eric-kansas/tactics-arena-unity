@@ -8,13 +8,20 @@ public enum Direction
     North,
     East,
     South,
-    West
+    West,
+    Up,
+    Down,
+    NorthEast,
+    SouthEast,
+    SouthWest,
+    NorthWest,
 }
 
 public class ZoneBorderVisual : MonoBehaviour
 {
     private LineRenderer lineRenderer;
     private Zone zone;
+    private float yOffset;
 
     void Awake()
     {
@@ -25,6 +32,13 @@ public class ZoneBorderVisual : MonoBehaviour
     public void Setup(Zone zone)
     {
         this.zone = zone;
+        UpdateBorderPoints();
+    }
+
+    public void Setup(Zone zone, float yOffset = 0.0f, float lineWidth = 0.1f)
+    {
+        this.zone = zone;
+        this.yOffset = yOffset;
         UpdateBorderPoints();
     }
 
@@ -97,7 +111,7 @@ public class ZoneBorderVisual : MonoBehaviour
 
     private void AddEdgePoints(GridPosition pos, Direction directionOfTrace, Direction directionToAddEdge, List<Vector3> points)
     {
-        Vector3 worldPos = LevelGrid.Instance.GetWorldPosition(pos);
+        Vector3 worldPos = FogOfWarSystem.Instance.GetPerceivedWorldPosition(pos);
         float cellSize = LevelGrid.Instance.GetCellSize();
         float halfCellSize = cellSize / 2f;
 
@@ -105,8 +119,8 @@ public class ZoneBorderVisual : MonoBehaviour
         {
             case Direction.North:
                 // Add North-West and North-East points in order based on direction of trace
-                Vector3 pointNW = new Vector3(worldPos.x - halfCellSize, worldPos.y, worldPos.z + halfCellSize);
-                Vector3 pointNE = new Vector3(worldPos.x + halfCellSize, worldPos.y, worldPos.z + halfCellSize);
+                Vector3 pointNW = new Vector3(worldPos.x - halfCellSize, worldPos.y + yOffset, worldPos.z + halfCellSize);
+                Vector3 pointNE = new Vector3(worldPos.x + halfCellSize, worldPos.y + yOffset, worldPos.z + halfCellSize);
 
                 if (directionOfTrace == Direction.East)
                 {

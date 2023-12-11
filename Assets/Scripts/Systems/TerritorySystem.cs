@@ -118,10 +118,8 @@ public class TerritorySystem : MonoBehaviour
         return 1; // Example: Each territory is worth 1 point per turn
     }
 
-    private void Unit_OnAnyUnitSpawned(object sender, EventArgs e)
+    private void Unit_OnAnyUnitSpawned(Unit unit)
     {
-        Unit unit = sender as Unit;
-
         UpdateTerritoryControlBasedOnUnitMovement(unit.GetGridPosition(), unit);
     }
 
