@@ -51,4 +51,14 @@ public class UnitFavor : MonoBehaviour
         return favorMax;
     }
 
+
+    public void SetMaxFavor(int max)
+    {
+        favorMax = max;
+        if (favor > max)
+        {
+            favor = max;
+        }
+    }
+
 }

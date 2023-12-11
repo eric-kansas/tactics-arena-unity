@@ -81,7 +81,7 @@ public class GrenadeAction : BaseAction
 
     private void OnGrenadeBehaviourComplete()
     {
-        ActionComplete();
+        ActionComplete(GameEvent.AttackHit);
     }
 
 }

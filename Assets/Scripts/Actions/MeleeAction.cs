@@ -3,44 +3,44 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MeleeAction : BaseAction
+public class MeleeAction : BaseAction, IOpportunityAttack
 {
+    // events
+    public static event Action OnAnySwordHit;
+    public event Action OnSwordActionStarted;
+    public event Action OnSwordActionCompleted;
+    public event Action OnAttackMissed;
 
-    public static event EventHandler OnAnySwordHit;
-
-    public event EventHandler OnSwordActionStarted;
-    public event EventHandler OnSwordActionCompleted;
-    public event EventHandler OnAttackMissed;
-
+    // state
     private enum State
     {
         SwingingSwordBeforeHit,
         SwingingSwordAfterHit,
     }
 
-    private int maxSwordDistance = 1;
     private State state;
     private float stateTimer;
     private Unit targetUnit;
 
+    private int maxSwordDistance = 1;
+
     private void Update()
     {
-        if (!isActive)
-        {
-            return;
-        }
+        if (!isActive) return;
 
         stateTimer -= Time.deltaTime;
+        HandleState();
+    }
 
+    private void HandleState()
+    {
         switch (state)
         {
             case State.SwingingSwordBeforeHit:
-                Vector3 aimDir = (targetUnit.GetWorldPosition() - unit.GetWorldPosition()).normalized;
-
-                float rotateSpeed = 10f;
-                transform.forward = Vector3.Lerp(transform.forward, aimDir, Time.deltaTime * rotateSpeed);
+                HandleSwingingSwordBeforeHit();
                 break;
             case State.SwingingSwordAfterHit:
+                HandleSwingingSwordAfterHit();
                 break;
         }
 
@@ -48,6 +48,19 @@ public class MeleeAction : BaseAction
         {
             NextState();
         }
+    }
+
+    private void HandleSwingingSwordBeforeHit()
+    {
+        Vector3 aimDir = (targetUnit.GetWorldPosition() - unit.GetWorldPosition()).normalized;
+
+        float rotateSpeed = 10f;
+        transform.forward = Vector3.Lerp(transform.forward, aimDir, Time.deltaTime * rotateSpeed);
+    }
+
+    private void HandleSwingingSwordAfterHit()
+    {
+
     }
 
     private void NextState()
@@ -61,16 +74,16 @@ public class MeleeAction : BaseAction
                 if (DoesAttackHit(targetUnit))
                 {
                     targetUnit.Damage(CalculateDamage()); // Damage the target if the attack hits
-                    OnAnySwordHit?.Invoke(this, EventArgs.Empty);
+                    OnAnySwordHit?.Invoke();
                 }
                 else
                 {
-                    OnAttackMissed?.Invoke(this, EventArgs.Empty); // Invoke the miss event
+                    OnAttackMissed?.Invoke(); // Invoke the miss event
                 }
                 break;
             case State.SwingingSwordAfterHit:
-                OnSwordActionCompleted?.Invoke(this, EventArgs.Empty);
-                ActionComplete();
+                OnSwordActionCompleted?.Invoke();
+                ActionComplete(GameEvent.AttackHit);
                 break;
         }
     }
@@ -84,23 +97,13 @@ public class MeleeAction : BaseAction
     {
         System.Random random = new System.Random();
         int attackRoll = random.Next(1, 21);
-        int armorCheck = target.CalculateArmorClass();
+        int armorCheck = ModifiersCalculator.PhysicalArmor(target);
+        int modifier = ModifiersCalculator.PhysicalHitModifier(unit, target);
 
-        attackRoll = attackRoll + AttckModifers() - AttackDemodifiers();
+        attackRoll += modifier;
 
         return attackRoll >= armorCheck;
     }
-
-    private int AttckModifers()
-    {
-        return unit.GetPlayerData().GetStats().Strength;
-    }
-
-    private int AttackDemodifiers()
-    {
-        return 0;
-    }
-
 
     public override string GetActionName()
     {
@@ -171,7 +174,7 @@ public class MeleeAction : BaseAction
         float beforeHitStateTime = 0.7f;
         stateTimer = beforeHitStateTime;
 
-        OnSwordActionStarted?.Invoke(this, EventArgs.Empty);
+        OnSwordActionStarted?.Invoke();
 
         ActionStart(onActionComplete);
     }

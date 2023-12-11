@@ -22,12 +22,13 @@ public class ActionBusyUI : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    private void UnitActionSystem_OnBusyChanged(object sender, bool isBusy)
+    private void UnitActionSystem_OnBusyChanged(bool isBusy)
     {
         if (isBusy)
         {
             Show();
-        } else
+        }
+        else
         {
             Hide();
         }

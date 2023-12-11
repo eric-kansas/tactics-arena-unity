@@ -142,7 +142,7 @@ public class Zone
             CreateBorderVisual();
         }
 
-        var borderVisual = borderVisualInstance.GetComponent<ZoneBorderVisual>();
+        var borderVisual = borderVisualInstance.GetComponent<ZoneBorderVisualRect>();
         borderVisual.Setup(this);
         borderVisual.ShowBorder(color);
     }
@@ -151,6 +151,8 @@ public class Zone
     {
         if (borderVisualInstance != null)
         {
+            var borderVisual = borderVisualInstance.GetComponent<ZoneBorderVisualRect>();
+            borderVisual.ClearBorderSegments();
             GameObject.Destroy(borderVisualInstance);
             borderVisualInstance = null;
         }

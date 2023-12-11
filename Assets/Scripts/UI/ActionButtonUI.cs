@@ -36,6 +36,17 @@ public class ActionButtonUI : MonoBehaviour
         {
             selectedGameObject.SetActive(selectedBaseAction == baseAction);
         }
+
+        Unit selectedUnit = UnitActionSystem.Instance.GetSelectedUnit();
+
+        if (selectedUnit.CanTakeAction(baseAction))
+        {
+            button.interactable = true;
+        }
+        else
+        {
+            button.interactable = false;
+        }
     }
 
 }

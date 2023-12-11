@@ -38,23 +38,23 @@ public class UnitAnimator : MonoBehaviour
         EquipRifle();
     }
 
-    private void SwordAction_OnSwordActionCompleted(object sender, EventArgs e)
+    private void SwordAction_OnSwordActionCompleted()
     {
         EquipRifle();
     }
 
-    private void SwordAction_OnSwordActionStarted(object sender, EventArgs e)
+    private void SwordAction_OnSwordActionStarted()
     {
         EquipSword();
         animator.SetTrigger("SwordSlash");
     }
 
-    private void MoveAction_OnStartMoving(object sender, EventArgs e)
+    private void MoveAction_OnStartMoving()
     {
         animator.SetBool("IsWalking", true);
     }
 
-    private void MoveAction_OnStopMoving(object sender, EventArgs e)
+    private void MoveAction_OnStopMoving()
     {
         animator.SetBool("IsWalking", false);
     }

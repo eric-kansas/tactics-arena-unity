@@ -64,19 +64,19 @@ public class UnitActionSystemUI : MonoBehaviour
         }
     }
 
-    private void UnitActionSystem_OnSelectedUnitChanged(object sender, EventArgs e)
+    private void UnitActionSystem_OnSelectedUnitChanged()
     {
         CreateUnitActionButtons();
         UpdateSelectedVisual();
         UpdateActionPoints();
     }
 
-    private void UnitActionSystem_OnSelectedActionChanged(object sender, EventArgs e)
+    private void UnitActionSystem_OnSelectedActionChanged()
     {
         UpdateSelectedVisual();
     }
 
-    private void UnitActionSystem_OnActionStarted(object sender, EventArgs e)
+    private void UnitActionSystem_OnActionStarted()
     {
         UpdateActionPoints();
     }
@@ -112,7 +112,7 @@ public class UnitActionSystemUI : MonoBehaviour
         UpdateActionPoints();
     }
 
-    private void Unit_OnAnyActionPointsChanged(object sender, EventArgs e)
+    private void Unit_OnAnyActionPointsChanged()
     {
         UpdateActionPoints();
     }

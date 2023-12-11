@@ -10,7 +10,7 @@ public class TerrainGridDebugObject : GridDebugObject
     [SerializeField] private TextMeshPro elevationText;
     [SerializeField] private GameObject fogOfWarObject;
     [SerializeField] private MeshRenderer prefabMeshRenderer;
-    [SerializeField] private Material[] terrainMaterials; // Assuming you have materials for each terrain type
+    [SerializeField] private TerrainColorMapping terrainColorMapping; // Assuming you have materials for each terrain type
 
     private GridObject gridObject;
 
@@ -27,17 +27,22 @@ public class TerrainGridDebugObject : GridDebugObject
 
         bool seePosition = FogOfWarSystem.Instance.IsVisible(Match.Instance.GetClientTeam(), gridObject.GetGridPosition());
         int elevation = FogOfWarSystem.Instance.GetKnownElevation(Match.Instance.GetClientTeam(), gridObject.GetGridPosition());
+
+        if (elevation <= 0)
+        {
+            elevation = 1;
+        }
         fogOfWarObject.SetActive(!seePosition);
 
         elevationText.text = elevation.ToString();
 
         // Update the prefab's material based on terrain type
         int terrainIndex = (int)gridObject.GetTerrainType();
-        prefabMeshRenderer.material = terrainMaterials[terrainIndex];
+        prefabMeshRenderer.material = terrainColorMapping.terrainColors[terrainIndex].material;
 
         transform.localScale = new Vector3(
             transform.localScale.x,
-            elevation * LevelGrid.Instance.ElevationScaleFactor,
+            elevation * LevelGrid.Instance.elevationScaleFactor,
             transform.localScale.z
         );
     }

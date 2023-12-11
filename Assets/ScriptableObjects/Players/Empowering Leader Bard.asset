@@ -18,17 +18,18 @@ MonoBehaviour:
   favorRole: 1
   combatRole: 1
   stats:
-    moveValue: 8
-    strength: 3
+    might: 3
     endurance: 3
     agility: 3
     intelligence: 3
-    perception: 3
+    perception: 2
     charisma: 3
   gear:
     helm: {fileID: 0}
     chestPlate: {fileID: 0}
     weapon: {fileID: 0}
     ring: {fileID: 0}
+  perks:
+  - {fileID: 11400000, guid: d3b4dddf3c86e094c9aa9c009c6d2ab9, type: 2}
   abilities:
   - {fileID: 11400000, guid: bb4a4a5a189b76b4884840132c6c2edd, type: 2}

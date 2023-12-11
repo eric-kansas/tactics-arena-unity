@@ -95,14 +95,11 @@ public class EnemyAI : MonoBehaviour
             if (!enemyUnit.CanSpendActionPointsToTakeAction(baseAction))
             {
                 // Enemy cannot afford this action
-                Debug.Log("AI CanSpendActionPointsToTakeAction");
                 continue;
             }
 
             if (!baseAction.IsActionApplicable())
             {
-                Debug.Log("AI no IsActionApplicable");
-
                 // Activating from the wrong domain
                 continue;
             }

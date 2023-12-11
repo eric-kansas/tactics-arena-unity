@@ -1,61 +1,54 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
-    private const int ACTION_POINTS_MAX = 5;
+    private const int ACTION_POINTS_MAX = 2;
 
-    public static event EventHandler OnAnyActionPointsChanged;
-    public static event EventHandler OnAnyUnitInitialized;
+    public static event Action OnAnyActionPointsChanged;
+    public static event Action<Unit> OnAnyUnitInitialized;
     public static Action<Unit> OnAnyUnitOutOfEnergy;
     public static Action<Unit> OnAnyUnitExpendFavor;
 
     [SerializeField] private Team team;
+    [SerializeField] private LayerMask unitLayerMask; // If used
+    [SerializeField] private SkinnedMeshRenderer unitRenderer;
+
     private Player playerData;
     private GridPosition gridPosition;
     private UnitEnergySystem unitEnergySystem;
     private UnitFavor favorSystem;
+    private Perk[] basePerkArray;
+    private StatusEffect[] baseStatusEffectArray;
     private BaseAction[] baseActionArray;
     private int actionPoints = ACTION_POINTS_MAX;
-    [SerializeField] private bool inArena = true;
-    [SerializeField] private SkinnedMeshRenderer renderer;
-
+    private bool inArena = true;
     private bool isProne;
-
-    private void Awake()
-    {
-
-    }
 
     private void Start()
     {
-        //gridPosition = LevelGrid.Instance.GetGridPosition(transform.position);
-        //LevelGrid.Instance.AddUnitAtGridPosition(gridPosition, this);
-        //transform.position = LevelGrid.Instance.GetWorldPosition(gridPosition);
-
         LevelGrid.Instance.OnElevationChanged += LevelGrid_OnElevationChange;
         TurnSystem.Instance.OnTurnChanged += TurnSystem_OnTurnChanged;
 
         unitEnergySystem.OnOutOfEnergy += EnergySystem_OnOutOfEnergy;
 
-        OnAnyUnitInitialized?.Invoke(this, EventArgs.Empty);
+        OnAnyUnitInitialized?.Invoke(this);
     }
 
     public void Setup(Team team, Player player)
     {
         unitEnergySystem = GetComponent<UnitEnergySystem>();
         favorSystem = GetComponent<UnitFavor>();
+        basePerkArray = GetComponents<Perk>();
         baseActionArray = new BaseAction[0];
+        baseStatusEffectArray = new StatusEffect[0];
 
         this.team = team;
         playerData = player;
 
-        unitEnergySystem.SetMaxHealth(CalculateMaxEnergy());
-
-        MoveAction moveAction = GetComponent<MoveAction>();
-        moveAction.SetMaxMove(playerData.GetStats().MoveValue);
+        unitEnergySystem.SetMaxHealth(ModifiersCalculator.MaxEnergy(this));
+        favorSystem.SetMaxFavor(ModifiersCalculator.MaxFavor(this));
 
         foreach (var abilityData in player.GetAbilities())
         {
@@ -72,7 +65,22 @@ public class Unit : MonoBehaviour
 
         baseActionArray = GetComponents<BaseAction>();
 
-        renderer.material = team.GetMaterial();
+        foreach (var perkData in player.GetPerks())
+        {
+            Type perkType = Type.GetType(perkData.perkBehaviourName);
+            if (perkType != null)
+            {
+                gameObject.AddComponent(perkType);
+            }
+            else
+            {
+                Debug.LogError("Ability type not found: " + perkData.perkBehaviourName);
+            }
+        }
+
+
+
+        unitRenderer.material = team.GetMaterial();
     }
 
     private void Update()
@@ -90,13 +98,13 @@ public class Unit : MonoBehaviour
         }
     }
 
-    public T GetAction<T>() where T : BaseAction
+    public T GetAction<T>() where T : class
     {
         foreach (BaseAction baseAction in baseActionArray)
         {
-            if (baseAction is T)
+            if (baseAction is T action)
             {
-                return (T)baseAction;
+                return action;
             }
         }
         return null;
@@ -142,11 +150,29 @@ public class Unit : MonoBehaviour
         }
     }
 
+    internal bool CanTakeAction(BaseAction baseAction)
+    {
+        return CanSpendActionPointsToTakeAction(baseAction) && baseAction.MeetsRequirements(GetGridPosition());
+    }
+
+    internal bool CanTakeAnyActions()
+    {
+        foreach (BaseAction baseAction in baseActionArray)
+        {
+            if (CanTakeAction(baseAction))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private void SpendActionPoints(int amount)
     {
         actionPoints -= amount;
 
-        OnAnyActionPointsChanged?.Invoke(this, EventArgs.Empty);
+        OnAnyActionPointsChanged?.Invoke();
     }
 
     public int GetActionPoints()
@@ -158,9 +184,39 @@ public class Unit : MonoBehaviour
     {
         if (TurnSystem.Instance.GetCurrentTeam() == GetTeam() && inArena)
         {
+            // right now restore all action points
             actionPoints = ACTION_POINTS_MAX;
 
-            OnAnyActionPointsChanged?.Invoke(this, EventArgs.Empty);
+            UpdateModifers(GameEvent.TurnStart);
+
+            ApplyFavorAttrition();
+
+            OnAnyActionPointsChanged?.Invoke();
+        }
+    }
+
+    private void ApplyFavorAttrition()
+    {
+        System.Random random = new System.Random();
+        int favorAttrition = random.Next(1, 9);
+        favorAttrition += ModifiersCalculator.FavorAttritionModifer(this);
+        favorSystem.Remove(favorAttrition);
+    }
+
+    public void UpdateModifers(GameEvent gameEvent)
+    {
+        // try update gear
+
+        // try update and apply perks
+        foreach (Perk perk in basePerkArray)
+        {
+            perk.TryApplyEffect(gameEvent, this, null);
+        }
+
+        // try update and apply status effects
+        foreach (StatusEffect statusEffect in baseStatusEffectArray)
+        {
+            statusEffect.TryApplyEffect(gameEvent, this, null);
         }
     }
 
@@ -207,6 +263,10 @@ public class Unit : MonoBehaviour
 
     private void EnergySystem_OnOutOfEnergy(object sender, EventArgs e)
     {
+        if (DeathPrevention())
+        {
+            return;
+        }
         actionPoints = 1;
         LevelGrid.Instance.RemoveUnitAtGridPosition(gridPosition, this);
         inArena = false;
@@ -214,6 +274,19 @@ public class Unit : MonoBehaviour
         transform.position = ReserveGridSystem.Instance.GetWorldPosition(GetTeam(), gridPosition);
 
         OnAnyUnitOutOfEnergy?.Invoke(this);
+    }
+
+    public bool DeathPrevention()
+    {
+        foreach (Perk perk in basePerkArray)
+        {
+            if (perk.MeetsConditions(GameEvent.UnitEnergyDepleted, this, null))
+            {
+                perk.ApplyEffect(this); // right now only checks for first one
+                return true;
+            }
+        }
+        return false;
     }
 
     public int GetEnergy()
@@ -266,20 +339,34 @@ public class Unit : MonoBehaviour
         return playerData.GetStats();
     }
 
-    private int CalculateMaxEnergy()
+    public int GetTotalArmorBonusFromPerks()
     {
-        // Example calculation: base HP + (Constitution * factor)
-        int baseHP = 10;
-        int factor = 10;
-        return baseHP + (playerData.GetStats().Endurance * factor);
+        int totalBonus = 0;
+        foreach (Perk perk in basePerkArray)
+        {
+            totalBonus += 0; //perk.GetArmorClassBonus();
+        }
+        return totalBonus;
     }
 
-    public int CalculateArmorClass()
+    public Perk[] GetPerks()
     {
-        // Example calculation based on Dexterity and equipment
-        int baseArmorClass = 10;
-        int dexterityBonus = playerData.GetStats().Agility / 2;
-        int equipmentArmorBonus = playerData.GetGear().GetTotalArmorBonus();
-        return baseArmorClass + dexterityBonus + equipmentArmorBonus;
+        return basePerkArray;
+    }
+
+    public StatusEffect[] GetStatusEffects()
+    {
+        return baseStatusEffectArray;
+    }
+
+
+    internal void AddStatus(StatusEffect status)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void RemoveStatus(StatusEffect status)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -29,7 +29,7 @@ public class TerritoryGridSystemVisual : MonoBehaviour
     {
         RenderZones();
 
-        FogOfWarSystem.OnTeamVisbilityChanged += FogOfWarSystem_OnTeamVisbilityChanged;
+        FogOfWarSystem.OnTeamVisibilityChanged += FogOfWarSystem_OnTeamVisibilityChanged;
     }
 
     private void RenderZones()
@@ -62,7 +62,7 @@ public class TerritoryGridSystemVisual : MonoBehaviour
         }
     }
 
-    private void FogOfWarSystem_OnTeamVisbilityChanged(Team team)
+    private void FogOfWarSystem_OnTeamVisibilityChanged(Team team)
     {
         RenderZones();
     }

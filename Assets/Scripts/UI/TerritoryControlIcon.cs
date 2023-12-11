@@ -22,7 +22,7 @@ public class TerritoryControlIcon : MonoBehaviour
             return;
         }
 
-        foregroundImage.color = Match.Instance.GetTeamColor(team);
+        foregroundImage.color = team.GetColor();
     }
 
     public Button GetButton()

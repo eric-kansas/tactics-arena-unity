@@ -797,8 +797,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   team: {fileID: 0}
-  inArena: 1
-  renderer: {fileID: 7535684240227392754}
+  unitLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  unitRenderer: {fileID: 7535684240227392754}
 --- !u!65 &7313912752346062244
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -878,7 +880,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e77071bd79f18645abfccc43343856a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxMoveDistance: 8
 --- !u!114 &-5639441539148911859
 MonoBehaviour:
   m_ObjectHideFlags: 0

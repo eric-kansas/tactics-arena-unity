@@ -43,13 +43,8 @@ public class UnitEnergySystem : MonoBehaviour
 
         if (energy == 0)
         {
-            Die();
+            OnOutOfEnergy?.Invoke(this, EventArgs.Empty);
         }
-    }
-
-    private void Die()
-    {
-        OnOutOfEnergy?.Invoke(this, EventArgs.Empty);
     }
 
     public float GetEnergyNormalized()

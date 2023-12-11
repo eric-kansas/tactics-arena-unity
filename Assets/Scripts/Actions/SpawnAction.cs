@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,14 +18,16 @@ public class SpawnAction : BaseAction
     private void Update()
     {
         if (!isActive)
-        {
             return;
-        }
 
+        HandleSpawning();
+    }
+
+    private void HandleSpawning()
+    {
         transform.position = LevelGrid.Instance.GetWorldPosition(targetGridPosition);
         unit.SetInArena(true);
-
-        ActionComplete();
+        ActionComplete(GameEvent.UnitSpawn);
     }
 
     public override void TakeAction(GridPosition gridPosition, Action onActionComplete)
@@ -38,30 +39,22 @@ public class SpawnAction : BaseAction
 
     public override List<GridPosition> GetValidActionGridPositionList()
     {
-        List<GridPosition> result = new List<GridPosition>();
+        List<GridPosition> validPositions = new List<GridPosition>();
         foreach (Zone zone in Match.Instance.GetSpawnZonesForTeam(unit.GetTeam()))
         {
-            foreach (GridPosition pos in zone.GridPositions())
-            {
-
-                if (!LevelGrid.Instance.IsValidGridPosition(pos))
-                {
-                    continue;
-                }
-
-                if (LevelGrid.Instance.HasAnyUnitOnGridPosition(pos))
-                {
-                    // Grid Position has Unit
-                    continue;
-                }
-
-                result.Add(pos);
-            }
-
+            validPositions.AddRange(GetValidPositionsInZone(zone));
         }
-        return result;
+        return validPositions;
     }
 
+    private IEnumerable<GridPosition> GetValidPositionsInZone(Zone zone)
+    {
+        foreach (GridPosition pos in zone.GridPositions())
+        {
+            if (LevelGrid.Instance.IsValidGridPosition(pos) && !LevelGrid.Instance.HasAnyUnitOnGridPosition(pos))
+                yield return pos;
+        }
+    }
 
     public override string GetActionName()
     {
@@ -70,12 +63,10 @@ public class SpawnAction : BaseAction
 
     public override EnemyAIAction GetEnemyAIAction(GridPosition gridPosition)
     {
-
         return new EnemyAIAction
         {
             gridPosition = gridPosition,
             actionValue = 100,
         };
     }
-
 }

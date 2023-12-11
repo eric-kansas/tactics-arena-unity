@@ -17,11 +17,11 @@ public abstract class BaseAction : MonoBehaviour
     public static event EventHandler OnAnyActionStarted;
     public static event EventHandler OnAnyActionCompleted;
 
-
     protected Unit unit;
     protected bool isActive;
     protected ActionUsage actionUsage = ActionUsage.Arena;
     protected Action onActionComplete;
+
 
     protected virtual void Awake()
     {
@@ -65,10 +65,12 @@ public abstract class BaseAction : MonoBehaviour
         OnAnyActionStarted?.Invoke(this, EventArgs.Empty);
     }
 
-    protected void ActionComplete()
+    protected void ActionComplete(GameEvent gameEvent)
     {
         isActive = false;
         onActionComplete();
+
+        unit.UpdateModifers(gameEvent);
 
         OnAnyActionCompleted?.Invoke(this, EventArgs.Empty);
     }

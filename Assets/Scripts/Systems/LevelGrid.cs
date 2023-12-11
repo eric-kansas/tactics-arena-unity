@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class LevelGrid : MonoBehaviour
@@ -8,7 +9,7 @@ public class LevelGrid : MonoBehaviour
 
     public static LevelGrid Instance { get; private set; }
 
-    public event EventHandler<OnAnyUnitMovedGridPositionEventArgs> OnAnyUnitMovedGridPosition;
+    public Action<OnAnyUnitMovedGridPositionEventArgs> OnAnyUnitMovedGridPosition;
     public class OnAnyUnitMovedGridPositionEventArgs : EventArgs
     {
         public Unit unit;
@@ -18,16 +19,16 @@ public class LevelGrid : MonoBehaviour
 
     public event Action<GridPosition, int> OnElevationChanged;
 
-    private float elevationScaleFactor = 0.5f;
-
-    public float ElevationScaleFactor => elevationScaleFactor;
-
     [SerializeField] private Transform gridDebugObjectPrefab;
     [SerializeField] private int width;
     [SerializeField] private int height;
     [SerializeField] private float cellSize;
+    [SerializeField] public float elevationScaleFactor = 0.5f;
+
+    [SerializeField] private List<BiomeConfig> biomeConfigs;
 
     private GridSystem<GridObject> gridSystem;
+    private Dictionary<GridPosition, BiomeConfig> regionConfigMap = new Dictionary<GridPosition, BiomeConfig>();
 
     private void Awake()
     {
@@ -39,29 +40,107 @@ public class LevelGrid : MonoBehaviour
         }
         Instance = this;
 
+        InitializeGrid();
+    }
+
+    private void InitializeGrid()
+    {
+        CreateTerrainRegions();
+
         gridSystem = new GridSystem<GridObject>(width, height, cellSize, Vector3.zero,
             (GridSystem<GridObject> g, GridPosition gridPosition) =>
             {
-                var (terrain, elevation) = GetRandomTerrainAndElevation();
-                return new GridObject(g, gridPosition, terrain, elevation);
+                return CreateGridCell(g, gridPosition);
             });
 
         gridSystem.CreateDebugObjects(gridDebugObjectPrefab);
     }
 
-    private (TerrainType, int) GetRandomTerrainAndElevation()
+    private GridObject CreateGridCell(GridSystem<GridObject> gridsystem, GridPosition gridPosition)
     {
-        Array terrainTypes = Enum.GetValues(typeof(TerrainType));
-        TerrainType randomTerrain = TerrainType.Snow;//(TerrainType)terrainTypes.GetValue(UnityEngine.Random.Range(0, terrainTypes.Length));
+        BiomeConfig biomeConfig = ChooseBiomeConfigForPosition(gridPosition);
 
-        int randomElevation = UnityEngine.Random.Range(1, 8);
+        TerrainProbability chosenTerrainProbability = ChooseTerrainProbability(biomeConfig);
+        TerrainType terrainType = chosenTerrainProbability.TerrainType;
+        int elevation = UnityEngine.Random.Range(
+            chosenTerrainProbability.ElevationRange.MinElevation,
+            chosenTerrainProbability.ElevationRange.MaxElevation + 1
+        );
 
-        return (randomTerrain, randomElevation);
+        return new GridObject(gridsystem, gridPosition, terrainType, elevation);
     }
 
-    private void Start()
+    private Color GetTerrainColor(TerrainType terrainType)
     {
-        //Pathfinding.Instance.Setup(width, height, cellSize);
+        throw new NotImplementedException();
+    }
+
+    private TerrainProbability ChooseTerrainProbability(BiomeConfig biomeConfig)
+    {
+        float randomPoint = UnityEngine.Random.Range(0f, 1f);
+        float cumulativeProbability = 0f;
+
+        foreach (var terrainProbability in biomeConfig.terrainProbabilities)
+        {
+            cumulativeProbability += terrainProbability.Probability;
+            if (randomPoint <= cumulativeProbability)
+            {
+                return terrainProbability;
+            }
+        }
+
+        // Fallback to the last terrain probability
+        return biomeConfig.terrainProbabilities.Last();
+    }
+
+    private BiomeConfig ChooseBiomeConfigForPosition(GridPosition gridPosition)
+    {
+        if (regionConfigMap.TryGetValue(gridPosition, out BiomeConfig biomeConfig))
+        {
+            return biomeConfig;
+        }
+        else
+        {
+            // Fallback if no specific region config is found
+            return biomeConfigs[UnityEngine.Random.Range(0, biomeConfigs.Count)];
+        }
+    }
+
+    private void CreateTerrainRegions()
+    {
+        // Divide the grid into regions and assign a biome to each
+        int numRegionsX = 3;
+        int numRegionsZ = 3;
+        int regionWidth = width / numRegionsX;
+        int regionHeight = height / numRegionsZ;
+
+        for (int x = 0; x < numRegionsX; x++)
+        {
+            for (int z = 0; z < numRegionsZ; z++)
+            {
+                int startX = x * regionWidth;
+                int startZ = z * regionHeight;
+                BiomeConfig regionConfig = ChooseRandomRegionConfig();
+                ApplyRegionConfigToGrid(startX, startZ, regionWidth, regionHeight, regionConfig);
+            }
+        }
+    }
+
+    private void ApplyRegionConfigToGrid(int startX, int startZ, int regionWidth, int regionHeight, BiomeConfig regionConfig)
+    {
+        for (int x = startX; x < startX + regionWidth; x++)
+        {
+            for (int z = startZ; z < startZ + regionHeight; z++)
+            {
+                GridPosition gridPosition = new GridPosition(x, z);
+                regionConfigMap[gridPosition] = regionConfig;
+            }
+        }
+    }
+
+    private BiomeConfig ChooseRandomRegionConfig()
+    {
+        return biomeConfigs[UnityEngine.Random.Range(0, biomeConfigs.Count)];
     }
 
     public void AddUnitAtGridPosition(GridPosition gridPosition, Unit unit)
@@ -88,7 +167,7 @@ public class LevelGrid : MonoBehaviour
 
         AddUnitAtGridPosition(toGridPosition, unit);
 
-        OnAnyUnitMovedGridPosition?.Invoke(this, new OnAnyUnitMovedGridPositionEventArgs
+        OnAnyUnitMovedGridPosition?.Invoke(new OnAnyUnitMovedGridPositionEventArgs
         {
             unit = unit,
             fromGridPosition = fromGridPosition,
