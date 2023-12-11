@@ -87,14 +87,19 @@ public class Unit : MonoBehaviour
     {
         if (inArena)
         {
-            GridPosition newGridPosition = LevelGrid.Instance.GetGridPosition(transform.position);
-            if (newGridPosition != gridPosition)
-            {
-                GridPosition oldGridPosition = gridPosition;
-                gridPosition = newGridPosition;
+            UpdatePosition();
+        }
+    }
 
-                LevelGrid.Instance.UnitMovedGridPosition(this, oldGridPosition, newGridPosition);
-            }
+    private void UpdatePosition()
+    {
+        GridPosition newGridPosition = LevelGrid.Instance.GetGridPosition(transform.position);
+        if (newGridPosition != gridPosition)
+        {
+            GridPosition oldGridPosition = gridPosition;
+            gridPosition = newGridPosition;
+
+            LevelGrid.Instance.UnitMovedGridPosition(this, oldGridPosition, newGridPosition);
         }
     }
 
@@ -317,6 +322,7 @@ public class Unit : MonoBehaviour
     public void SetInArena(bool inArena)
     {
         this.inArena = inArena;
+        UpdatePosition();
     }
 
     public bool IsInArena()

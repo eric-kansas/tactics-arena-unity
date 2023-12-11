@@ -19,6 +19,7 @@ public class Pathfinding : MonoBehaviour
 
     private int width;
     private int height;
+    private int radius;
     private float cellSize;
     private GridSystem<PathNode> gridSystem;
 
@@ -36,38 +37,49 @@ public class Pathfinding : MonoBehaviour
 
     public void Start()
     {
-        Setup(LevelGrid.Instance.GetWidth(), LevelGrid.Instance.GetHeight(), LevelGrid.Instance.GetCellSize());
+        Setup(LevelGrid.Instance.GetRadius(), LevelGrid.Instance.GetCellSize());
     }
 
-    public void Setup(int width, int height, float cellSize)
+    public void Setup(int radius, float cellSize)
     {
-        this.width = width;
-        this.height = height;
+        this.radius = radius;
         this.cellSize = cellSize;
+        int diameter = radius * 2 + 1;
 
-        gridSystem = new GridSystem<PathNode>(width, height, cellSize, Vector3.zero,
+        gridSystem = new GridSystem<PathNode>(radius, cellSize, Vector3.zero,
             (GridSystem<PathNode> g, GridPosition gridPosition) => new PathNode(gridPosition));
 
-        //gridSystem.CreateDebugObjects(gridDebugObjectPrefab);
-
-        for (int x = 0; x < width; x++)
+        // Update obstacle checking for circular grid
+        for (int x = 0; x < diameter; x++)
         {
-            for (int z = 0; z < height; z++)
+            for (int z = 0; z < diameter; z++)
             {
-                GridPosition gridPosition = new GridPosition(x, z);
-                Vector3 worldPosition = LevelGrid.Instance.GetWorldPosition(gridPosition);
-                float raycastOffsetDistance = 5f;
-                if (Physics.Raycast(
-                    worldPosition + Vector3.down * raycastOffsetDistance,
-                    Vector3.up,
-                    raycastOffsetDistance * 2,
-                    obstaclesLayerMask))
+                GridPosition gridPosition = new GridPosition(x - radius, z - radius); // Adjust for circle center
+                if (LevelGrid.Instance.IsValidGridPosition(gridPosition))
                 {
-                    GetNode(x, z).SetIsWalkable(false);
+                    Vector3 worldPosition = LevelGrid.Instance.GetWorldPosition(gridPosition);
+                    float raycastOffsetDistance = 5f;
+                    if (Physics.Raycast(
+                        worldPosition + Vector3.down * raycastOffsetDistance,
+                        Vector3.up,
+                        raycastOffsetDistance * 2,
+                        obstaclesLayerMask))
+                    {
+                        GetNode(x, z).SetIsWalkable(false);
+                    }
                 }
             }
         }
     }
+
+    private bool IsWithinCircle(int radius, int x, int z)
+    {
+        // Convert grid coordinates to circle coordinates by offsetting by radius
+        int circleX = x - radius;
+        int circleZ = z - radius;
+        return circleX * circleX + circleZ * circleZ <= (radius + 0.5f) * (radius + 0.5f);
+    }
+
 
     private int CalculatePerceivedRisk(PathNode fromNode, PathNode toNode)
     {
@@ -93,6 +105,10 @@ public class Pathfinding : MonoBehaviour
             for (int z = 0; z < gridSystem.GetHeight(); z++)
             {
                 GridPosition gridPosition = new GridPosition(x, z);
+                if (!LevelGrid.Instance.IsValidGridPosition(gridPosition))
+                {
+                    continue;
+                }
                 PathNode pathNode = gridSystem.GetGridObject(gridPosition);
 
                 pathNode.SetGCost(int.MaxValue);
@@ -234,37 +250,25 @@ public class Pathfinding : MonoBehaviour
     {
         return gridSystem.GetGridObject(new GridPosition(x, z));
     }
-
     private List<PathNode> GetNeighbourList(PathNode currentNode)
     {
         List<PathNode> neighbourList = new List<PathNode>();
 
         GridPosition gridPosition = currentNode.GetGridPosition();
-
-        if (gridPosition.x - 1 >= 0)
-        {
-            // Left
-            neighbourList.Add(GetNode(gridPosition.x - 1, gridPosition.z + 0));
-        }
-
-        if (gridPosition.x + 1 < gridSystem.GetWidth())
-        {
-            // Right
-            neighbourList.Add(GetNode(gridPosition.x + 1, gridPosition.z + 0));
-        }
-
-        if (gridPosition.z - 1 >= 0)
-        {
-            // Down
-            neighbourList.Add(GetNode(gridPosition.x + 0, gridPosition.z - 1));
-        }
-        if (gridPosition.z + 1 < gridSystem.GetHeight())
-        {
-            // Up
-            neighbourList.Add(GetNode(gridPosition.x + 0, gridPosition.z + 1));
-        }
+        AddNeighbour(neighbourList, gridPosition.x - 1, gridPosition.z); // Left
+        AddNeighbour(neighbourList, gridPosition.x + 1, gridPosition.z); // Right
+        AddNeighbour(neighbourList, gridPosition.x, gridPosition.z - 1); // Down
+        AddNeighbour(neighbourList, gridPosition.x, gridPosition.z + 1); // Up
 
         return neighbourList;
+    }
+
+    private void AddNeighbour(List<PathNode> neighbourList, int x, int z)
+    {
+        if (IsWithinCircle(radius, x, z))
+        {
+            neighbourList.Add(GetNode(x, z));
+        }
     }
 
     private List<GridPosition> CalculatePath(PathNode endNode)
@@ -306,6 +310,7 @@ public class Pathfinding : MonoBehaviour
 
     public int GetPathLength(Team team, GridPosition startGridPosition, GridPosition endGridPosition, int maxMoveDistance)
     {
+        Debug.Log("find path!");
         List<GridPosition> path = FindPath(team, startGridPosition, endGridPosition, out int pathLength, maxMoveDistance);
         return pathLength;
     }

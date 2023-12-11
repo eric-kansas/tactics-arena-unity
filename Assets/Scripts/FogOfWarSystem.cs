@@ -86,14 +86,19 @@ public class FogOfWarSystem : MonoBehaviour
 
     private void InitializeGrid()
     {
-        int width = LevelGrid.Instance.GetWidth();
-        int height = LevelGrid.Instance.GetHeight();
-        grid = new GridCell[width, height];
-        for (int x = 0; x < width; x++)
+        int radius = LevelGrid.Instance.GetRadius();
+        int diameter = LevelGrid.Instance.GetRadius() * 2 + 1;
+        grid = new GridCell[diameter, diameter];
+
+        for (int x = 0; x < diameter; x++)
         {
-            for (int z = 0; z < height; z++)
+            for (int z = 0; z < diameter; z++)
             {
-                grid[x, z] = new GridCell { Elevation = 1, Visibility = VisibilityState.Obscured };
+                GridPosition gridPosition = new GridPosition(x, z); // Adjust for circle center
+                if (LevelGrid.Instance.IsValidGridPosition(gridPosition))
+                {
+                    grid[x, z] = new GridCell { Elevation = 1, Visibility = VisibilityState.Obscured };
+                }
             }
         }
     }
@@ -238,11 +243,24 @@ public class FogOfWarSystem : MonoBehaviour
 
     private bool IsDiagonalObstructed(GridPosition startPos, GridPosition diagPos, int observerElev)
     {
+
         int diagElev = LevelGrid.Instance.GetElevationAtGridPosition(diagPos);
 
         // Get the elevations of the adjacent positions
-        int adjElev1 = LevelGrid.Instance.GetElevationAtGridPosition(new GridPosition(diagPos.x, startPos.z));
-        int adjElev2 = LevelGrid.Instance.GetElevationAtGridPosition(new GridPosition(startPos.x, diagPos.z));
+        // Initialize adjacent elevations to a value representing an invalid state
+        int adjElev1 = int.MinValue;
+        int adjElev2 = int.MinValue;
+
+        // Get the elevations of the adjacent positions if they are valid
+        if (LevelGrid.Instance.IsValidGridPosition(new GridPosition(diagPos.x, startPos.z)))
+        {
+            adjElev1 = LevelGrid.Instance.GetElevationAtGridPosition(new GridPosition(diagPos.x, startPos.z));
+        }
+
+        if (LevelGrid.Instance.IsValidGridPosition(new GridPosition(startPos.x, diagPos.z)))
+        {
+            adjElev2 = LevelGrid.Instance.GetElevationAtGridPosition(new GridPosition(startPos.x, diagPos.z));
+        }
 
         // Define an elevation threshold
         int elevationThreshold = 2; // Adjust this based on game design
@@ -277,4 +295,5 @@ public class FogOfWarSystem : MonoBehaviour
         }
         return null;
     }
+
 }

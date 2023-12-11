@@ -22,6 +22,7 @@ public class LevelGrid : MonoBehaviour
     [SerializeField] private Transform gridDebugObjectPrefab;
     [SerializeField] private int width;
     [SerializeField] private int height;
+    [SerializeField] private int radius = 15;
     [SerializeField] private float cellSize;
     [SerializeField] public float elevationScaleFactor = 0.5f;
 
@@ -47,7 +48,7 @@ public class LevelGrid : MonoBehaviour
     {
         CreateTerrainRegions();
 
-        gridSystem = new GridSystem<GridObject>(width, height, cellSize, Vector3.zero,
+        gridSystem = new GridSystem<GridObject>(radius, cellSize, Vector3.zero,
             (GridSystem<GridObject> g, GridPosition gridPosition) =>
             {
                 return CreateGridCell(g, gridPosition);
@@ -68,11 +69,6 @@ public class LevelGrid : MonoBehaviour
         );
 
         return new GridObject(gridsystem, gridPosition, terrainType, elevation);
-    }
-
-    private Color GetTerrainColor(TerrainType terrainType)
-    {
-        throw new NotImplementedException();
     }
 
     private TerrainProbability ChooseTerrainProbability(BiomeConfig biomeConfig)
@@ -157,6 +153,11 @@ public class LevelGrid : MonoBehaviour
 
     public void RemoveUnitAtGridPosition(GridPosition gridPosition, Unit unit)
     {
+        if (!IsValidGridPosition(gridPosition))
+        {
+            return;
+        }
+
         GridObject gridObject = gridSystem.GetGridObject(gridPosition);
         gridObject.RemoveUnit(unit);
     }
@@ -193,6 +194,8 @@ public class LevelGrid : MonoBehaviour
     public int GetWidth() => gridSystem.GetWidth();
 
     public int GetHeight() => gridSystem.GetHeight();
+
+    public int GetRadius() => gridSystem.GetRadius();
 
     public bool HasAnyUnitOnGridPosition(GridPosition gridPosition)
     {

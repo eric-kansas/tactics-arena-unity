@@ -26,6 +26,7 @@ public class SpawnAction : BaseAction
     private void HandleSpawning()
     {
         transform.position = LevelGrid.Instance.GetWorldPosition(targetGridPosition);
+        Debug.Log(targetGridPosition);
         unit.SetInArena(true);
         ActionComplete(GameEvent.UnitSpawn);
     }

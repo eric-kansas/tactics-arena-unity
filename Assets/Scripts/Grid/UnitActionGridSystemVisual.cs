@@ -98,44 +98,61 @@ public class UnitActionGridSystemVisual : MonoBehaviour
 
     private void BuildGrid()
     {
-        gridSystemVisualSingleArray = new GridSystemVisualSingle[
-            LevelGrid.Instance.GetWidth(),
-            LevelGrid.Instance.GetHeight()
-        ];
+        int radius = LevelGrid.Instance.GetRadius(); // Assuming LevelGrid provides radius
+        int diameter = radius * 2 + 1;
+        gridSystemVisualSingleArray = new GridSystemVisualSingle[diameter, diameter];
 
-        for (int x = 0; x < LevelGrid.Instance.GetWidth(); x++)
+        for (int x = 0; x < diameter; x++)
         {
-            for (int z = 0; z < LevelGrid.Instance.GetHeight(); z++)
+            for (int z = 0; z < diameter; z++)
             {
-                Vector3 worldPos = FogOfWarSystem.Instance.GetPerceivedWorldPosition(new GridPosition(x, z));
-                worldPos.y += 0.01f;
-                Transform gridSystemVisualSingleTransform = Instantiate(gridSystemVisualSinglePrefab, worldPos, Quaternion.identity);
+                GridPosition gridPosition = new GridPosition(x, z); // Adjust for circle center
+                if (LevelGrid.Instance.IsValidGridPosition(gridPosition))
+                {
+                    Vector3 worldPos = FogOfWarSystem.Instance.GetPerceivedWorldPosition(gridPosition);
+                    worldPos.y += 0.01f;
+                    Transform gridSystemVisualSingleTransform = Instantiate(gridSystemVisualSinglePrefab, worldPos, Quaternion.identity);
 
-                gridSystemVisualSingleArray[x, z] = gridSystemVisualSingleTransform.GetComponent<GridSystemVisualSingle>();
+                    gridSystemVisualSingleArray[x, z] = gridSystemVisualSingleTransform.GetComponent<GridSystemVisualSingle>();
+                }
             }
         }
     }
 
     private void UpdateGrid()
     {
-        for (int x = 0; x < LevelGrid.Instance.GetWidth(); x++)
+        int radius = LevelGrid.Instance.GetRadius(); // Assuming LevelGrid provides radius
+        int diameter = radius * 2 + 1;
+
+        for (int x = 0; x < diameter; x++)
         {
-            for (int z = 0; z < LevelGrid.Instance.GetHeight(); z++)
+            for (int z = 0; z < diameter; z++)
             {
-                Vector3 worldPos = FogOfWarSystem.Instance.GetPerceivedWorldPosition(new GridPosition(x, z));
-                worldPos.y += 0.01f;
-                gridSystemVisualSingleArray[x, z].transform.position = worldPos;
+                GridPosition gridPosition = new GridPosition(x, z);
+                if (LevelGrid.Instance.IsValidGridPosition(gridPosition))
+                {
+                    Vector3 worldPos = FogOfWarSystem.Instance.GetPerceivedWorldPosition(gridPosition);
+                    worldPos.y += 0.01f;
+                    gridSystemVisualSingleArray[x, z].transform.position = worldPos;
+                }
             }
         }
     }
 
     public void HideAllGridPosition()
     {
-        for (int x = 0; x < LevelGrid.Instance.GetWidth(); x++)
+        int radius = LevelGrid.Instance.GetRadius(); // Assuming LevelGrid provides radius
+        int diameter = radius * 2 + 1;
+
+        for (int x = 0; x < diameter; x++)
         {
-            for (int z = 0; z < LevelGrid.Instance.GetHeight(); z++)
+            for (int z = 0; z < diameter; z++)
             {
-                gridSystemVisualSingleArray[x, z].Hide();
+                GridPosition gridPosition = new GridPosition(x, z);
+                if (LevelGrid.Instance.IsValidGridPosition(gridPosition))
+                {
+                    gridSystemVisualSingleArray[x, z].Hide();
+                }
             }
         }
     }
@@ -194,6 +211,10 @@ public class UnitActionGridSystemVisual : MonoBehaviour
     {
         foreach (GridPosition gridPosition in gridPositionList)
         {
+            if (gridSystemVisualSingleArray[gridPosition.x, gridPosition.z] == null)
+            {
+                Debug.Log("position null: " + gridPosition);
+            }
             gridSystemVisualSingleArray[gridPosition.x, gridPosition.z].
                 Show(GetGridVisualTypeMaterial(gridVisualType));
         }

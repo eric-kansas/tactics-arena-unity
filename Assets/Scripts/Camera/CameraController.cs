@@ -10,7 +10,7 @@ public class CameraController : MonoBehaviour
 
 
     private const float MIN_FOLLOW_Y_OFFSET = 2f;
-    private const float MAX_FOLLOW_Y_OFFSET = 20f;
+    private const float MAX_FOLLOW_Y_OFFSET = 200f;
 
 
     [SerializeField] private CinemachineVirtualCamera cinemachineVirtualCamera;
@@ -76,7 +76,7 @@ public class CameraController : MonoBehaviour
 
         targetFollowOffset.y = Mathf.Clamp(targetFollowOffset.y, MIN_FOLLOW_Y_OFFSET, MAX_FOLLOW_Y_OFFSET);
 
-        float zoomSpeed = 5f;
+        float zoomSpeed = 10f;
         cinemachineTransposer.m_FollowOffset =
             Vector3.Lerp(cinemachineTransposer.m_FollowOffset, targetFollowOffset, Time.deltaTime * zoomSpeed);
     }
