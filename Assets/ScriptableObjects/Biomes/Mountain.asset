@@ -15,17 +15,17 @@ MonoBehaviour:
   biomeName: Mountain
   terrainProbabilities:
   - TerrainType: 5
-    Probability: 0.6
+    Probability: 0.5
     ElevationRange:
-      MinElevation: 4
+      MinElevation: 5
       MaxElevation: 7
   - TerrainType: 11
     Probability: 0.2
     ElevationRange:
-      MinElevation: 5
-      MaxElevation: 7
+      MinElevation: 4
+      MaxElevation: 6
   - TerrainType: 6
-    Probability: 0.2
+    Probability: 0.3
     ElevationRange:
       MinElevation: 3
-      MaxElevation: 6
+      MaxElevation: 5

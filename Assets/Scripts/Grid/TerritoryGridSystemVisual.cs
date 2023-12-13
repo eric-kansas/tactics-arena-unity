@@ -6,10 +6,31 @@ using UnityEngine;
 public class TerritoryGridSystemVisual : MonoBehaviour
 {
 
+
+    [Serializable]
+    public struct TerritoryGridVisualTypeMaterial
+    {
+        public TerritoryGridVisualType gridVisualType;
+        public Material material;
+    }
+
+    public enum TerritoryGridVisualType
+    {
+        CrimsonRed,
+        DeepSkyBlue,
+        ForestGreen,
+        Gold,
+        DarkViolet,
+        OrangeRed,
+        RoyalBlue,
+        SaddleBrown,
+        SeaGreen,
+    }
+
     public static TerritoryGridSystemVisual Instance { get; private set; }
 
     [SerializeField] private Transform gridSystemVisualSinglePrefab;
-    [SerializeField] private List<GridVisualTypeMaterial> gridVisualTypeMaterialList;
+    [SerializeField] private List<TerritoryGridVisualTypeMaterial> territoryGridVisualTypeMaterialList;
 
     private GridSystemVisualSingle[,] gridSystemVisualSingleArray;
 
@@ -34,13 +55,13 @@ public class TerritoryGridSystemVisual : MonoBehaviour
 
     private void RenderZones()
     {
-        Dictionary<int, Rect> zones = TerritorySystem.Instance.GetZones();
+        Dictionary<int, ZoneInfo> zones = TerritorySystem.Instance.GetZones();
         int radius = LevelGrid.Instance.GetRadius(); // Assuming LevelGrid provides radius
         int diameter = radius * 2 + 1;
 
-        foreach (KeyValuePair<int, Rect> zoneEntry in zones)
+        foreach (KeyValuePair<int, ZoneInfo> zoneEntry in zones)
         {
-            Rect rect = zoneEntry.Value;
+            Rect rect = zoneEntry.Value.rect;
 
             // Ensure gridSystemVisualSingleArray is initialized with the correct dimensions
             gridSystemVisualSingleArray = new GridSystemVisualSingle[diameter, diameter];
@@ -58,7 +79,7 @@ public class TerritoryGridSystemVisual : MonoBehaviour
                         Vector3 pos = FogOfWarSystem.Instance.GetPerceivedWorldPosition(gridPosition);
                         Transform gridSystemVisualSingleTransform = Instantiate(gridSystemVisualSinglePrefab, pos, Quaternion.identity);
                         gridSystemVisualSingleArray[x, z] = gridSystemVisualSingleTransform.GetComponent<GridSystemVisualSingle>();
-                        gridSystemVisualSingleArray[x, z].Show(GetGridVisualTypeMaterial(zoneEntry.Key));
+                        gridSystemVisualSingleArray[x, z].Show(GetGridVisualTypeMaterial(zoneEntry.Value.sectionID));
                     }
                 }
             }
@@ -72,7 +93,7 @@ public class TerritoryGridSystemVisual : MonoBehaviour
 
     private Material GetGridVisualTypeMaterial(int zone)
     {
-        return gridVisualTypeMaterialList[zone].material;
+        return territoryGridVisualTypeMaterialList[zone].material;
 
         // foreach (GridVisualTypeMaterial gridVisualTypeMaterial in gridVisualTypeMaterialList)
         // {

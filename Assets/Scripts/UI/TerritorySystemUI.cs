@@ -21,10 +21,10 @@ public class TerritorySystemUI : MonoBehaviour
         territoryIcons = new TerritoryControlIcon[zones.Count];
 
         int index = 0;
-        foreach (KeyValuePair<int, Rect> zoneEntry in zones)
+        foreach (KeyValuePair<int, ZoneInfo> zoneEntry in zones)
         {
             int zoneID = zoneEntry.Key;
-            Rect zoneRect = zoneEntry.Value;
+            Rect zoneRect = zoneEntry.Value.rect;
 
             // Calculate the world position for the icon based on the zone's Rect
             Vector3 worldPosition = LevelGrid.Instance.GetWorldPositionFromRect(zoneRect);

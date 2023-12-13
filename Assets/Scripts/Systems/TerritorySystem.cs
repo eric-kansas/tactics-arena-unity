@@ -7,6 +7,19 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
 
+public class ZoneInfo
+{
+    public Rect rect;
+    public int sectionID;
+
+    public ZoneInfo(Rect rect, int sectionID)
+    {
+        this.rect = rect;
+        this.sectionID = sectionID;
+    }
+}
+
+
 public class TerritorySystem : MonoBehaviour
 {
     [Serializable]
@@ -27,22 +40,17 @@ public class TerritorySystem : MonoBehaviour
         }
     }
 
+
     public static TerritorySystem Instance { get; private set; }
     public static Action<int, Team> OnTerritoryOwnerChanged; // what zone to what team
     public static Action<Team, int> OnTerritoryScoreChanged; // what team to how many points
 
     private Dictionary<Team, TerritoryScore> territoryScores;
 
-    public UnityEngine.Color[] TerritoryColorList = new UnityEngine.Color[]
-    {
-        UnityEngine.Color.blue,
-        UnityEngine.Color.red,
-        UnityEngine.Color.green,
-        UnityEngine.Color.yellow
-    };
-
-    private Dictionary<int, Rect> zones;
+    private Dictionary<int, ZoneInfo> zones;
     private Dictionary<int, Team> territoryOwners; // Maps zone ID to owner team ID
+
+    int totalGridPositionsPerZone = 9; // Example value
 
     private void Awake()
     {
@@ -53,15 +61,16 @@ public class TerritorySystem : MonoBehaviour
             return;
         }
         Instance = this;
+    }
 
-        zones = new Dictionary<int, Rect>{
-            { 0, new(2,2,4,4) },
-            { 1, new(14,2,4,4) },
-            { 2, new(2,14,4,4) },
-            { 3, new(14,14,4,4) },
-            { 4 , new(8,8,4,4) },
-        };
+    private void Start()
+    {
+        LevelGrid.Instance.OnAnyUnitMovedGridPosition += LevelGrid_OnAnyUnitMovedGridPosition;
+        Unit.OnAnyUnitInitialized += Unit_OnAnyUnitSpawned;
 
+        TurnSystem.Instance.OnTurnChanged += TurnSystem_OnTurnChanged;
+
+        InitializeTerritoryZones();
         territoryScores = new Dictionary<Team, TerritoryScore>{
             { Match.Instance.GetClientTeam(), new(0, 10) },
             { Match.Instance.GetAwayTeam(), new(0, 10) },
@@ -74,12 +83,70 @@ public class TerritorySystem : MonoBehaviour
         }
     }
 
-    private void Start()
+    private void InitializeTerritoryZones()
     {
-        LevelGrid.Instance.OnAnyUnitMovedGridPosition += LevelGrid_OnAnyUnitMovedGridPosition;
-        Unit.OnAnyUnitInitialized += Unit_OnAnyUnitSpawned;
+        zones = new Dictionary<int, ZoneInfo>();
 
-        TurnSystem.Instance.OnTurnChanged += TurnSystem_OnTurnChanged;
+        // Generate and zones for the sectors
+        Dictionary<int, List<Rect>> sectorToZones = GenerateZones();
+
+        // Loop through sector to zones and their lists and add to zones
+        int zoneID = 0;
+        foreach (var sectorPair in sectorToZones)
+        {
+            foreach (var rect in sectorPair.Value)
+            {
+                zones.Add(zoneID, new ZoneInfo(rect, sectorPair.Key));
+                zoneID++;
+            }
+        }
+    }
+
+    private Dictionary<int, List<Rect>> GenerateZones()
+    {
+        Dictionary<int, List<Rect>> gridPositions = new Dictionary<int, List<Rect>>(); // dictionary of sector to territory zones 
+        for (int i = 0; i < LevelGrid.Instance.GetNumberOfSections(); i++)
+        {
+            gridPositions[i] = GenerateZoneGridPositions(i);
+        }
+        return gridPositions;
+    }
+
+    private List<Rect> GenerateZoneGridPositions(int zone)
+    {
+        List<Rect> zonePositions = new List<Rect>();
+        List<GridPosition> potentialPositions = GetPotentialPositionsForSector(zone);
+        if (potentialPositions.Count > 0)
+        {
+            for (int i = 0; i < totalGridPositionsPerZone; i++)
+            {
+                int randomIndex = UnityEngine.Random.Range(0, potentialPositions.Count);
+                GridPosition chosenPosition = potentialPositions[randomIndex];
+                Rect rect = new Rect(chosenPosition.x, chosenPosition.z, 1, 1); // for now -- just point as rect
+                zonePositions.Add(rect);
+            }
+        }
+        return zonePositions;
+    }
+
+    private List<GridPosition> GetPotentialPositionsForSector(int sectorID)
+    {
+        List<GridPosition> potentialPositions = new List<GridPosition>();
+
+        for (int x = 0; x < 2 * LevelGrid.Instance.GetRadius() + 1; x++)
+        {
+            for (int z = 0; z < 2 * LevelGrid.Instance.GetRadius() + 1; z++)
+            {
+                GridPosition position = new GridPosition(x, z);
+                if (LevelGrid.Instance.IsWithinCircle(LevelGrid.Instance.GetRadius(), x, z) &&
+                    LevelGrid.Instance.GetSector(position) == sectorID)
+                {
+                    potentialPositions.Add(position);
+                }
+            }
+        }
+
+        return potentialPositions;
     }
 
     private void TurnSystem_OnTurnChanged(object sender, EventArgs e)
@@ -131,9 +198,9 @@ public class TerritorySystem : MonoBehaviour
 
     private void UpdateTerritoryControlBasedOnUnitMovement(GridPosition gridPosition, Unit unit)
     {
-        foreach (KeyValuePair<int, Rect> zoneEntry in zones)
+        foreach (KeyValuePair<int, ZoneInfo> zoneEntry in zones)
         {
-            if (zoneEntry.Value.Contains(gridPosition.ToVector2()))
+            if (zoneEntry.Value.rect.Contains(gridPosition.ToVector2()))
             {
                 UpdateTerritoryControl(zoneEntry.Key, unit);
                 break;
@@ -155,7 +222,7 @@ public class TerritorySystem : MonoBehaviour
     private Team CalculateNewOwnerForTerritory(int zoneID)
     {
         HashSet<Team> teamsInZone = new HashSet<Team>();
-        Rect zoneRect = zones[zoneID];
+        Rect zoneRect = zones[zoneID].rect;
 
         foreach (Unit tempUnit in UnitManager.Instance.GetArenaUnitList())
         {
@@ -174,7 +241,7 @@ public class TerritorySystem : MonoBehaviour
         return null; // Territory becomes neutral if empty or contested
     }
 
-    public Dictionary<int, Rect> GetZones()
+    public Dictionary<int, ZoneInfo> GetZones()
     {
         return zones;
     }

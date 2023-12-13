@@ -661,17 +661,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridSystemVisualSinglePrefab: {fileID: 4317425081643120330, guid: f65a034859b6bef49a01b678a9512355,
     type: 3}
-  gridVisualTypeMaterialList:
+  territoryGridVisualTypeMaterialList:
+  - gridVisualType: 0
+    material: {fileID: 2100000, guid: 6c7cd2a85a9afbf41892a1ee4977ab07, type: 2}
   - gridVisualType: 1
-    material: {fileID: 2100000, guid: cf6de489ec51e5e4ebe6a150919faf67, type: 2}
+    material: {fileID: 2100000, guid: 2a129ead1b4c3a94a868dda14a2f7ef0, type: 2}
   - gridVisualType: 2
-    material: {fileID: 2100000, guid: 2f371600f6fb3fd4a9d51a6fdd8d05c6, type: 2}
-  - gridVisualType: 5
-    material: {fileID: 2100000, guid: ecb0a836999b78240b7669be092a95fe, type: 2}
+    material: {fileID: 2100000, guid: aad924ff45dadc74da9841653a54eb33, type: 2}
+  - gridVisualType: 3
+    material: {fileID: 2100000, guid: 9a05fb1d40e23f94586e3140de56c8e1, type: 2}
   - gridVisualType: 4
-    material: {fileID: 2100000, guid: da7abb1f2ec56b3459d10cdc4c3cdd61, type: 2}
+    material: {fileID: 2100000, guid: 3b01fcf2d4cbc664dbfbd58ea7c926a2, type: 2}
+  - gridVisualType: 5
+    material: {fileID: 2100000, guid: 2f811d3482af7f4408fbfff2d8e62724, type: 2}
   - gridVisualType: 6
-    material: {fileID: 2100000, guid: 5d246064bd803374b8bb4fb41e460b3a, type: 2}
+    material: {fileID: 2100000, guid: 4804f11873adde4469f6c7df13e7c0da, type: 2}
+  - gridVisualType: 7
+    material: {fileID: 2100000, guid: 3d66f24a069cd704398009776b39bdaf, type: 2}
+  - gridVisualType: 8
+    material: {fileID: 2100000, guid: 63ee585835ed05d4b95df76f22ef030c, type: 2}
 --- !u!4 &209504787 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6947802751664692026, guid: 400cd0a8288305b469243396097f391c,
@@ -965,7 +973,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.29687124, y: -0.15052916, z: 0.047450144, w: 0.9417839}
+  m_LocalRotation: {x: 0.29687124, y: -0.15052918, z: 0.047450148, w: 0.9417839}
   m_LocalPosition: {x: 15.11705, y: 7, z: -3.501789}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -7446,15 +7454,22 @@ MonoBehaviour:
     type: 3}
   width: 20
   height: 20
-  radius: 22
+  radius: 20
   cellSize: 2
   elevationScaleFactor: 0.5
+  numberOfSections: 4
   biomeConfigs:
   - {fileID: 11400000, guid: 3828274612e1a5f4085ac95a4081ac61, type: 2}
   - {fileID: 11400000, guid: dfdeef838feaae94aaf897818062ee75, type: 2}
   - {fileID: 11400000, guid: b5090308bd37ca941b848eb2769be24b, type: 2}
   - {fileID: 11400000, guid: ce9a774121e8efb4a8d97291e2bb1e31, type: 2}
   - {fileID: 11400000, guid: 5ba971110fc18ca42a0cf59fb1f68efd, type: 2}
+  - {fileID: 11400000, guid: 193457b388bd09d4e8c7e13729edce9f, type: 2}
+  - {fileID: 11400000, guid: bce6468e77b69764a98c84edbdf9ccaa, type: 2}
+  - {fileID: 11400000, guid: bd9746d2e7f440242b31c6a8652d1894, type: 2}
+  - {fileID: 11400000, guid: 5ba971110fc18ca42a0cf59fb1f68efd, type: 2}
+  - {fileID: 11400000, guid: b52a05f1cdc38a14aa98d8b9ee6c5c57, type: 2}
+  - {fileID: 11400000, guid: 65d4a4b0f8811704ea12736a7b5a4cf8, type: 2}
 --- !u!4 &740475727
 Transform:
   m_ObjectHideFlags: 0
@@ -7568,12 +7583,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4f4f4e698c00704bb4bb7003119ce9c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TerritoryColorList:
-  - {r: 0, g: 0, b: 1, a: 1}
-  - {r: 1, g: 0, b: 0, a: 1}
-  - {r: 0, g: 1, b: 0, a: 1}
-  - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  - {r: 0.21960786, g: 0, b: 0.21960786, a: 1}
 --- !u!1 &817116900
 GameObject:
   m_ObjectHideFlags: 0
@@ -10528,7 +10537,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1285166486}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.29687124, y: -0.15052916, z: 0.047450144, w: 0.9417839}
+  m_LocalRotation: {x: 0.29687124, y: -0.15052918, z: 0.047450148, w: 0.9417839}
   m_LocalPosition: {x: 15.11705, y: 7, z: -3.501789}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

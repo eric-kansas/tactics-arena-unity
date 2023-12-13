@@ -15,17 +15,22 @@ MonoBehaviour:
   biomeName: Desert
   terrainProbabilities:
   - TerrainType: 8
-    Probability: 0.7
+    Probability: 0.6
     ElevationRange:
       MinElevation: 1
       MaxElevation: 3
-  - TerrainType: 17
-    Probability: 0.1
-    ElevationRange:
-      MinElevation: 1
-      MaxElevation: 2
-  - TerrainType: 0
+  - TerrainType: 15
     Probability: 0.2
     ElevationRange:
       MinElevation: 1
-      MaxElevation: 4
+      MaxElevation: 2
+  - TerrainType: 17
+    Probability: 0.1
+    ElevationRange:
+      MinElevation: 2
+      MaxElevation: 3
+  - TerrainType: 7
+    Probability: 0.1
+    ElevationRange:
+      MinElevation: 3
+      MaxElevation: 5

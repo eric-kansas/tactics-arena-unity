@@ -199,6 +199,10 @@ public class FogOfWarSystem : MonoBehaviour
 
         foreach (GridPosition pos in line)
         {
+            if (!LevelGrid.Instance.IsValidGridPosition(pos))
+            {
+                continue;
+            }
             int cellElevation = LevelGrid.Instance.GetElevationAtGridPosition(pos);
 
             if (DoesElevationBlockSight(startElevation, endElevation, cellElevation, pos, fromPos, toPos))
@@ -243,7 +247,6 @@ public class FogOfWarSystem : MonoBehaviour
 
     private bool IsDiagonalObstructed(GridPosition startPos, GridPosition diagPos, int observerElev)
     {
-
         int diagElev = LevelGrid.Instance.GetElevationAtGridPosition(diagPos);
 
         // Get the elevations of the adjacent positions
