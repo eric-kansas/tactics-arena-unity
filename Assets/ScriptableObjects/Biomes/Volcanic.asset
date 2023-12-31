@@ -10,22 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 29b72a0e1568b3244a24f2065aa65fd1, type: 3}
-  m_Name: Tundra
+  m_Name: Volcanic
   m_EditorClassIdentifier: 
-  biomeName: Tundra
+  biomeName: Volcanic
   terrainProbabilities:
-  - TerrainType: 9
+  - TerrainType: 18
     Probability: 0.5
     ElevationRange:
-      MinElevation: 1
-      MaxElevation: 3
-  - TerrainType: 11
+      MinElevation: 3
+      MaxElevation: 7
+  - TerrainType: 5
     Probability: 0.3
     ElevationRange:
-      MinElevation: 1
-      MaxElevation: 4
-  - TerrainType: 10
+      MinElevation: 5
+      MaxElevation: 7
+  - TerrainType: 7
     Probability: 0.2
     ElevationRange:
-      MinElevation: 2
-      MaxElevation: 4
+      MinElevation: 3
+      MaxElevation: 6

@@ -6,10 +6,31 @@ using UnityEngine;
 public class TerritoryGridSystemVisual : MonoBehaviour
 {
 
+
+    [Serializable]
+    public struct TerritoryGridVisualTypeMaterial
+    {
+        public TerritoryGridVisualType gridVisualType;
+        public Material material;
+    }
+
+    public enum TerritoryGridVisualType
+    {
+        CrimsonRed,
+        DeepSkyBlue,
+        ForestGreen,
+        Gold,
+        DarkViolet,
+        OrangeRed,
+        RoyalBlue,
+        SaddleBrown,
+        SeaGreen,
+    }
+
     public static TerritoryGridSystemVisual Instance { get; private set; }
 
     [SerializeField] private Transform gridSystemVisualSinglePrefab;
-    [SerializeField] private List<GridVisualTypeMaterial> gridVisualTypeMaterialList;
+    [SerializeField] private List<TerritoryGridVisualTypeMaterial> territoryGridVisualTypeMaterialList;
 
     private GridSystemVisualSingle[,] gridSystemVisualSingleArray;
 
@@ -34,29 +55,32 @@ public class TerritoryGridSystemVisual : MonoBehaviour
 
     private void RenderZones()
     {
-        Dictionary<int, Rect> zones = TerritorySystem.Instance.GetZones();
+        Dictionary<int, ZoneInfo> zones = TerritorySystem.Instance.GetZones();
+        int radius = LevelGrid.Instance.GetRadius(); // Assuming LevelGrid provides radius
+        int diameter = radius * 2 + 1;
 
-        foreach (KeyValuePair<int, Rect> zoneEntry in zones)
+        foreach (KeyValuePair<int, ZoneInfo> zoneEntry in zones)
         {
-            Rect rect = zoneEntry.Value;
-            gridSystemVisualSingleArray = new GridSystemVisualSingle[
-                (int)rect.width,
-                (int)rect.height
-            ];
+            Rect rect = zoneEntry.Value.rect;
 
-            for (int x = 0; x < (int)rect.width; x++)
+            // Ensure gridSystemVisualSingleArray is initialized with the correct dimensions
+            gridSystemVisualSingleArray = new GridSystemVisualSingle[diameter, diameter];
+
+            for (int x = 0; x < diameter; x++)
             {
-                for (int z = 0; z < (int)rect.height; z++)
+                for (int z = 0; z < diameter; z++)
                 {
-                    GridPosition gridPosition = new GridPosition((int)rect.x + x, (int)rect.y + z);
+                    GridPosition gridPosition = new GridPosition(x, z);
 
-                    Vector3 pos = FogOfWarSystem.Instance.GetPerceivedWorldPosition(gridPosition);
-
-                    Transform gridSystemVisualSingleTransform = Instantiate(gridSystemVisualSinglePrefab, pos, Quaternion.identity);
-
-                    gridSystemVisualSingleArray[x, z] = gridSystemVisualSingleTransform.GetComponent<GridSystemVisualSingle>();
-
-                    gridSystemVisualSingleArray[x, z].Show(GetGridVisualTypeMaterial(zoneEntry.Key));
+                    // Check if the position is valid within both the zone and the circular grid
+                    if (rect.Contains(new Vector2(gridPosition.x, gridPosition.z)) &&
+                        LevelGrid.Instance.IsValidGridPosition(gridPosition))
+                    {
+                        Vector3 pos = FogOfWarSystem.Instance.GetPerceivedWorldPosition(gridPosition);
+                        Transform gridSystemVisualSingleTransform = Instantiate(gridSystemVisualSinglePrefab, pos, Quaternion.identity);
+                        gridSystemVisualSingleArray[x, z] = gridSystemVisualSingleTransform.GetComponent<GridSystemVisualSingle>();
+                        gridSystemVisualSingleArray[x, z].Show(GetGridVisualTypeMaterial(zoneEntry.Value.sectionID));
+                    }
                 }
             }
         }
@@ -69,7 +93,7 @@ public class TerritoryGridSystemVisual : MonoBehaviour
 
     private Material GetGridVisualTypeMaterial(int zone)
     {
-        return gridVisualTypeMaterialList[zone].material;
+        return territoryGridVisualTypeMaterialList[zone].material;
 
         // foreach (GridVisualTypeMaterial gridVisualTypeMaterial in gridVisualTypeMaterialList)
         // {

@@ -231,10 +231,10 @@ public class ModifiersCalculator
 
         int totalModifier = statModiferTotal + statusesBonus;
 
-        Debug.Log($"Push Strength Modifier:\n" +
-                  $"- Stat: Base[{baseModeSpeed}] + Perks[{perkStatBonus}] = {statModiferTotal}\n" +
-                  $"- Statuses: {statusesBonus}\n" +
-                  $"Total Modifier: {totalModifier}");
+        // Debug.Log($"Push Strength Modifier:\n" +
+        //           $"- Stat: Base[{baseModeSpeed}] + Perks[{perkStatBonus}] = {statModiferTotal}\n" +
+        //           $"- Statuses: {statusesBonus}\n" +
+        //           $"Total Modifier: {totalModifier}");
 
         return totalModifier;
     }
@@ -252,10 +252,10 @@ public class ModifiersCalculator
 
         int totalModifier = statModiferTotal + statusesBonus;
 
-        Debug.Log($"Max Move Modifier:\n" +
-                  $"- Stat: Base[{baseModeSpeed}] + Perks[{perkStatBonus}] = {statModiferTotal}\n" +
-                  $"- Statuses: {statusesBonus}\n" +
-                  $"Total Modifier: {totalModifier}");
+        // Debug.Log($"Max Move Modifier:\n" +
+        //           $"- Stat: Base[{baseModeSpeed}] + Perks[{perkStatBonus}] = {statModiferTotal}\n" +
+        //           $"- Statuses: {statusesBonus}\n" +
+        //           $"Total Modifier: {totalModifier}");
 
         return totalModifier;
     }
@@ -272,10 +272,10 @@ public class ModifiersCalculator
 
         int totalModifier = statModiferTotal + statusesBonus;
 
-        Debug.Log($"Move Speed Modifier:\n" +
-                  $"- Stat: Base[{baseModeSpeed}] + Perks[{perkStatBonus}] = {statModiferTotal}\n" +
-                  $"- Statuses: {statusesBonus}\n" +
-                  $"Total Modifier: {totalModifier}");
+        // Debug.Log($"Move Speed Modifier:\n" +
+        //           $"- Stat: Base[{baseModeSpeed}] + Perks[{perkStatBonus}] = {statModiferTotal}\n" +
+        //           $"- Statuses: {statusesBonus}\n" +
+        //           $"Total Modifier: {totalModifier}");
 
 
         return totalModifier;
@@ -293,10 +293,10 @@ public class ModifiersCalculator
 
         int totalModifier = statModiferTotal + statusesBonus;
 
-        Debug.Log($"Sight Distance Modifier:\n" +
-                  $"- Stat: Base[{baseModeSpeed}] + Perks[{perkStatBonus}] = {statModiferTotal}\n" +
-                  $"- Statuses: {statusesBonus}\n" +
-                  $"Total Modifier: {totalModifier}");
+        // Debug.Log($"Sight Distance Modifier:\n" +
+        //           $"- Stat: Base[{baseModeSpeed}] + Perks[{perkStatBonus}] = {statModiferTotal}\n" +
+        //           $"- Statuses: {statusesBonus}\n" +
+        //           $"Total Modifier: {totalModifier}");
 
 
         return totalModifier;
@@ -314,10 +314,10 @@ public class ModifiersCalculator
 
         int totalModifier = statModiferTotal + statusesBonus;
 
-        Debug.Log($"XP gain Modifier:\n" +
-                  $"- Stat: Base[{baseModeSpeed}] + Perks[{perkStatBonus}] = {statModiferTotal}\n" +
-                  $"- Statuses: {statusesBonus}\n" +
-                  $"Total Modifier: {totalModifier}");
+        // Debug.Log($"XP gain Modifier:\n" +
+        //           $"- Stat: Base[{baseModeSpeed}] + Perks[{perkStatBonus}] = {statModiferTotal}\n" +
+        //           $"- Statuses: {statusesBonus}\n" +
+        //           $"Total Modifier: {totalModifier}");
 
 
         return totalModifier;
@@ -334,10 +334,10 @@ public class ModifiersCalculator
 
         int totalModifier = statModiferTotal + statusesBonus;
 
-        Debug.Log($"MaxFavor Modifier:\n" +
-                  $"- Stat: Base[{baseModeSpeed}] + Perks[{perkStatBonus}] = {statModiferTotal}\n" +
-                  $"- Statuses: {statusesBonus}\n" +
-                  $"Total Modifier: {totalModifier}");
+        // Debug.Log($"MaxFavor Modifier:\n" +
+        //           $"- Stat: Base[{baseModeSpeed}] + Perks[{perkStatBonus}] = {statModiferTotal}\n" +
+        //           $"- Statuses: {statusesBonus}\n" +
+        //           $"Total Modifier: {totalModifier}");
 
 
         return totalModifier;
@@ -354,10 +354,10 @@ public class ModifiersCalculator
 
         int totalModifier = statModiferTotal + statusesBonus;
 
-        Debug.Log($"Physical Armor Modifier:\n" +
-                  $"- Stat: Base[{baseModeSpeed}] + Perks[{perkStatBonus}] = {statModiferTotal}\n" +
-                  $"- Statuses: {statusesBonus}\n" +
-                  $"Total Modifier: {totalModifier}");
+        // Debug.Log($"Physical Armor Modifier:\n" +
+        //           $"- Stat: Base[{baseModeSpeed}] + Perks[{perkStatBonus}] = {statModiferTotal}\n" +
+        //           $"- Statuses: {statusesBonus}\n" +
+        //           $"Total Modifier: {totalModifier}");
 
 
         return totalModifier;
@@ -374,10 +374,10 @@ public class ModifiersCalculator
 
         int totalModifier = statModiferTotal + statusesBonus;
 
-        Debug.Log($"Magic Armor Modifier:\n" +
-                  $"- Stat: Base[{baseModeSpeed}] + Perks[{perkStatBonus}] = {statModiferTotal}\n" +
-                  $"- Statuses: {statusesBonus}\n" +
-                  $"Total Modifier: {totalModifier}");
+        // Debug.Log($"Magic Armor Modifier:\n" +
+        //           $"- Stat: Base[{baseModeSpeed}] + Perks[{perkStatBonus}] = {statModiferTotal}\n" +
+        //           $"- Statuses: {statusesBonus}\n" +
+        //           $"Total Modifier: {totalModifier}");
 
 
         return totalModifier;

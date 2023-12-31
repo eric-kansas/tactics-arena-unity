@@ -10,22 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 29b72a0e1568b3244a24f2065aa65fd1, type: 3}
-  m_Name: Tundra
+  m_Name: Wetlands
   m_EditorClassIdentifier: 
-  biomeName: Tundra
+  biomeName: Wetlands
   terrainProbabilities:
-  - TerrainType: 9
+  - TerrainType: 13
     Probability: 0.5
     ElevationRange:
       MinElevation: 1
       MaxElevation: 3
-  - TerrainType: 11
+  - TerrainType: 14
     Probability: 0.3
     ElevationRange:
       MinElevation: 1
-      MaxElevation: 4
-  - TerrainType: 10
+      MaxElevation: 2
+  - TerrainType: 12
     Probability: 0.2
     ElevationRange:
-      MinElevation: 2
-      MaxElevation: 4
+      MinElevation: 1
+      MaxElevation: 2

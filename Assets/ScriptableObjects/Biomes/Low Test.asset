@@ -10,22 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 29b72a0e1568b3244a24f2065aa65fd1, type: 3}
-  m_Name: Tundra
+  m_Name: Low Test
   m_EditorClassIdentifier: 
-  biomeName: Tundra
+  biomeName: Low Test
   terrainProbabilities:
-  - TerrainType: 9
-    Probability: 0.5
+  - TerrainType: 8
+    Probability: 1
     ElevationRange:
       MinElevation: 1
-      MaxElevation: 3
-  - TerrainType: 11
-    Probability: 0.3
-    ElevationRange:
-      MinElevation: 1
-      MaxElevation: 4
-  - TerrainType: 10
-    Probability: 0.2
-    ElevationRange:
-      MinElevation: 2
-      MaxElevation: 4
+      MaxElevation: 1

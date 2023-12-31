@@ -19,16 +19,24 @@ public class LevelGrid : MonoBehaviour
 
     public event Action<GridPosition, int> OnElevationChanged;
 
+    private const int BULLSEYE_SECTOR = -1; // Special value for the bullseye sector
+    private const float BULLSEYE_RADIUS = 4; // Radius of the bullseye area
+
+
     [SerializeField] private Transform gridDebugObjectPrefab;
     [SerializeField] private int width;
     [SerializeField] private int height;
+    [SerializeField] private int radius = 15;
     [SerializeField] private float cellSize;
     [SerializeField] public float elevationScaleFactor = 0.5f;
+    [SerializeField] public int numberOfSections;
 
     [SerializeField] private List<BiomeConfig> biomeConfigs;
 
     private GridSystem<GridObject> gridSystem;
     private Dictionary<GridPosition, BiomeConfig> regionConfigMap = new Dictionary<GridPosition, BiomeConfig>();
+
+    private Dictionary<int, BiomeConfig> sectorBiomes = new Dictionary<int, BiomeConfig>();
 
     private void Awake()
     {
@@ -47,13 +55,15 @@ public class LevelGrid : MonoBehaviour
     {
         CreateTerrainRegions();
 
-        gridSystem = new GridSystem<GridObject>(width, height, cellSize, Vector3.zero,
+        gridSystem = new GridSystem<GridObject>(radius, cellSize, Vector3.zero,
             (GridSystem<GridObject> g, GridPosition gridPosition) =>
             {
                 return CreateGridCell(g, gridPosition);
             });
 
         gridSystem.CreateDebugObjects(gridDebugObjectPrefab);
+
+
     }
 
     private GridObject CreateGridCell(GridSystem<GridObject> gridsystem, GridPosition gridPosition)
@@ -68,11 +78,6 @@ public class LevelGrid : MonoBehaviour
         );
 
         return new GridObject(gridsystem, gridPosition, terrainType, elevation);
-    }
-
-    private Color GetTerrainColor(TerrainType terrainType)
-    {
-        throw new NotImplementedException();
     }
 
     private TerrainProbability ChooseTerrainProbability(BiomeConfig biomeConfig)
@@ -108,40 +113,71 @@ public class LevelGrid : MonoBehaviour
 
     private void CreateTerrainRegions()
     {
-        // Divide the grid into regions and assign a biome to each
-        int numRegionsX = 3;
-        int numRegionsZ = 3;
-        int regionWidth = width / numRegionsX;
-        int regionHeight = height / numRegionsZ;
+        // Step 1: Generate Biome Configuration for Each Sector
+        GenerateBiomesForSectors();
 
-        for (int x = 0; x < numRegionsX; x++)
+        foreach (var region in sectorBiomes)
         {
-            for (int z = 0; z < numRegionsZ; z++)
-            {
-                int startX = x * regionWidth;
-                int startZ = z * regionHeight;
-                BiomeConfig regionConfig = ChooseRandomRegionConfig();
-                ApplyRegionConfigToGrid(startX, startZ, regionWidth, regionHeight, regionConfig);
-            }
+            Debug.Log(region);
         }
-    }
 
-    private void ApplyRegionConfigToGrid(int startX, int startZ, int regionWidth, int regionHeight, BiomeConfig regionConfig)
-    {
-        for (int x = startX; x < startX + regionWidth; x++)
+        // Step 2: Fill regionConfigMap Based on Sectors    
+        for (int x = 0; x < 2 * radius + 1; x++)
         {
-            for (int z = startZ; z < startZ + regionHeight; z++)
+            for (int z = 0; z < 2 * radius + 1; z++)
             {
                 GridPosition gridPosition = new GridPosition(x, z);
-                regionConfigMap[gridPosition] = regionConfig;
+                if (IsWithinCircle(radius, gridPosition.x, gridPosition.z))
+                {
+                    int sector = GetSector(gridPosition);
+                    BiomeConfig regionConfig = sectorBiomes[sector];
+                    regionConfigMap[gridPosition] = regionConfig;
+                }
             }
         }
     }
 
-    private BiomeConfig ChooseRandomRegionConfig()
+    public bool IsWithinCircle(int radius, int x, int z)
     {
-        return biomeConfigs[UnityEngine.Random.Range(0, biomeConfigs.Count)];
+        // Convert grid coordinates to circle coordinates by offsetting by radius
+        int circleX = x - radius;
+        int circleZ = z - radius;
+        return circleX * circleX + circleZ * circleZ <= (radius + 0.5f) * (radius + 0.5f);
     }
+
+
+    private void GenerateBiomesForSectors()
+    {
+        for (int sector = -1; sector < numberOfSections; sector++)
+        {
+            BiomeConfig biome = biomeConfigs[UnityEngine.Random.Range(0, biomeConfigs.Count)];
+            sectorBiomes[sector] = biome;
+        }
+    }
+
+
+    public int GetSector(GridPosition gridPosition)
+    {
+        float relativeX = gridPosition.x - radius;
+        float relativeZ = gridPosition.z - radius;
+
+        // Check if the position is within the bullseye radius
+        if (relativeX * relativeX + relativeZ * relativeZ <= BULLSEYE_RADIUS * BULLSEYE_RADIUS)
+        {
+            return BULLSEYE_SECTOR; // Return special value for bullseye
+        }
+
+        // Calculate the angle and normalize it
+        float angle = Mathf.Atan2(relativeZ, relativeX) * Mathf.Rad2Deg;
+        angle = (angle + 360) % 360;
+        float sectorSize = 360f / numberOfSections;
+        angle = (angle + sectorSize / 2) % 360; // Adjust angle to distribute sectors evenly
+
+        // Calculate the sector and ensure it is within bounds
+        int sector = Mathf.FloorToInt(angle / sectorSize);
+        return Mathf.Min(sector, numberOfSections - 1); // Ensure sector does not exceed max
+    }
+
 
     public void AddUnitAtGridPosition(GridPosition gridPosition, Unit unit)
     {
@@ -157,6 +193,11 @@ public class LevelGrid : MonoBehaviour
 
     public void RemoveUnitAtGridPosition(GridPosition gridPosition, Unit unit)
     {
+        if (!IsValidGridPosition(gridPosition))
+        {
+            return;
+        }
+
         GridObject gridObject = gridSystem.GetGridObject(gridPosition);
         gridObject.RemoveUnit(unit);
     }
@@ -193,6 +234,11 @@ public class LevelGrid : MonoBehaviour
     public int GetWidth() => gridSystem.GetWidth();
 
     public int GetHeight() => gridSystem.GetHeight();
+
+    public int GetRadius() => gridSystem.GetRadius();
+
+
+    public int GetNumberOfSections() => numberOfSections;
 
     public bool HasAnyUnitOnGridPosition(GridPosition gridPosition)
     {

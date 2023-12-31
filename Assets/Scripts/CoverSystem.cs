@@ -36,12 +36,18 @@ public class CoverSystem : MonoBehaviour
 
     private void InitializeCoverMap()
     {
-        for (int x = 0; x < LevelGrid.Instance.GetWidth(); x++)
+        int radius = LevelGrid.Instance.GetRadius(); // Assuming LevelGrid provides radius
+        int diameter = radius * 2 + 1;
+
+        for (int x = 0; x < diameter; x++)
         {
-            for (int z = 0; z < LevelGrid.Instance.GetHeight(); z++)
+            for (int z = 0; z < diameter; z++)
             {
-                GridPosition position = new GridPosition(x, z);
-                UpdateCoverForPosition(position);
+                if (LevelGrid.Instance.IsValidGridPosition(new GridPosition(x - radius, z - radius)))
+                {
+                    GridPosition position = new GridPosition(x - radius, z - radius); // Adjust for circle center
+                    UpdateCoverForPosition(position);
+                }
             }
         }
     }
@@ -94,36 +100,46 @@ public class CoverSystem : MonoBehaviour
 
     private GridPosition GetPositionInDirection(GridPosition currentPosition, Direction direction)
     {
+        GridPosition adjacentPosition;
         switch (direction)
         {
             case Direction.North:
-                return new GridPosition(currentPosition.x, currentPosition.z + 1);
-
+                adjacentPosition = new GridPosition(currentPosition.x, currentPosition.z + 1);
+                break;
             case Direction.East:
-                return new GridPosition(currentPosition.x + 1, currentPosition.z);
-
+                adjacentPosition = new GridPosition(currentPosition.x + 1, currentPosition.z);
+                break;
             case Direction.South:
-                return new GridPosition(currentPosition.x, currentPosition.z - 1);
-
+                adjacentPosition = new GridPosition(currentPosition.x, currentPosition.z - 1);
+                break;
             case Direction.West:
-                return new GridPosition(currentPosition.x - 1, currentPosition.z);
-
+                adjacentPosition = new GridPosition(currentPosition.x - 1, currentPosition.z);
+                break;
             case Direction.NorthEast:
-                return new GridPosition(currentPosition.x + 1, currentPosition.z + 1);
-
+                adjacentPosition = new GridPosition(currentPosition.x + 1, currentPosition.z + 1);
+                break;
             case Direction.SouthEast:
-                return new GridPosition(currentPosition.x + 1, currentPosition.z - 1);
-
+                adjacentPosition = new GridPosition(currentPosition.x + 1, currentPosition.z - 1);
+                break;
             case Direction.SouthWest:
-                return new GridPosition(currentPosition.x - 1, currentPosition.z - 1);
-
+                adjacentPosition = new GridPosition(currentPosition.x - 1, currentPosition.z - 1);
+                break;
             case Direction.NorthWest:
-                return new GridPosition(currentPosition.x - 1, currentPosition.z + 1);
-
+                adjacentPosition = new GridPosition(currentPosition.x - 1, currentPosition.z + 1);
+                break;
             default:
                 // If the direction is not recognized, return the current position
-                return currentPosition;
+                adjacentPosition = currentPosition;
+                break;
         }
+
+        // Check if the adjacent position is within the circular grid
+        if (!LevelGrid.Instance.IsValidGridPosition(adjacentPosition))
+        {
+            return currentPosition; // Return the current position if adjacent is invalid
+        }
+
+        return adjacentPosition;
     }
 
     public CoverLevel GetCoverAtPosition(GridPosition position, Direction attackDirection)

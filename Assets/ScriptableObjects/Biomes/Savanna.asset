@@ -20,12 +20,12 @@ MonoBehaviour:
       MinElevation: 1
       MaxElevation: 4
   - TerrainType: 0
-    Probability: 0.3
+    Probability: 0.2
     ElevationRange:
       MinElevation: 1
-      MaxElevation: 5
-  - TerrainType: 3
-    Probability: 0.1
+      MaxElevation: 3
+  - TerrainType: 12
+    Probability: 0.2
     ElevationRange:
-      MinElevation: 2
-      MaxElevation: 5
+      MinElevation: 1
+      MaxElevation: 2

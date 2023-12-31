@@ -20,9 +20,9 @@ MonoBehaviour:
   stats:
     might: 3
     endurance: 3
-    agility: 3
+    agility: 12
     intelligence: 3
-    perception: 2
+    perception: 12
     charisma: 3
   gear:
     helm: {fileID: 0}

@@ -15,17 +15,22 @@ MonoBehaviour:
   biomeName: Forest
   terrainProbabilities:
   - TerrainType: 3
-    Probability: 0.6
-    ElevationRange:
-      MinElevation: 1
-      MaxElevation: 4
-  - TerrainType: 1
-    Probability: 0.2
+    Probability: 0.4
     ElevationRange:
       MinElevation: 2
       MaxElevation: 5
+  - TerrainType: 1
+    Probability: 0.3
+    ElevationRange:
+      MinElevation: 1
+      MaxElevation: 3
   - TerrainType: 6
     Probability: 0.2
     ElevationRange:
-      MinElevation: 3
+      MinElevation: 4
       MaxElevation: 6
+  - TerrainType: 12
+    Probability: 0.1
+    ElevationRange:
+      MinElevation: 1
+      MaxElevation: 2
