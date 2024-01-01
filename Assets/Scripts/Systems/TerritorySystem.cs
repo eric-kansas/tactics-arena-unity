@@ -11,36 +11,37 @@ public class ZoneInfo
 {
     public Rect rect;
     public int sectionID;
+    public Card card;
 
-    public ZoneInfo(Rect rect, int sectionID)
+    public ZoneInfo(Rect rect, int sectionID, Card card)
     {
         this.rect = rect;
         this.sectionID = sectionID;
+        this.card = card;
     }
 }
 
 
-public class TerritorySystem : MonoBehaviour
+[Serializable]
+public struct TerritoryScore
 {
-    [Serializable]
-    public struct TerritoryScore
+    public int amount;
+    public int max;
+
+    public TerritoryScore(int v1, int v2)
     {
-        public int amount;
-        public int max;
-
-        public TerritoryScore(int v1, int v2)
-        {
-            amount = v1;
-            max = v2;
-        }
-
-        public float GetScoreNormalized()
-        {
-            return (float)amount / max;
-        }
+        amount = v1;
+        max = v2;
     }
 
+    public float GetScoreNormalized()
+    {
+        return (float)amount / max;
+    }
+}
 
+public class TerritorySystem : MonoBehaviour
+{
     public static TerritorySystem Instance { get; private set; }
     public static Action<int, Team> OnTerritoryOwnerChanged; // what zone to what team
     public static Action<Team, int> OnTerritoryScoreChanged; // what team to how many points
@@ -50,6 +51,7 @@ public class TerritorySystem : MonoBehaviour
     private Dictionary<int, ZoneInfo> zones;
     private Dictionary<int, Team> territoryOwners; // Maps zone ID to owner team ID
 
+    private TerritoryDeck territoryDeck;
     int totalGridPositionsPerZone = 9; // Example value
 
     private void Awake()
@@ -65,6 +67,8 @@ public class TerritorySystem : MonoBehaviour
 
     private void Start()
     {
+        territoryDeck = new TerritoryDeck(); 
+        
         LevelGrid.Instance.OnAnyUnitMovedGridPosition += LevelGrid_OnAnyUnitMovedGridPosition;
         Unit.OnAnyUnitInitialized += Unit_OnAnyUnitSpawned;
 
@@ -96,7 +100,7 @@ public class TerritorySystem : MonoBehaviour
         {
             foreach (var rect in sectorPair.Value)
             {
-                zones.Add(zoneID, new ZoneInfo(rect, sectorPair.Key));
+                zones.Add(zoneID, new ZoneInfo(rect, sectorPair.Key, territoryDeck.DrawCard()));
                 zoneID++;
             }
         }
@@ -249,6 +253,10 @@ public class TerritorySystem : MonoBehaviour
     public float GetTeamTerritoryScoreNormalized(Team team)
     {
         return territoryScores[team].GetScoreNormalized();
+    }
+
+    public Team GetTerritoryOwner(int zoneID) {
+        return territoryOwners[zoneID];
     }
 
 }
