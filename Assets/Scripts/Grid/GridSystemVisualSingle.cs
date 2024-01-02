@@ -6,17 +6,21 @@ public class GridSystemVisualSingle : MonoBehaviour
 {
 
     [SerializeField] private MeshRenderer meshRenderer;
+    [SerializeField] private Card card;
 
 
     public void Show(Material material)
     {
-        meshRenderer.enabled = true;
-        meshRenderer.material = material;
+        if (material != null) {
+            meshRenderer.material = material;
+        }
+        gameObject.SetActive(true);
+
     }
 
     public void Hide()
     {
-        meshRenderer.enabled = false;
+        gameObject.SetActive(false);
     }
 
 }

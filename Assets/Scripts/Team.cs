@@ -7,7 +7,7 @@ public class Team : ScriptableObject
 {
     [SerializeField] private string teamName;
     [SerializeField] private Material teamMaterial;
-    [SerializeField] private Color teamColor;
+    [SerializeField] private Material teamColor;
     [SerializeField] private List<Player> players;
 
     public void AddPlayer(Player player)
@@ -27,7 +27,12 @@ public class Team : ScriptableObject
 
     public Color GetColor()
     {
-        return teamColor;
+        return teamColor.color;
+    }
+
+    public Material GetTeamColorAsMaterial()
+    {
+       return teamColor;
     }
 
 }

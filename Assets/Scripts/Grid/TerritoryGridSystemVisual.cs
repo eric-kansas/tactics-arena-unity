@@ -5,15 +5,6 @@ using UnityEngine;
 
 public class TerritoryGridSystemVisual : MonoBehaviour
 {
-
-
-    [Serializable]
-    public struct TerritoryGridVisualTypeMaterial
-    {
-        public TerritoryGridVisualType gridVisualType;
-        public Material material;
-    }
-
     public enum TerritoryGridVisualType
     {
         CrimsonRed,
@@ -30,7 +21,6 @@ public class TerritoryGridSystemVisual : MonoBehaviour
     public static TerritoryGridSystemVisual Instance { get; private set; }
 
     [SerializeField] private Transform gridSystemVisualSinglePrefab;
-    [SerializeField] private List<TerritoryGridVisualTypeMaterial> territoryGridVisualTypeMaterialList;
 
     private GridSystemVisualSingle[,] gridSystemVisualSingleArray;
 
@@ -48,23 +38,46 @@ public class TerritoryGridSystemVisual : MonoBehaviour
 
     private void Start()
     {
-        RenderZones();
+        MakeZones();
 
         FogOfWarSystem.OnTeamVisibilityChanged += FogOfWarSystem_OnTeamVisibilityChanged;
+        TerritorySystem.OnTerritoryOwnerChanged += TerritorySystem_OnTerritoryOwnerChanged;
     }
 
-    private void RenderZones()
+    private void FogOfWarSystem_OnTeamVisibilityChanged(Team team)
+    {
+        //ClearZones();
+        UpdateZones();
+    }
+
+    private void TerritorySystem_OnTerritoryOwnerChanged(int zoneID, Team team)
+    {
+        //ClearZones();
+        UpdateZones();
+    }
+
+    private void ClearZones()
+    {
+        foreach (GridSystemVisualSingle single in gridSystemVisualSingleArray) 
+        {
+            if (single != null) {
+                Destroy(single.gameObject);
+            }
+        }
+    }
+
+    private void MakeZones()
     {
         Dictionary<int, ZoneInfo> zones = TerritorySystem.Instance.GetZones();
         int radius = LevelGrid.Instance.GetRadius(); // Assuming LevelGrid provides radius
         int diameter = radius * 2 + 1;
 
+        // Ensure gridSystemVisualSingleArray is initialized with the correct dimensions
+        gridSystemVisualSingleArray = new GridSystemVisualSingle[diameter, diameter];
+
         foreach (KeyValuePair<int, ZoneInfo> zoneEntry in zones)
         {
             Rect rect = zoneEntry.Value.rect;
-
-            // Ensure gridSystemVisualSingleArray is initialized with the correct dimensions
-            gridSystemVisualSingleArray = new GridSystemVisualSingle[diameter, diameter];
 
             for (int x = 0; x < diameter; x++)
             {
@@ -79,32 +92,53 @@ public class TerritoryGridSystemVisual : MonoBehaviour
                         Vector3 pos = FogOfWarSystem.Instance.GetPerceivedWorldPosition(gridPosition);
                         Transform gridSystemVisualSingleTransform = Instantiate(gridSystemVisualSinglePrefab, pos, Quaternion.identity);
                         gridSystemVisualSingleArray[x, z] = gridSystemVisualSingleTransform.GetComponent<GridSystemVisualSingle>();
-                        gridSystemVisualSingleArray[x, z].Show(GetGridVisualTypeMaterial(zoneEntry.Value.sectionID));
+                        gridSystemVisualSingleArray[x, z].Show(GetGridVisualTypeMaterial(zoneEntry.Key));
                     }
                 }
             }
         }
     }
-
-    private void FogOfWarSystem_OnTeamVisibilityChanged(Team team)
+    
+    private void UpdateZones()
     {
-        RenderZones();
+        Dictionary<int, ZoneInfo> zones = TerritorySystem.Instance.GetZones();
+        int radius = LevelGrid.Instance.GetRadius(); // Assuming LevelGrid provides radius
+        int diameter = radius * 2 + 1;
+
+        foreach (KeyValuePair<int, ZoneInfo> zoneEntry in zones) 
+        {
+            Rect rect = zoneEntry.Value.rect;
+
+            int xStart = (int)rect.x;
+            int yStart = (int)rect.y;
+
+            for (int x = xStart; x < xStart + rect.width; x++)
+            {
+                for (int z = yStart; z < yStart + rect.height; z++)
+                {
+                    GridPosition gridPosition = new GridPosition(x, z);
+                    if (LevelGrid.Instance.IsValidGridPosition(gridPosition)) 
+                    {
+                        GridSystemVisualSingle gridVisual = gridSystemVisualSingleArray[x, z];
+                        gridVisual.transform.position = FogOfWarSystem.Instance.GetPerceivedWorldPosition(gridPosition);
+                        gridVisual.Show(GetGridVisualTypeMaterial(zoneEntry.Key));
+                    }
+
+                }
+            }
+
+        }
     }
+
 
     private Material GetGridVisualTypeMaterial(int zone)
     {
-        return territoryGridVisualTypeMaterialList[zone].material;
+        Team owner = TerritorySystem.Instance.GetTerritoryOwner(zone);
+        if (owner != null) {
+            return owner.GetTeamColorAsMaterial();
+        }
 
-        // foreach (GridVisualTypeMaterial gridVisualTypeMaterial in gridVisualTypeMaterialList)
-        // {
-        //     if (gridVisualTypeMaterial.gridVisualType == gridVisualType)
-        //     {
-        //         return gridVisualTypeMaterial.material;
-        //     }
-        // }
-
-        // Debug.LogError("Could not find GridVisualTypeMaterial for GridVisualType " + gridVisualType);
-        // return null;
+        return null;
     }
 
 }

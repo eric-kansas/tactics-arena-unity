@@ -88,9 +88,9 @@ GameObject:
   - component: {fileID: 7805730762861315410}
   - component: {fileID: 1125676798740891965}
   - component: {fileID: 3072566103271474847}
-  - component: {fileID: 4104395818763260589}
+  - component: {fileID: -5544644620713885378}
   m_Layer: 7
-  m_Name: GridHighlightWorldUI
+  m_Name: TerritoryCardWorldUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -194,7 +194,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   invert: 1
---- !u!114 &4104395818763260589
+--- !u!114 &-5544644620713885378
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -203,11 +203,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 3679391361860590310}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64c76d9fe5bd39245bb76ce4ad9ff983, type: 3}
+  m_Script: {fileID: 11500000, guid: 2fbb5171726563f46b4be6eb39d485fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridPositionTerrainType: {fileID: 4921597356961657468}
-  gridPositionHeight: {fileID: 454157506699124435}
+  gridPositionTerrainType: {fileID: 0}
+  gridPositionHeight: {fileID: 0}
 --- !u!1 &8407083777764609402
 GameObject:
   m_ObjectHideFlags: 0
